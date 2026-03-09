@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FL Training System</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- Modal Base Técnica -->
+    <div id="tech-modal" class="modal-overlay hidden">
+        <div class="modal-content glass-panel">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-book-open"></i> Base Técnica</h2>
+                <button id="btn-close-modal" class="btn-icon"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <p id="modal-text"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- App Wrapper -->
+    <div class="app-wrapper">
+
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar glass-panel">
+            <div class="sidebar-header">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                    <img src="https://footballlab.com.br/favicon.svg" alt="FL" style="width: 48px; height: 48px;">
+                    <h2 style="font-size: 1.4rem;">FL Training System</h2>
+                </div>
+                <span class="badge">Pro Training</span>
+            </div>
+
+            <nav class="nav-menu" id="nav-fundamentals">
+                <div class="nav-label">FUNDAMENTOS TÉCNICOS</div>
+                <!-- Buttons injected by JS -->
+            </nav>
+
+
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+
+            <!-- Header section: Fundamental Data -->
+            <header class="content-header glass-panel fade-in" id="fundamental-header">
+                <div>
+                    <h1 class="page-title" id="fund-title">Selecione um Fundamento</h1>
+                    <p class="page-subtitle" id="fund-desc">Escolha uma opção no menu lateral para visualizar os
+                        exercícios de grupo.</p>
+                </div>
+                <button id="btn-tech-base" class="btn-primary hidden">
+                    <i class="fa-solid fa-microscope"></i> Ver Base Técnica
+                </button>
+            </header>
+
+            <!-- Workspace Section: Split between Exercises and Visual Pitch -->
+            <div class="workspace hidden" id="workspace">
+
+                <!-- Left: Exercise List -->
+                <div class="exercise-list custom-scrollbar">
+                    <div class="list-header">
+                        <h2>Sessões Táticas (4 Alunos)</h2>
+                        <span class="drill-count">10 exercícios</span>
+                    </div>
+                    <div class="drills-container" id="drills-container">
+                        <!-- Drill cards injected by JS -->
+                    </div>
+                </div>
+
+                <!-- Right: Animated Pitch -->
+                <div class="visual-panel glass-panel">
+                    <div class="visual-header">
+                        <h3>Simulação Interativa</h3>
+                        <div class="pitch-specs">
+                            <span class="tag"><i class="fa-solid fa-users"></i> Quarteto</span>
+                            <span class="tag"><i class="fa-solid fa-ruler-combined"></i> 20x10m</span>
+                            <button id="btn-replay" class="btn-icon" title="Repetir Animação"><i
+                                    class="fa-solid fa-rotate-right"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- The 20x10 Training Pitch -->
+                    <div class="pitch-container">
+                        <div class="pitch" id="pitch">
+                            <!-- Field Markings -->
+                            <div class="pitch-border"></div>
+                            <div class="line center-line"></div>
+                            <div class="center-circle"></div>
+
+                            <!-- Tactical Setup -->
+                            <div class="goal-area">
+                                <div class="machine machine-left" title="Máquina Lançadora Esquerda">
+                                    <img src="https://footballlab.com.br/favicon.svg" alt="FL">
+                                </div>
+                                <div class="goal" title="Gol (5m)">
+                                    <div class="net"></div>
+                                </div>
+                                <div class="machine machine-right" title="Máquina Lançadora Direita">
+                                    <img src="https://footballlab.com.br/favicon.svg" alt="FL">
+                                </div>
+                            </div>
+
+                            <!-- Actors (4 Players + 1 Ball) -->
+                            <div class="actor player" id="actor-p1" style="--x: 5; --y: 10;">1</div>
+                            <div class="actor player" id="actor-p2" style="--x: 5; --y: 10;">2</div>
+                            <div class="actor player" id="actor-p3" style="--x: 5; --y: 10;">3</div>
+                            <div class="actor player" id="actor-p4" style="--x: 5; --y: 10;">4</div>
+                            <div class="actor ball" id="actor-ball" style="--x: 5; --y: 10;"></div>
+
+                            <!-- Dynamic Cones/Targets injected by Drill logic -->
+                            <div id="dynamic-elements"></div>
+                        </div>
+                    </div>
+                    <div class="visual-footer" id="visual-caption">
+                        <p>Aguardando seleção do exercício...</p>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>

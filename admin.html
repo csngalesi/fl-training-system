@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FL Admin — Training System</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-dark:     #0f172a;
+            --bg-darker:   #020617;
+            --bg-raised:   #1e293b;
+            --acc-primary: #10b981;
+            --acc-blue:    #3b82f6;
+            --acc-danger:  #ef4444;
+            --text-main:   #f8fafc;
+            --text-muted:  #94a3b8;
+            --glass-bg:    rgba(30, 41, 59, 0.6);
+            --glass-border:rgba(255, 255, 255, 0.1);
+            --radius:      12px;
+            --transition:  0.2s ease;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-darker);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        h1, h2, h3 { font-family: 'Outfit', sans-serif; }
+
+        .hidden { display: none !important; }
+
+        /* ── Header ── */
+        .admin-header {
+            background: var(--glass-bg);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(16px);
+        }
+
+        .admin-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .admin-header-left img {
+            width: 36px;
+            height: 36px;
+        }
+
+        .admin-header h1 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--acc-primary);
+        }
+
+        .admin-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* ── Buttons ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 18px;
+            border-radius: var(--radius);
+            font-size: .9rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all var(--transition);
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--acc-blue), #2563eb);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(59,130,246,.35);
+        }
+
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(59,130,246,.5); }
+
+        .btn-secondary {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+        }
+
+        .btn-secondary:hover { color: var(--text-main); border-color: rgba(255,255,255,.3); }
+
+        .btn-danger {
+            background: rgba(239,68,68,.15);
+            border: 1px solid rgba(239,68,68,.3);
+            color: var(--acc-danger);
+        }
+
+        .btn-danger:hover { background: rgba(239,68,68,.25); }
+
+        .btn-success {
+            background: rgba(16,185,129,.15);
+            border: 1px solid rgba(16,185,129,.3);
+            color: var(--acc-primary);
+        }
+
+        .btn-success:hover { background: rgba(16,185,129,.25); }
+
+        .btn-sm { padding: 6px 12px; font-size: .8rem; }
+
+        /* ── Page ── */
+        .page {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+
+        /* ── Login Card ── */
+        #login-section {
+            max-width: 420px;
+            margin: 80px auto 0;
+        }
+
+        .card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 8px 32px rgba(0,0,0,.3);
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .card-subtitle {
+            color: var(--text-muted);
+            font-size: .9rem;
+            margin-bottom: 28px;
+        }
+
+        /* ── Forms ── */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 18px;
+        }
+
+        label {
+            font-size: .85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-input, .form-textarea, .form-select {
+            background: rgba(0,0,0,.3);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: .95rem;
+            font-family: 'Inter', sans-serif;
+            transition: border-color var(--transition);
+            width: 100%;
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--acc-blue);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-textarea.mono {
+            font-family: 'Courier New', monospace;
+            font-size: .85rem;
+            min-height: 130px;
+        }
+
+        .form-select option { background: var(--bg-dark); }
+
+        .error-msg {
+            color: var(--acc-danger);
+            font-size: .85rem;
+            margin-top: 8px;
+        }
+
+        /* ── Admin Panel ── */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .section-header h2 { font-size: 1.3rem; }
+
+        /* ── Drill Form Panel ── */
+        #drill-form-panel {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 28px;
+            box-shadow: 0 4px 20px rgba(0,0,0,.25);
+        }
+
+        #drill-form-panel h3 {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            color: var(--acc-blue);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* ── Tooltip / Help button ── */
+        .help-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            background: rgba(59,130,246,.25);
+            border: 1px solid var(--acc-blue);
+            color: var(--acc-blue);
+            border-radius: 50%;
+            font-size: .7rem;
+            font-weight: 800;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all var(--transition);
+        }
+
+        .help-btn:hover { background: var(--acc-blue); color: #fff; }
+
+        /* ── Modal ── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.65);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .modal-box {
+            background: var(--bg-dark);
+            border: 1px solid var(--acc-blue);
+            border-radius: 16px;
+            padding: 32px;
+            width: 640px;
+            max-width: 100%;
+            max-height: 88vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 50px rgba(0,0,0,.6), 0 0 30px rgba(59,130,246,.15);
+            animation: popIn .25s cubic-bezier(.34,1.56,.64,1) forwards;
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(.92); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .modal-header h2 {
+            font-size: 1.15rem;
+            color: var(--acc-blue);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-close {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: color var(--transition);
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-close:hover { color: var(--text-main); }
+
+        /* ── Guide Content ── */
+        .guide-section {
+            margin-bottom: 24px;
+        }
+
+        .guide-section:last-child { margin-bottom: 0; }
+
+        .guide-section h3 {
+            font-size: .95rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .guide-section ul {
+            list-style: none;
+            padding-left: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .guide-section ul li {
+            font-size: .9rem;
+            color: #cbd5e1;
+            display: flex;
+            gap: 8px;
+        }
+
+        .guide-section ul li::before {
+            content: '•';
+            color: var(--acc-blue);
+            flex-shrink: 0;
+        }
+
+        .guide-code {
+            background: rgba(0,0,0,.5);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 14px 16px;
+            font-family: 'Courier New', monospace;
+            font-size: .82rem;
+            color: #a5f3fc;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            margin-top: 8px;
+        }
+
+        .guide-note {
+            font-size: .82rem;
+            color: #fbbf24;
+            margin-top: 8px;
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+        }
+
+        .actor-pills {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+
+        .actor-pill {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: .78rem;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* ── Drill List ── */
+        .drill-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .drill-item {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            transition: border-color var(--transition);
+        }
+
+        .drill-item:hover { border-color: rgba(255,255,255,.2); }
+
+        .drill-item-info { flex: 1; min-width: 0; }
+
+        .drill-item-title {
+            font-weight: 600;
+            font-size: .95rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .drill-item-desc {
+            font-size: .82rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .drill-item-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+            font-size: .9rem;
+        }
+
+        .empty-state i { font-size: 2rem; display: block; margin-bottom: 12px; opacity: .4; }
+
+        /* ── Inline Edit ── */
+        #inline-edit-form {
+            background: rgba(59,130,246,.08);
+            border: 1px solid rgba(59,130,246,.3);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 12px;
+        }
+
+        #inline-edit-form h3 {
+            font-size: 1rem;
+            color: var(--acc-blue);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ── Toast ── */
+        #toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--bg-raised);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 12px 20px;
+            font-size: .9rem;
+            font-weight: 500;
+            box-shadow: 0 8px 24px rgba(0,0,0,.4);
+            z-index: 9999;
+            transition: opacity .3s, transform .3s;
+            pointer-events: none;
+        }
+
+        #toast.toast-success { border-color: rgba(16,185,129,.5); color: var(--acc-primary); }
+        #toast.toast-error   { border-color: rgba(239,68,68,.5);  color: var(--acc-danger); }
+        #toast.hide { opacity: 0; transform: translateY(8px); }
+    </style>
+</head>
+
+<body>
+
+    <!-- ── Header ── -->
+    <header class="admin-header">
+        <div class="admin-header-left">
+            <img src="https://footballlab.com.br/favicon.svg" alt="FL">
+            <h1>FL Admin</h1>
+        </div>
+        <div class="admin-header-actions">
+            <a href="index.html" class="btn btn-secondary btn-sm">
+                <i class="fa-solid fa-arrow-left"></i> Voltar ao App
+            </a>
+            <button id="btn-logout" class="btn btn-secondary btn-sm hidden">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </button>
+        </div>
+    </header>
+
+    <!-- ── Animation Guide Modal ── -->
+    <div id="guide-modal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-map"></i> Guia de Animação</h2>
+                <button class="btn-close" id="btn-close-guide"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="guide-section">
+                <h3><span>📐</span> Geometria do Campo</h3>
+                <ul>
+                    <li>O campo simula <strong>20m × 10m</strong> em escala real.</li>
+                    <li>Eixo <strong>X</strong>: 0 (esquerda) → 10 (direita)</li>
+                    <li>Eixo <strong>Y</strong>: 0 (gol / baixo) → 20 (fundo / cima)</li>
+                    <li>Gol fixo centralizado em <code style="background:rgba(0,0,0,.4);padding:1px 6px;border-radius:4px;font-family:monospace">{"x": 5, "y": 0}</code></li>
+                </ul>
+            </div>
+
+            <div class="guide-section">
+                <h3><span>🧑</span> Atores (IDs)</h3>
+                <div class="actor-pills">
+                    <span class="actor-pill" style="background:#ef444433;color:#ef4444;border:1px solid #ef444466">p1 — Vermelho</span>
+                    <span class="actor-pill" style="background:#3b82f633;color:#3b82f6;border:1px solid #3b82f666">p2 — Azul</span>
+                    <span class="actor-pill" style="background:#10b98133;color:#10b981;border:1px solid #10b98166">p3 — Verde</span>
+                    <span class="actor-pill" style="background:#f59e0b33;color:#f59e0b;border:1px solid #f59e0b66">p4 — Âmbar</span>
+                    <span class="actor-pill" style="background:#f8fafc22;color:#f8fafc;border:1px solid #f8fafc44">ball — Bola</span>
+                </div>
+            </div>
+
+            <div class="guide-section">
+                <h3><span>📋</span> Passo de Movimento</h3>
+                <p style="font-size:.88rem;color:var(--text-muted);margin-bottom:6px">
+                    Cada passo move um ator para uma coordenada em um tempo (<code style="font-family:monospace">dur</code>) em milissegundos.
+                </p>
+                <div class="guide-code">{"actor": "p1", "to": {"x": 3, "y": 10}, "dur": 1200}</div>
+            </div>
+
+            <div class="guide-section">
+                <h3><span>🔀</span> SYNC — Mover dois ao mesmo tempo</h3>
+                <p style="font-size:.88rem;color:var(--text-muted);margin-bottom:6px">
+                    Por padrão o motor <strong>espera</strong> o ator terminar antes do próximo passo.
+                    Use <code style="font-family:monospace">sync: true</code> no primeiro passo para que ambos se movam juntos:
+                </p>
+                <div class="guide-code">{"actor": "ball", "to": {"x": 3, "y": 10}, "dur": 800, "sync": true},
+{"actor": "p1",   "to": {"x": 4, "y": 12}, "dur": 1200}</div>
+                <div class="guide-note"><i class="fa-solid fa-triangle-exclamation"></i> Sem <code style="font-family:monospace">sync: true</code>, o passe ficará travado esperando o jogador terminar de correr.</div>
+            </div>
+
+            <div class="guide-section">
+                <h3><span>⏱</span> DELAY — Pausa geral</h3>
+                <p style="font-size:.88rem;color:var(--text-muted);margin-bottom:6px">
+                    Pausa tudo por N milissegundos. Ideal para o "pisão" do pivô ou tomada de decisão.
+                </p>
+                <div class="guide-code">{"delay": 300}</div>
+            </div>
+
+            <div class="guide-section">
+                <h3><span>💡</span> Exemplo completo</h3>
+                <div class="guide-code">[
+  {"actor": "ball", "to": {"x": 5, "y": 15}, "dur": 1000},
+  {"delay": 400},
+  {"actor": "ball", "to": {"x": 2, "y": 10}, "dur": 800, "sync": true},
+  {"actor": "p1",   "to": {"x": 2, "y": 10}, "dur": 1200},
+  {"delay": 200},
+  {"actor": "ball", "to": {"x": 5, "y": 0},  "dur": 800}
+]</div>
+            </div>
+
+            <div class="guide-section">
+                <h3><span>🏟</span> Setup — Posições Iniciais</h3>
+                <div class="guide-code">{
+  "players": {
+    "p1": {"x": 5, "y": 15},
+    "p2": {"x": 2, "y": 10},
+    "p3": {"x": 8, "y": 10},
+    "p4": {"x": 5, "y": 5}
+  },
+  "ball": {"x": 0.5, "y": 0},
+  "cones": [{"x": 4, "y": 8}, {"x": 6, "y": 8}]
+}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Toast ── -->
+    <div id="toast" class="hide"></div>
+
+    <!-- ── Login Section ── -->
+    <section id="login-section" class="page">
+        <div class="card">
+            <h2 class="card-title"><i class="fa-solid fa-lock" style="color:var(--acc-primary)"></i> FL Admin</h2>
+            <p class="card-subtitle">Entre com suas credenciais para acessar o painel.</p>
+            <div class="form-group">
+                <label for="login-email">E-mail</label>
+                <input type="email" id="login-email" class="form-input" placeholder="seu@email.com" autocomplete="email">
+            </div>
+            <div class="form-group">
+                <label for="login-password">Senha</label>
+                <input type="password" id="login-password" class="form-input" placeholder="••••••••" autocomplete="current-password">
+            </div>
+            <p id="login-error" class="error-msg hidden"></p>
+            <button id="btn-login" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px">
+                <i class="fa-solid fa-right-to-bracket"></i> Entrar
+            </button>
+        </div>
+    </section>
+
+    <!-- ── Admin Section ── -->
+    <section id="admin-section" class="page hidden">
+
+        <!-- Fundamental Selector + New Drill -->
+        <div class="section-header">
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                <h2>Drills</h2>
+                <select id="sel-fundamental" class="form-select" style="width:220px">
+                    <!-- Options injected by JS -->
+                </select>
+            </div>
+            <button id="btn-new-drill" class="btn btn-primary">
+                <i class="fa-solid fa-plus"></i> Novo Drill
+            </button>
+        </div>
+
+        <!-- Inline Edit Form (hidden by default) -->
+        <div id="inline-edit-form" class="hidden">
+            <h3><i class="fa-solid fa-pen"></i> <span id="edit-form-title">Editar Drill</span></h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="edit-title">Título *</label>
+                    <input type="text" id="edit-title" class="form-input" placeholder="Nome do exercício">
+                </div>
+                <div class="form-group">
+                    <label for="edit-fundamental">Fundamental</label>
+                    <select id="edit-fundamental" class="form-select"></select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="edit-desc">Descrição</label>
+                <textarea id="edit-desc" class="form-textarea" placeholder="Explique o exercício em texto..."></textarea>
+            </div>
+            <div class="form-group">
+                <label for="edit-setup">Setup (JSON) — posições iniciais</label>
+                <textarea id="edit-setup" class="form-textarea mono" placeholder='{"players":{"p1":{"x":5,"y":15},...},"ball":{"x":0.5,"y":0},"cones":[]}'></textarea>
+            </div>
+            <div class="form-group">
+                <label for="edit-anim">
+                    Animação (JSON)
+                    <button class="help-btn" id="btn-guide-edit" type="button" title="Ver Guia de Animação">?</button>
+                </label>
+                <textarea id="edit-anim" class="form-textarea mono" placeholder='[{"actor":"ball","to":{"x":5,"y":10},"dur":1000},{"delay":300},...]'></textarea>
+            </div>
+            <div class="form-actions">
+                <button id="btn-save-edit" class="btn btn-success">
+                    <i class="fa-solid fa-floppy-disk"></i> Salvar
+                </button>
+                <button id="btn-cancel-edit" class="btn btn-secondary">Cancelar</button>
+            </div>
+        </div>
+
+        <!-- New Drill Form (hidden by default) -->
+        <div id="drill-form-panel" class="hidden">
+            <h3><i class="fa-solid fa-plus-circle"></i> Novo Drill</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="new-title">Título *</label>
+                    <input type="text" id="new-title" class="form-input" placeholder="Nome do exercício">
+                </div>
+                <div class="form-group">
+                    <label for="new-fundamental">Fundamental</label>
+                    <select id="new-fundamental" class="form-select"></select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="new-desc">Descrição</label>
+                <textarea id="new-desc" class="form-textarea" placeholder="Explique o exercício em texto..."></textarea>
+            </div>
+            <div class="form-group">
+                <label for="new-setup">Setup (JSON) — posições iniciais</label>
+                <textarea id="new-setup" class="form-textarea mono" placeholder='{"players":{"p1":{"x":5,"y":15},"p2":{"x":2,"y":10},"p3":{"x":8,"y":10},"p4":{"x":5,"y":5}},"ball":{"x":0.5,"y":0},"cones":[]}'></textarea>
+            </div>
+            <div class="form-group">
+                <label for="new-anim">
+                    Animação (JSON)
+                    <button class="help-btn" id="btn-guide-new" type="button" title="Ver Guia de Animação">?</button>
+                </label>
+                <textarea id="new-anim" class="form-textarea mono" placeholder='[{"actor":"ball","to":{"x":5,"y":10},"dur":1000},{"delay":300},...]'></textarea>
+            </div>
+            <div class="form-actions">
+                <button id="btn-save-new" class="btn btn-primary">
+                    <i class="fa-solid fa-floppy-disk"></i> Salvar Drill
+                </button>
+                <button id="btn-cancel-new" class="btn btn-secondary">Cancelar</button>
+            </div>
+        </div>
+
+        <!-- Drill List -->
+        <div id="drill-list" class="drill-list">
+            <div class="empty-state">
+                <i class="fa-solid fa-futbol"></i>
+                Selecione um fundamental para ver os drills.
+            </div>
+        </div>
+    </section>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+
+</html>
