@@ -448,10 +448,37 @@
     }
 
     // ── Drag logic ────────────────────────────────────────────────
+
+    // After dragging actor on frame N, propagate new position to frames N+1, N+2...
+    // as long as those frames still have the OLD position (weren't manually changed).
+    function propagateForward(fromFrame, key, oldPos, newPos) {
+        for (let i = fromFrame + 1; i < FRAME_COUNT; i++) {
+            const f = builderFrames[i];
+            const pos = key === 'ball' ? f.ball : f[key];
+            if (pos.x === oldPos.x && pos.y === oldPos.y) {
+                if (key === 'ball') f.ball = { ...newPos };
+                else f[key] = { ...newPos };
+            } else {
+                break; // frame was manually changed — stop propagating
+            }
+        }
+    }
+
     function onActorPointerDown(e) {
         e.preventDefault();
         const key = e.currentTarget.dataset.key;
-        dragging = { key, el: e.currentTarget };
+        // Capture position before drag for forward propagation
+        const frame = builderFrames[builderFrame];
+        let initPos;
+        if (key.startsWith('cone')) {
+            const idx = parseInt(key.replace('cone', ''));
+            initPos = { ...builderFrames[0].cones[idx] };
+        } else if (key === 'ball') {
+            initPos = { ...frame.ball };
+        } else {
+            initPos = { ...frame[key] };
+        }
+        dragging = { key, el: e.currentTarget, initPos };
         e.currentTarget.setPointerCapture(e.pointerId);
         e.currentTarget.addEventListener('pointermove', onActorPointerMove);
         e.currentTarget.addEventListener('pointerup',   onActorPointerUp);
@@ -478,15 +505,18 @@
 
         const frame = builderFrames[builderFrame];
         const key = dragging.key;
+        const initPos = dragging.initPos;
 
         if (key.startsWith('cone')) {
-            // Cones always edit frame 0
+            // Cones always edit frame 0 (no forward propagation needed)
             const idx = parseInt(key.replace('cone', ''));
             builderFrames[0].cones[idx] = {x, y};
         } else if (key === 'ball') {
             frame.ball = {x, y};
+            propagateForward(builderFrame, 'ball', initPos, {x, y});
         } else {
             frame[key] = {x, y};
+            propagateForward(builderFrame, key, initPos, {x, y});
         }
 
         dragging.el.removeEventListener('pointermove', onActorPointerMove);
