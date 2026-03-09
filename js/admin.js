@@ -403,14 +403,12 @@
         `;
 
         const frame = builderFrames[builderFrame];
-        const isFirst = builderFrame === 0;
 
-        // Cones (always from frame 0)
-        const conesSource = builderFrames[0].cones;
-        conesSource.forEach((c, idx) => {
+        // Cones — read from current frame, draggable everywhere
+        frame.cones.forEach((c, idx) => {
             const {px, py} = fieldToPixel(c.x, c.y);
             const el = document.createElement('div');
-            el.className = 'vb-actor cone' + (isFirst ? '' : ' cone-locked');
+            el.className = 'vb-actor cone';
             el.dataset.key = `cone${idx}`;
             el.style.left = px + 'px';
             el.style.top  = py + 'px';
@@ -441,8 +439,8 @@
         ballEl.style.top  = by + 'px';
         vbPitch.appendChild(ballEl);
 
-        // Bind drag
-        vbPitch.querySelectorAll('.vb-actor:not(.cone-locked)').forEach(el => {
+        // Bind drag — all actors including cones
+        vbPitch.querySelectorAll('.vb-actor').forEach(el => {
             el.addEventListener('pointerdown', onActorPointerDown);
         });
     }
@@ -472,7 +470,7 @@
         let initPos;
         if (key.startsWith('cone')) {
             const idx = parseInt(key.replace('cone', ''));
-            initPos = { ...builderFrames[0].cones[idx] };
+            initPos = { ...builderFrames[builderFrame].cones[idx] };
         } else if (key === 'ball') {
             initPos = { ...frame.ball };
         } else {
@@ -508,9 +506,15 @@
         const initPos = dragging.initPos;
 
         if (key.startsWith('cone')) {
-            // Cones always edit frame 0 (no forward propagation needed)
             const idx = parseInt(key.replace('cone', ''));
-            builderFrames[0].cones[idx] = {x, y};
+            builderFrames[builderFrame].cones[idx] = {x, y};
+            // Propagate forward while following frames still have the old cone position
+            for (let i = builderFrame + 1; i < FRAME_COUNT; i++) {
+                const c = builderFrames[i].cones[idx];
+                if (c.x === initPos.x && c.y === initPos.y) {
+                    builderFrames[i].cones[idx] = {x, y};
+                } else { break; }
+            }
         } else if (key === 'ball') {
             frame.ball = {x, y};
             propagateForward(builderFrame, 'ball', initPos, {x, y});
