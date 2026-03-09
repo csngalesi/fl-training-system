@@ -47,9 +47,28 @@ document.addEventListener('DOMContentLoaded', () => {
             const btn = document.createElement('button');
             btn.className = 'nav-btn';
             btn.innerHTML = `<i class="fa-solid ${fund.icon}"></i> ${fund.title}`;
-            btn.addEventListener('click', () => selectFundamental(index, btn));
+            btn.addEventListener('click', () => {
+                selectFundamental(index, btn);
+                closeMobileSidebar();
+            });
             navMenu.appendChild(btn);
         });
+
+        // Mobile sidebar toggle
+        const btnMenu = document.getElementById('btn-menu');
+        const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+        const sidebar = document.querySelector('.sidebar');
+        if (btnMenu) {
+            btnMenu.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+                sidebarBackdrop.classList.toggle('hidden');
+            });
+            sidebarBackdrop.addEventListener('click', closeMobileSidebar);
+        }
+        function closeMobileSidebar() {
+            sidebar.classList.remove('open');
+            sidebarBackdrop.classList.add('hidden');
+        }
 
         // Event Listeners
         btnReplay.addEventListener('click', () => {

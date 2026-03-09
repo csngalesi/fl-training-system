@@ -37,6 +37,8 @@
 
     <!-- App Wrapper -->
     <div class="app-wrapper">
+    <!-- Mobile sidebar backdrop -->
+    <div id="sidebar-backdrop" class="sidebar-backdrop hidden"></div>
 
         <!-- Sidebar Navigation -->
         <aside class="sidebar glass-panel">
@@ -61,7 +63,10 @@
 
             <!-- Header section: Fundamental Data -->
             <header class="content-header glass-panel fade-in" id="fundamental-header">
-                <div>
+                <button id="btn-menu" class="btn-icon btn-menu" title="Menu" aria-label="Abrir menu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div style="flex:1;min-width:0">
                     <h1 class="page-title" id="fund-title">Selecione um Fundamento</h1>
                     <p class="page-subtitle" id="fund-desc">Escolha uma opção no menu lateral para visualizar os
                         exercícios de grupo.</p>

@@ -630,3 +630,103 @@ h3 {
         transform: translateY(0);
     }
 }
+
+/* ── Mobile Sidebar Backdrop ── */
+.sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 199;
+}
+
+.btn-menu {
+    display: none;
+    flex-shrink: 0;
+}
+
+/* ── Mobile Layout (≤ 768px) ── */
+@media (max-width: 768px) {
+
+    body {
+        overflow: auto;
+    }
+
+    .app-wrapper {
+        flex-direction: column;
+        height: auto;
+        min-height: 100dvh;
+    }
+
+    /* Sidebar becomes a slide-in drawer */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 82vw;
+        max-width: 300px;
+        height: 100dvh;
+        margin: 0;
+        border-radius: 0 16px 16px 0;
+        z-index: 200;
+        transform: translateX(-110%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow-y: auto;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+        box-shadow: 4px 0 40px rgba(0, 0, 0, .7);
+    }
+
+    .sidebar-backdrop:not(.hidden) {
+        display: block;
+    }
+
+    .btn-menu {
+        display: flex;
+        margin-right: 8px;
+    }
+
+    .main-content {
+        padding: 12px;
+        height: auto;
+        overflow: visible;
+    }
+
+    .content-header {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .page-title {
+        font-size: 1.2rem;
+    }
+
+    .workspace {
+        flex-direction: column;
+        height: auto;
+        overflow: visible;
+    }
+
+    .exercise-list {
+        min-width: 0;
+        overflow-y: visible;
+        max-height: none;
+    }
+
+    .visual-panel {
+        width: 100%;
+    }
+
+    .pitch-container {
+        padding: 16px;
+    }
+
+    .pitch {
+        width: 180px;
+        height: 360px;
+    }
+}
