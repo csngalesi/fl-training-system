@@ -506,6 +506,228 @@
         #toast.toast-success { border-color: rgba(16,185,129,.5); color: var(--acc-primary); }
         #toast.toast-error   { border-color: rgba(239,68,68,.5);  color: var(--acc-danger); }
         #toast.hide { opacity: 0; transform: translateY(8px); }
+
+        /* ── Visual Builder ── */
+        #visual-builder {
+            background: var(--glass-bg);
+            border: 1px solid rgba(16,185,129,.3);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 28px;
+            box-shadow: 0 4px 20px rgba(0,0,0,.25);
+        }
+
+        #visual-builder > h3 {
+            font-size: 1rem;
+            color: var(--acc-primary);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .vb-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+
+        .vb-frame-tabs {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .vb-frame-tab {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            border: 1px solid var(--glass-border);
+            background: rgba(0,0,0,.3);
+            color: var(--text-muted);
+            font-size: .8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .15s ease;
+        }
+
+        .vb-frame-tab.active {
+            background: var(--acc-primary);
+            border-color: var(--acc-primary);
+            color: #fff;
+        }
+
+        .vb-frame-tab:hover:not(.active) {
+            border-color: rgba(255,255,255,.3);
+            color: var(--text-main);
+        }
+
+        .vb-frame-label {
+            font-size: .78rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            font-style: italic;
+        }
+
+        .vb-body {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .vb-pitch {
+            width: 180px;
+            height: 360px;
+            background: #16a34a;
+            border-radius: 4px;
+            border: 2px solid rgba(255,255,255,.2);
+            position: relative;
+            flex-shrink: 0;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        .vb-goal {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 36px;
+            height: 8px;
+            background: rgba(255,255,255,.25);
+            border: 2px solid rgba(255,255,255,.6);
+            border-bottom: none;
+            border-radius: 2px 2px 0 0;
+        }
+
+        .vb-centerline {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: rgba(255,255,255,.2);
+        }
+
+        .vb-actor {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,.7);
+            transform: translate(-50%, -50%);
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .62rem;
+            font-weight: 800;
+            color: #fff;
+            user-select: none;
+            touch-action: none;
+            z-index: 2;
+        }
+
+        .vb-actor:active { cursor: grabbing; }
+
+        .vb-actor.ball {
+            background: #fff;
+            border-color: #999;
+            width: 14px;
+            height: 14px;
+        }
+
+        .vb-actor.cone {
+            background: #f97316;
+            border-color: #fb923c;
+            border-radius: 2px;
+            width: 12px;
+            height: 12px;
+            cursor: grab;
+        }
+
+        .vb-actor.cone-locked {
+            cursor: default;
+            opacity: .65;
+        }
+
+        .vb-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            flex: 1;
+            min-width: 190px;
+        }
+
+        .vb-legend-title {
+            font-size: .75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            margin-bottom: 2px;
+        }
+
+        .vb-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: .82rem;
+            color: #cbd5e1;
+        }
+
+        .vb-legend-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            border: 2px solid rgba(255,255,255,.35);
+        }
+
+        .vb-legend-dot.ball-dot {
+            background: #fff;
+            border-color: #999;
+        }
+
+        .vb-legend-dot.cone-dot {
+            background: #f97316;
+            border-radius: 2px;
+        }
+
+        .vb-tip {
+            font-size: .78rem;
+            color: var(--text-muted);
+            margin-top: 10px;
+            line-height: 1.6;
+            padding: 10px 12px;
+            background: rgba(0,0,0,.2);
+            border-radius: 8px;
+            border-left: 3px solid var(--acc-primary);
+        }
+
+        .btn-builder {
+            background: rgba(16,185,129,.15);
+            border: 1px dashed rgba(16,185,129,.4);
+            color: var(--acc-primary);
+            font-size: .82rem;
+            padding: 7px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-weight: 600;
+            transition: all var(--transition);
+            margin-bottom: 16px;
+        }
+
+        .btn-builder:hover {
+            background: rgba(16,185,129,.25);
+            border-style: solid;
+        }
     </style>
 </head>
 
@@ -678,6 +900,10 @@
                 </label>
                 <textarea id="edit-anim" class="form-textarea mono" placeholder='[{"actor":"ball","to":{"x":5,"y":10},"dur":1000},{"delay":300},...]'></textarea>
             </div>
+            <button id="btn-builder-edit" class="btn-builder" type="button">
+                <i class="fa-solid fa-paintbrush"></i> Construtor Visual
+                <span style="font-weight:400;font-size:.75rem;color:var(--text-muted)">— arraste os atores nos 8 momentos</span>
+            </button>
             <div class="form-actions">
                 <button id="btn-save-edit" class="btn btn-success">
                     <i class="fa-solid fa-floppy-disk"></i> Salvar
@@ -714,11 +940,67 @@
                 </label>
                 <textarea id="new-anim" class="form-textarea mono" placeholder='[{"actor":"ball","to":{"x":5,"y":10},"dur":1000},{"delay":300},...]'></textarea>
             </div>
+            <button id="btn-builder-new" class="btn-builder" type="button">
+                <i class="fa-solid fa-paintbrush"></i> Construtor Visual
+                <span style="font-weight:400;font-size:.75rem;color:var(--text-muted)">— arraste os atores nos 8 momentos</span>
+            </button>
             <div class="form-actions">
                 <button id="btn-save-new" class="btn btn-primary">
                     <i class="fa-solid fa-floppy-disk"></i> Salvar Drill
                 </button>
                 <button id="btn-cancel-new" class="btn btn-secondary">Cancelar</button>
+            </div>
+        </div>
+
+        <!-- Visual Builder -->
+        <div id="visual-builder" class="hidden">
+            <h3>
+                <span><i class="fa-solid fa-paintbrush"></i> Construtor Visual</span>
+                <button id="btn-close-builder" class="btn-close" type="button"><i class="fa-solid fa-xmark"></i></button>
+            </h3>
+            <div class="vb-controls">
+                <button id="vb-prev" class="btn btn-secondary btn-sm" type="button">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <div id="vb-frame-tabs" class="vb-frame-tabs"></div>
+                <button id="vb-next" class="btn btn-secondary btn-sm" type="button">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+            <div id="vb-frame-label" class="vb-frame-label"></div>
+            <div class="vb-body">
+                <div id="vb-pitch" class="vb-pitch"></div>
+                <div class="vb-legend">
+                    <div class="vb-legend-title">Legenda</div>
+                    <div class="vb-legend-item">
+                        <div class="vb-legend-dot" style="background:#ef4444"></div> p1 — Vermelho
+                    </div>
+                    <div class="vb-legend-item">
+                        <div class="vb-legend-dot" style="background:#3b82f6"></div> p2 — Azul
+                    </div>
+                    <div class="vb-legend-item">
+                        <div class="vb-legend-dot" style="background:#10b981"></div> p3 — Verde
+                    </div>
+                    <div class="vb-legend-item">
+                        <div class="vb-legend-dot" style="background:#f59e0b"></div> p4 — Âmbar
+                    </div>
+                    <div class="vb-legend-item">
+                        <div class="vb-legend-dot ball-dot"></div> Bola
+                    </div>
+                    <div class="vb-legend-item">
+                        <div class="vb-legend-dot cone-dot"></div> Cone <span style="font-size:.74rem;color:var(--text-muted)">(editável só no Momento 1)</span>
+                    </div>
+                    <div class="vb-tip">
+                        <strong>Como usar:</strong><br>
+                        1. No <strong>Momento 1</strong>, posicione todos na posição inicial (incluindo cones).<br>
+                        2. Avance para o <strong>Momento 2</strong> e arraste para onde cada um se move.<br>
+                        3. Repita até o <strong>Momento 8</strong> (pule momentos desnecessários).<br>
+                        4. Clique em <strong>Gerar JSON</strong> — os campos Setup e Animação serão preenchidos automaticamente.
+                    </div>
+                    <button id="btn-apply-builder" class="btn btn-primary" type="button" style="margin-top:14px">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Gerar JSON
+                    </button>
+                </div>
             </div>
         </div>
 

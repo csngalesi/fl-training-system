@@ -60,6 +60,13 @@ const FLData = {
             icon: 'fa-bolt',
             baseTech: 'Explosão e desaceleração. Acelerações lineares e mudanças de direção em T. Treinos sincronizados para aprimorar tempo de reação visual e agilidade.',
             drills: []
+        },
+        {
+            id: 'festa',
+            title: 'Atividades de Festa',
+            icon: 'fa-cake-candles',
+            baseTech: 'Exercícios lúdicos e recreativos voltados para celebração, integração e diversão em grupo. Perfeitos para encerramento de temporada, confraternizações e eventos especiais. Atividades de baixa pressão que reforçam o senso de equipe e alegria pelo esporte.',
+            drills: []
         }
     ]
 };
@@ -314,5 +321,6 @@ FLData.fundamentals[4].drills = scaffoldDrills4p('con', 'Transição e Conduçã
 FLData.fundamentals[5].drills = scaffoldDrills4p('cab', 'Jogo Aéreo / Cabeceio');
 FLData.fundamentals[6].drills = scaffoldDrills4p('mar', 'Dobras de Marcação');
 FLData.fundamentals[7].drills = scaffoldDrills4p('atl', 'Circuitos e Sprint 4x4');
+FLData.fundamentals[8].drills = scaffoldDrills4p('fes', 'Atividade de Festa');
 
 window.FLData = FLData;
