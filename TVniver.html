@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Lab - TV Portal (Aniversário)</title>
+    <!-- Usaremos a mesma fonte que já deve estar rolando no projeto principal -->
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;600&family=Montserrat:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/tv.css">
+</head>
+
+<body>
+
+    <!-- Slide 1: Welcome -->
+    <div id="slide-video" class="tv-slide active">
+        <div class="overlay-text" style="display: flex; flex-direction: column; align-items: flex-start; margin-left: 100px;">
+            <img src="../fl_value_proposal/logo-football-lab.svg" alt="FL Logo"
+                style="width: 700px; margin-bottom: 0px;">
+            <p style="font-size: 3rem; margin-top: -15px;">Gerando sua melhor versão</p>
+        </div>
+    </div>
+
+    <!-- Slide 2: Aniversário Bruno e Pietro -->
+    <div id="slide-birthday" class="tv-slide">
+        <div class="content-wrapper">
+            <h2 style="font-size: 2.5rem; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); margin-bottom: 20px; margin-top: 10px;">Bem vindos ao aniversário do Bruno e do Pietro!<br>12 anos!!</h2>
+            <div style="display: inline-block; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden; max-width: 80%; max-height: 55vh;">
+                <img src="../fl_value_proposal/niver%20bruno/bruno_pietro.jpeg" alt="Bruno e Pietro" style="display: block; max-height: 55vh; max-width: 100%; transform: scale(1.2); transform-origin: center center;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Barra inferior (Ticker) rodando notícias/avisos -->
+    <div class="ticker-wrap">
+        <div class="ticker">
+            <div class="ticker__item">MATRÍCULAS ABERTAS</div>
+        </div>
+    </div>
+
+    <!-- Injeta o motor do portal da TV -->
+    <script src="js/tv.js"></script>
+</body>
+
+</html>
