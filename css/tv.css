@@ -54,7 +54,7 @@ h3 {
    Slide 1: Cover
    ========================================= */
 #slide-video {
-    background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('../../fl_value_proposal/fotos%20slides/slide%201.jpg');
+    background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('../assets/img/slide%201.jpg');
     background-size: cover;
     background-position: center;
 }
@@ -78,7 +78,7 @@ h3 {
    Slide 2: Agendamento / Grade de Alunos
    ========================================= */
 #slide-schedule, #slide-birthday {
-    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url('../../fl_value_proposal/fotos%20slides/slide%202.jpg');
+    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url('../assets/img/slide%202.jpg');
     background-size: cover;
     background-position: center;
 }
@@ -156,7 +156,7 @@ h3 {
    Slide 3: Patrocinadores
    ========================================= */
 #slide-sponsors {
-    background: linear-gradient(rgba(255,255,255,0.85), rgba(255,255,255,0.85)), url('../../fl_value_proposal/fotos%20slides/slide%203.jpg');
+    background: linear-gradient(rgba(255,255,255,0.85), rgba(255,255,255,0.85)), url('../assets/img/slide%203.jpg');
     background-size: cover;
     background-position: center;
     color: #000000;
