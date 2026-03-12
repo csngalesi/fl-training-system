@@ -367,6 +367,42 @@
 
     document.getElementById('btn-close-builder').addEventListener('click', closeBuilder);
 
+    // ── Template loader ───────────────────────────────────────────
+    const btnLoadTemplate = document.getElementById('btn-load-template');
+    const templateMenu    = document.getElementById('vb-template-menu');
+
+    function buildTemplateMenu() {
+        templateMenu.innerHTML = '';
+        const templates = window.FL_TEMPLATES || [];
+        templates.forEach(tpl => {
+            const item = document.createElement('div');
+            item.className = 'vb-template-item';
+            item.innerHTML = `<div class="vb-template-item-title">${tpl.title}</div>
+                <div class="vb-template-item-desc">${tpl.description}</div>`;
+            item.addEventListener('click', () => {
+                builderFrames = tpl.frames.map(f => JSON.parse(JSON.stringify(f)));
+                builderFrame  = 0;
+                renderBuilderTabs();
+                renderBuilderPitch();
+                templateMenu.classList.add('hidden');
+                toast(`Template carregado: ${tpl.title}`);
+            });
+            templateMenu.appendChild(item);
+        });
+    }
+
+    btnLoadTemplate.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (templateMenu.classList.contains('hidden')) {
+            buildTemplateMenu();
+            templateMenu.classList.remove('hidden');
+        } else {
+            templateMenu.classList.add('hidden');
+        }
+    });
+
+    document.addEventListener('click', () => templateMenu.classList.add('hidden'));
+
     document.getElementById('btn-builder-new').addEventListener('click', () => openBuilder('new'));
     document.getElementById('btn-builder-edit').addEventListener('click', () => openBuilder('edit'));
 

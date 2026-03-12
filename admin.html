@@ -702,6 +702,50 @@
             border-radius: 2px;
         }
 
+        /* Template dropdown */
+        .vb-template-wrap {
+            position: relative;
+        }
+
+        .vb-template-menu {
+            position: absolute;
+            top: calc(100% + 6px);
+            right: 0;
+            background: #1e293b;
+            border: 1px solid rgba(255,255,255,.15);
+            border-radius: 10px;
+            min-width: 260px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.5);
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        .vb-template-menu.hidden { display: none; }
+
+        .vb-template-item {
+            padding: 10px 14px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255,255,255,.07);
+            transition: background .15s;
+        }
+
+        .vb-template-item:last-child { border-bottom: none; }
+
+        .vb-template-item:hover { background: rgba(16,185,129,.15); }
+
+        .vb-template-item-title {
+            font-size: .85rem;
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+
+        .vb-template-item-desc {
+            font-size: .72rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+            line-height: 1.4;
+        }
+
         .vb-tip {
             font-size: .78rem;
             color: var(--text-muted);
@@ -961,7 +1005,15 @@
         <div id="visual-builder" class="hidden">
             <h3>
                 <span><i class="fa-solid fa-paintbrush"></i> Construtor Visual</span>
-                <button id="btn-close-builder" class="btn-close" type="button"><i class="fa-solid fa-xmark"></i></button>
+                <div style="display:flex;align-items:center;gap:8px;margin-left:auto">
+                    <div class="vb-template-wrap">
+                        <button id="btn-load-template" class="btn btn-secondary btn-sm" type="button" title="Carregar template de movimentação">
+                            <i class="fa-solid fa-layer-group"></i> Templates
+                        </button>
+                        <div id="vb-template-menu" class="vb-template-menu hidden"></div>
+                    </div>
+                    <button id="btn-close-builder" class="btn-close" type="button"><i class="fa-solid fa-xmark"></i></button>
+                </div>
             </h3>
             <div class="vb-controls">
                 <button id="vb-prev" class="btn btn-secondary btn-sm" type="button">
@@ -1023,6 +1075,7 @@
     <script src="js/supabase-client.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/api.js"></script>
+    <script src="js/templates.js"></script>
     <script src="js/admin.js"></script>
 </body>
 
