@@ -71,6 +71,7 @@
     const newTitle        = document.getElementById('new-title');
     const newFundamental  = document.getElementById('new-fundamental');
     const newDesc         = document.getElementById('new-desc');
+    const newDuration     = document.getElementById('new-duration');
     const newSetup        = document.getElementById('new-setup');
     const newAnim         = document.getElementById('new-anim');
     const btnSaveNew      = document.getElementById('btn-save-new');
@@ -81,6 +82,7 @@
     const editTitle       = document.getElementById('edit-title');
     const editFundamental = document.getElementById('edit-fundamental');
     const editDesc        = document.getElementById('edit-desc');
+    const editDuration    = document.getElementById('edit-duration');
     const editSetup       = document.getElementById('edit-setup');
     const editAnim        = document.getElementById('edit-anim');
     const btnSaveEdit     = document.getElementById('btn-save-edit');
@@ -195,7 +197,7 @@
         drillList.innerHTML = drills.map((d, i) => `
             <div class="drill-item" id="drill-item-${d.id}">
                 <div class="drill-item-info">
-                    <div class="drill-item-title">#${i+1} — ${esc(d.title)}</div>
+                    <div class="drill-item-title">#${i+1} — ${esc(d.title)}${d.duration ? ` <span style="font-size:.75rem;color:var(--text-muted);font-weight:400;margin-left:6px"><i class="fa-regular fa-clock"></i> ${esc(d.duration)}</span>` : ''}</div>
                     <div class="drill-item-desc">${esc(d.description || '')}</div>
                 </div>
                 <div class="drill-item-actions">
@@ -221,8 +223,9 @@
     btnNewDrill.addEventListener('click', () => {
         closeAllForms();
         newFundamental.value = currentFundId;
-        newTitle.value = '';
-        newDesc.value  = '';
+        newTitle.value    = '';
+        newDesc.value     = '';
+        newDuration.value = '';
         newSetup.value = JSON.stringify(EXAMPLE_SETUP, null, 2);
         newAnim.value  = JSON.stringify(EXAMPLE_ANIM,  null, 2);
         formNew.classList.remove('hidden');
@@ -248,7 +251,9 @@
         try {
             await window.FLApi.Drills.create({
                 fundamental_id: newFundamental.value, title,
-                description: newDesc.value.trim(), setup, anim,
+                description: newDesc.value.trim(),
+                duration: newDuration.value.trim(),
+                setup, anim,
             });
             toast('Drill criado!');
             formNew.classList.add('hidden');
@@ -273,6 +278,7 @@
         editTitle.value       = drill.title;
         editFundamental.value = drill.fundamental_id;
         editDesc.value        = drill.description || '';
+        editDuration.value    = drill.duration || '';
         editSetup.value       = JSON.stringify(drill.setup, null, 2);
         editAnim.value        = JSON.stringify(drill.anim,  null, 2);
         formNew.classList.add('hidden');
@@ -302,7 +308,9 @@
         try {
             await window.FLApi.Drills.update(editingId, {
                 fundamental_id: editFundamental.value, title,
-                description: editDesc.value.trim(), setup, anim,
+                description: editDesc.value.trim(),
+                duration: editDuration.value.trim(),
+                setup, anim,
             });
             toast('Drill atualizado!');
             formEdit.classList.add('hidden');
@@ -736,6 +744,9 @@
                         <button class="btn btn-secondary btn-sm" onclick="window._editTemplate('${t.id}')">
                             <i class="fa-solid fa-pencil"></i>
                         </button>
+                        <button class="btn btn-secondary btn-sm" onclick="window._duplicateTemplate('${t.id}')" title="Duplicar">
+                            <i class="fa-solid fa-copy"></i>
+                        </button>
                         <button class="btn btn-danger btn-sm" onclick="window._deleteTemplate('${t.id}')">
                             <i class="fa-solid fa-trash"></i>
                         </button>
@@ -824,6 +835,20 @@
     window._editTemplate = (id) => {
         const tpl = templates.find(t => t.id === id);
         if (tpl) openTemplateForm('edit', tpl);
+    };
+
+    window._duplicateTemplate = async (id) => {
+        const tpl = templates.find(t => t.id === id);
+        if (!tpl) return;
+        try {
+            await window.FLApi.Templates.create({
+                title: tpl.title + ' (Cópia)',
+                description: tpl.description,
+                frames: tpl.frames,
+            });
+            toast('Template duplicado!');
+            await loadTemplates();
+        } catch (err) { toast('Erro: ' + err.message, 'error'); }
     };
 
     window._deleteTemplate = async (id) => {

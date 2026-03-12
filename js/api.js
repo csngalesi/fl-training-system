@@ -24,7 +24,7 @@
         async getByFundamental(fundamentalId) {
             const { data, error } = await db()
                 .from('fl_drills')
-                .select('id, fundamental_id, title, description, setup, anim, sort_order, user_id, created_at')
+                .select('id, fundamental_id, title, description, duration, setup, anim, sort_order, user_id, created_at')
                 .eq('fundamental_id', fundamentalId)
                 .order('sort_order', { ascending: true })
                 .order('created_at', { ascending: true });
