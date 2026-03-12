@@ -402,16 +402,12 @@
         const rFill = foot === 'R' ? 'white' : color;
         const lOp   = foot === 'L' ? '1'     : '0.88';
         const rOp   = foot === 'R' ? '1'     : '0.88';
-        return `<svg viewBox="0 0 42 44" width="40" height="41" style="display:block;filter:drop-shadow(0 1px 3px rgba(0,0,0,.6));">
-            <circle cx="21" cy="7" r="6" fill="${color}"/>
-            <ellipse cx="21" cy="21" rx="13" ry="8" fill="${color}"/>
-            <ellipse cx="3" cy="18" rx="6.5" ry="2.5" fill="${color}" opacity="0.82" transform="rotate(20,3,18)"/>
-            <ellipse cx="39" cy="18" rx="6.5" ry="2.5" fill="${color}" opacity="0.82" transform="rotate(-20,39,18)"/>
-            <ellipse cx="15" cy="37" rx="4" ry="6" fill="${lFill}" opacity="${lOp}"/>
-            <ellipse cx="27" cy="37" rx="4" ry="6" fill="${rFill}" opacity="${rOp}"/>
-            <circle cx="21" cy="7" r="6" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1"/>
-            <ellipse cx="21" cy="21" rx="13" ry="8" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1"/>
-            <text x="21" y="22" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="9" font-weight="900" font-family="'Outfit',sans-serif">${num}</text>
+        return `<svg viewBox="0 0 42 36" width="40" height="34" style="display:block;filter:drop-shadow(0 1px 3px rgba(0,0,0,.6));">
+            <ellipse cx="21" cy="13" rx="13" ry="8" fill="${color}"/>
+            <ellipse cx="21" cy="13" rx="13" ry="8" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1"/>
+            <ellipse cx="11" cy="30" rx="4" ry="6" fill="${lFill}" opacity="${lOp}"/>
+            <ellipse cx="31" cy="30" rx="4" ry="6" fill="${rFill}" opacity="${rOp}"/>
+            <text x="21" y="14" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="9" font-weight="900" font-family="'Outfit',sans-serif">${num}</text>
         </svg>`;
     }
 
