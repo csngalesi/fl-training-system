@@ -7,7 +7,7 @@
 
     // ── Constants ─────────────────────────────────────────────────
     const PITCH_W = 180, PITCH_H = 360;   // builder pitch dimensions (px)
-    const FRAME_COUNT = 15;
+    const FRAME_COUNT = 20;
     const ACTOR_COLORS = { p1:'#ef4444', p2:'#3b82f6', p3:'#10b981', p4:'#f59e0b' };
 
     const EXAMPLE_SETUP = {
