@@ -30,10 +30,14 @@
     let drills        = [];
     let editingId     = null;
 
+    // ── Templates state ───────────────────────────────────────────
+    let templates         = [];
+    let editingTemplateId = null;
+
     // ── Builder state ─────────────────────────────────────────────
     let builderFrames = [];
     let builderFrame  = 0;
-    let builderTarget = null;   // 'new' | 'edit'
+    let builderTarget = null;   // 'new' | 'edit' | 'template'
     let dragging      = null;   // { key: string, startPx, startPy }
 
     function defaultFrame() {
@@ -121,6 +125,7 @@
         adminSection.classList.remove('hidden');
         btnLogout.classList.remove('hidden');
         await loadFundamentals();
+        await loadTemplates();
     }
 
     btnLogin.addEventListener('click', async () => {
@@ -330,8 +335,6 @@
 
     // ── Guide Modal ───────────────────────────────────────────────
     function openGuide() { guideModal.classList.remove('hidden'); }
-    document.getElementById('btn-guide-new').addEventListener('click', openGuide);
-    document.getElementById('btn-guide-edit').addEventListener('click', openGuide);
     btnCloseGuide.addEventListener('click', () => guideModal.classList.add('hidden'));
     guideModal.addEventListener('click', (e) => { if (e.target === guideModal) guideModal.classList.add('hidden'); });
 
@@ -351,9 +354,21 @@
     }
 
     // ── Open / Close builder ──────────────────────────────────────
-    function openBuilder(target) {
+    const btnApplyBuilder   = document.getElementById('btn-apply-builder');
+    const btnApplyTemplate  = document.getElementById('btn-apply-template');
+
+    function openBuilder(target, frames = null) {
         builderTarget = target;
-        resetBuilderFrames();
+        if (frames) {
+            builderFrames = frames.map(f => JSON.parse(JSON.stringify(f)));
+        } else {
+            resetBuilderFrames();
+        }
+        // Toggle footer buttons
+        const isTemplate = target === 'template';
+        btnApplyBuilder.classList.toggle('hidden', isTemplate);
+        btnApplyTemplate.classList.toggle('hidden', !isTemplate);
+
         renderBuilderTabs();
         renderBuilderPitch();
         visualBuilder.classList.remove('hidden');
@@ -373,8 +388,9 @@
 
     function buildTemplateMenu() {
         templateMenu.innerHTML = '';
-        const templates = window.FL_TEMPLATES || [];
-        templates.forEach(tpl => {
+        // Use Supabase templates; fall back to hardcoded if none loaded yet
+        const tplSource = templates.length ? templates : (window.FL_TEMPLATES || []);
+        tplSource.forEach(tpl => {
             const item = document.createElement('div');
             item.className = 'vb-template-item';
             item.innerHTML = `<div class="vb-template-item-title">${tpl.title}</div>
@@ -693,6 +709,131 @@
         }
         toast('JSON aplicado! Revise e salve o drill.');
     });
+
+    // ── Templates admin ───────────────────────────────────────────
+    const tplFormPanel  = document.getElementById('template-form-panel');
+    const tplFormTitle  = document.getElementById('template-form-title');
+    const tplTitleInput = document.getElementById('tpl-title');
+    const tplDescInput  = document.getElementById('tpl-desc');
+    const tplList       = document.getElementById('template-list');
+
+    async function loadTemplates() {
+        try { templates = await window.FLApi.Templates.getAll(); }
+        catch (err) { console.error('[Admin] Erro ao carregar templates:', err); }
+        renderTemplateList();
+    }
+
+    function renderTemplateList() {
+        if (!templates.length) {
+            tplList.innerHTML = '<p style="color:var(--text-muted);font-size:.85rem">Nenhum template cadastrado.</p>';
+            return;
+        }
+        tplList.innerHTML = templates.map(t => `
+            <div class="drill-item" style="margin-bottom:10px">
+                <div class="drill-header">
+                    <span style="font-weight:600;font-size:.9rem">${esc(t.title)}</span>
+                    <div style="display:flex;gap:8px">
+                        <button class="btn btn-secondary btn-sm" onclick="window._editTemplate('${t.id}')">
+                            <i class="fa-solid fa-pencil"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="window._deleteTemplate('${t.id}')">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                ${t.description ? `<p style="font-size:.8rem;color:var(--text-muted);margin:4px 0 0">${esc(t.description)}</p>` : ''}
+            </div>`).join('');
+    }
+
+    function openTemplateForm(mode, tpl = null) {
+        editingTemplateId = tpl ? tpl.id : null;
+        tplFormTitle.textContent = tpl ? 'Editar Template' : 'Novo Template';
+        tplTitleInput.value = tpl ? tpl.title : '';
+        tplDescInput.value  = tpl ? tpl.description : '';
+        // Pre-load frames into builder state so the builder opens with them
+        if (tpl && tpl.frames) {
+            builderFrames = tpl.frames.map(f => JSON.parse(JSON.stringify(f)));
+        } else {
+            resetBuilderFrames();
+        }
+        tplFormPanel.classList.remove('hidden');
+        tplFormPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    document.getElementById('btn-new-template').addEventListener('click', () => {
+        openTemplateForm('new');
+    });
+
+    document.getElementById('btn-builder-template').addEventListener('click', () => {
+        openBuilder('template', builderFrames);
+    });
+
+    document.getElementById('btn-cancel-template').addEventListener('click', () => {
+        tplFormPanel.classList.add('hidden');
+        editingTemplateId = null;
+        closeBuilder();
+    });
+
+    document.getElementById('btn-save-template').addEventListener('click', async () => {
+        const title = tplTitleInput.value.trim();
+        if (!title) { toast('Preencha o título do template.', 'error'); return; }
+        const payload = { title, description: tplDescInput.value.trim(), frames: builderFrames };
+        try {
+            if (editingTemplateId) {
+                await window.FLApi.Templates.update(editingTemplateId, payload);
+                toast('Template atualizado!');
+            } else {
+                await window.FLApi.Templates.create(payload);
+                toast('Template criado!');
+            }
+            tplFormPanel.classList.add('hidden');
+            editingTemplateId = null;
+            closeBuilder();
+            await loadTemplates();
+        } catch (err) {
+            toast('Erro ao salvar template: ' + err.message, 'error');
+        }
+    });
+
+    // "Salvar Template" button inside the Visual Builder legend
+    btnApplyTemplate.addEventListener('click', async () => {
+        const title = tplTitleInput.value.trim();
+        if (!title) {
+            toast('Preencha o título antes de salvar.', 'error');
+            tplFormPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            return;
+        }
+        const payload = { title, description: tplDescInput.value.trim(), frames: builderFrames };
+        try {
+            if (editingTemplateId) {
+                await window.FLApi.Templates.update(editingTemplateId, payload);
+                toast('Template atualizado!');
+            } else {
+                await window.FLApi.Templates.create(payload);
+                toast('Template criado!');
+            }
+            tplFormPanel.classList.add('hidden');
+            editingTemplateId = null;
+            closeBuilder();
+            await loadTemplates();
+        } catch (err) {
+            toast('Erro ao salvar template: ' + err.message, 'error');
+        }
+    });
+
+    window._editTemplate = (id) => {
+        const tpl = templates.find(t => t.id === id);
+        if (tpl) openTemplateForm('edit', tpl);
+    };
+
+    window._deleteTemplate = async (id) => {
+        if (!confirm('Excluir este template?')) return;
+        try {
+            await window.FLApi.Templates.delete(id);
+            toast('Template excluído.');
+            await loadTemplates();
+        } catch (err) { toast('Erro: ' + err.message, 'error'); }
+    };
 
     // ── Helpers ───────────────────────────────────────────────────
     function closeAllForms() {

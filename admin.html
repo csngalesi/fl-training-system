@@ -938,16 +938,9 @@
                 <label for="edit-desc">Descrição</label>
                 <textarea id="edit-desc" class="form-textarea" placeholder="Explique o exercício em texto..."></textarea>
             </div>
-            <div class="form-group">
-                <label for="edit-setup">Setup (JSON) — posições iniciais</label>
-                <textarea id="edit-setup" class="form-textarea mono" placeholder='{"players":{"p1":{"x":5,"y":15},...},"ball":{"x":0.5,"y":0},"cones":[]}'></textarea>
-            </div>
-            <div class="form-group">
-                <label for="edit-anim">
-                    Animação (JSON)
-                    <button class="help-btn" id="btn-guide-edit" type="button" title="Ver Guia de Animação">?</button>
-                </label>
-                <textarea id="edit-anim" class="form-textarea mono" placeholder='[{"actor":"ball","to":{"x":5,"y":10},"dur":1000},{"delay":300},...]'></textarea>
+            <div style="display:none">
+                <textarea id="edit-setup"></textarea>
+                <textarea id="edit-anim"></textarea>
             </div>
             <button id="btn-builder-edit" class="btn-builder" type="button">
                 <i class="fa-solid fa-paintbrush"></i> Construtor Visual
@@ -978,16 +971,9 @@
                 <label for="new-desc">Descrição</label>
                 <textarea id="new-desc" class="form-textarea" placeholder="Explique o exercício em texto..."></textarea>
             </div>
-            <div class="form-group">
-                <label for="new-setup">Setup (JSON) — posições iniciais</label>
-                <textarea id="new-setup" class="form-textarea mono" placeholder='{"players":{"p1":{"x":5,"y":15},"p2":{"x":2,"y":10},"p3":{"x":8,"y":10},"p4":{"x":5,"y":5}},"ball":{"x":0.5,"y":0},"cones":[]}'></textarea>
-            </div>
-            <div class="form-group">
-                <label for="new-anim">
-                    Animação (JSON)
-                    <button class="help-btn" id="btn-guide-new" type="button" title="Ver Guia de Animação">?</button>
-                </label>
-                <textarea id="new-anim" class="form-textarea mono" placeholder='[{"actor":"ball","to":{"x":5,"y":10},"dur":1000},{"delay":300},...]'></textarea>
+            <div style="display:none">
+                <textarea id="new-setup"></textarea>
+                <textarea id="new-anim"></textarea>
             </div>
             <button id="btn-builder-new" class="btn-builder" type="button">
                 <i class="fa-solid fa-paintbrush"></i> Construtor Visual
@@ -1057,6 +1043,9 @@
                     <button id="btn-apply-builder" class="btn btn-primary" type="button" style="margin-top:14px">
                         <i class="fa-solid fa-wand-magic-sparkles"></i> Gerar JSON
                     </button>
+                    <button id="btn-apply-template" class="btn btn-success hidden" type="button" style="margin-top:14px">
+                        <i class="fa-solid fa-floppy-disk"></i> Salvar Template
+                    </button>
                 </div>
             </div>
         </div>
@@ -1067,6 +1056,44 @@
                 <i class="fa-solid fa-futbol"></i>
                 Selecione um fundamental para ver os drills.
             </div>
+        </div>
+
+        <!-- ── Templates de Movimentação ── -->
+        <div class="section-divider" style="margin:32px 0 20px;border-top:1px solid rgba(255,255,255,.08);padding-top:24px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+                <h2 style="font-size:1.1rem;color:var(--acc-primary);margin:0">
+                    <i class="fa-solid fa-layer-group"></i> Templates de Movimentação
+                </h2>
+                <button id="btn-new-template" class="btn btn-primary btn-sm">
+                    <i class="fa-solid fa-plus"></i> Novo Template
+                </button>
+            </div>
+
+            <!-- Template form (new / edit) -->
+            <div id="template-form-panel" class="form-panel hidden">
+                <h3 id="template-form-title" style="font-size:.95rem;color:var(--acc-primary);margin-bottom:14px">Novo Template</h3>
+                <div class="form-group">
+                    <label class="form-label">Título</label>
+                    <input id="tpl-title" class="form-input" type="text" placeholder="Ex: Movimentação de Orientado">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Descrição</label>
+                    <input id="tpl-desc" class="form-input" type="text" placeholder="Breve descrição do padrão de movimentação">
+                </div>
+                <button id="btn-builder-template" class="btn-builder" type="button">
+                    <i class="fa-solid fa-paintbrush"></i> Construtor Visual
+                    <span style="font-weight:400;font-size:.75rem;color:var(--text-muted)">— desenhe os 15 momentos</span>
+                </button>
+                <div class="form-actions">
+                    <button id="btn-save-template" class="btn btn-primary">
+                        <i class="fa-solid fa-floppy-disk"></i> Salvar Template
+                    </button>
+                    <button id="btn-cancel-template" class="btn btn-secondary">Cancelar</button>
+                </div>
+            </div>
+
+            <!-- Template list -->
+            <div id="template-list"></div>
         </div>
     </section>
 

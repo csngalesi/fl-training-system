@@ -63,7 +63,48 @@
         },
     };
 
-    window.FLApi = { Fundamentals, Drills };
+    // ── Templates ─────────────────────────────────────────────────
+    const Templates = {
+        async getAll() {
+            const { data, error } = await db()
+                .from('fl_templates')
+                .select('id, title, description, frames, created_at')
+                .order('created_at', { ascending: true });
+            if (error) throw error;
+            return data || [];
+        },
+
+        async create(payload) {
+            const { data, error } = await db()
+                .from('fl_templates')
+                .insert(payload)
+                .select()
+                .single();
+            if (error) throw error;
+            return data;
+        },
+
+        async update(id, payload) {
+            const { data, error } = await db()
+                .from('fl_templates')
+                .update(payload)
+                .eq('id', id)
+                .select()
+                .single();
+            if (error) throw error;
+            return data;
+        },
+
+        async delete(id) {
+            const { error } = await db()
+                .from('fl_templates')
+                .delete()
+                .eq('id', id);
+            if (error) throw error;
+        },
+    };
+
+    window.FLApi = { Fundamentals, Drills, Templates };
 
     console.info('[FL] API module loaded.');
 })();
