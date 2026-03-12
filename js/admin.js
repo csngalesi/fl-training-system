@@ -38,7 +38,8 @@
 
     function defaultFrame() {
         return {
-            p1: {x:5,y:15}, p2: {x:2,y:10}, p3: {x:8,y:10}, p4: {x:5,y:5},
+            p1: {x:5,y:15,rot:0,foot:null}, p2: {x:2,y:10,rot:0,foot:null},
+            p3: {x:8,y:10,rot:0,foot:null}, p4: {x:5,y:5, rot:0,foot:null},
             ball: {x:0.5,y:0},
             cones: [{x:3,y:8},{x:7,y:8},{x:3,y:14},{x:7,y:14}]
         };
@@ -396,17 +397,21 @@
     });
 
     // ── SVG player silhouette (top-down view) ─────────────────────
-    function playerSVG(num, color) {
-        return `<svg viewBox="0 0 24 32" width="22" height="29" style="display:block;filter:drop-shadow(0 1px 2px rgba(0,0,0,.55));">
-            <circle cx="12" cy="5.5" r="4.5" fill="${color}"/>
-            <ellipse cx="12" cy="16" rx="6" ry="7" fill="${color}"/>
-            <ellipse cx="3.5" cy="14" rx="4.5" ry="2" fill="${color}" opacity="0.82" transform="rotate(25,3.5,14)"/>
-            <ellipse cx="20.5" cy="14" rx="4.5" ry="2" fill="${color}" opacity="0.82" transform="rotate(-25,20.5,14)"/>
-            <ellipse cx="9" cy="27" rx="2.5" ry="4.5" fill="${color}" opacity="0.88"/>
-            <ellipse cx="15" cy="27" rx="2.5" ry="4.5" fill="${color}" opacity="0.88"/>
-            <circle cx="12" cy="5.5" r="4.5" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1"/>
-            <ellipse cx="12" cy="16" rx="6" ry="7" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1"/>
-            <text x="12" y="17" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="7" font-weight="900" font-family="'Outfit',sans-serif">${num}</text>
+    function playerSVG(num, color, foot = null) {
+        const lFill = foot === 'L' ? 'white' : color;
+        const rFill = foot === 'R' ? 'white' : color;
+        const lOp   = foot === 'L' ? '1'     : '0.88';
+        const rOp   = foot === 'R' ? '1'     : '0.88';
+        return `<svg viewBox="0 0 32 44" width="30" height="41" style="display:block;filter:drop-shadow(0 1px 3px rgba(0,0,0,.6));">
+            <circle cx="16" cy="7" r="6" fill="${color}"/>
+            <ellipse cx="16" cy="21" rx="8" ry="9" fill="${color}"/>
+            <ellipse cx="4.5" cy="19" rx="5.5" ry="2.5" fill="${color}" opacity="0.82" transform="rotate(25,4.5,19)"/>
+            <ellipse cx="27.5" cy="19" rx="5.5" ry="2.5" fill="${color}" opacity="0.82" transform="rotate(-25,27.5,19)"/>
+            <ellipse cx="11" cy="37" rx="3.5" ry="6" fill="${lFill}" opacity="${lOp}"/>
+            <ellipse cx="21" cy="37" rx="3.5" ry="6" fill="${rFill}" opacity="${rOp}"/>
+            <circle cx="16" cy="7" r="6" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1"/>
+            <ellipse cx="16" cy="21" rx="8" ry="9" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1"/>
+            <text x="16" y="22" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="9" font-weight="900" font-family="'Outfit',sans-serif">${num}</text>
         </svg>`;
     }
 
@@ -434,12 +439,31 @@
         ['p1','p2','p3','p4'].forEach(key => {
             const pos = frame[key];
             const {px, py} = fieldToPixel(pos.x, pos.y);
+            const rot  = pos.rot  || 0;
+            const foot = pos.foot || null;
             const el = document.createElement('div');
             el.className = 'vb-actor';
             el.dataset.key = key;
             el.style.left = px + 'px';
             el.style.top  = py + 'px';
-            el.innerHTML = playerSVG(key[1], ACTOR_COLORS[key]);
+            el.style.transform = `translate(-50%, -50%) rotate(${rot}deg)`;
+            el.innerHTML = playerSVG(key[1], ACTOR_COLORS[key], foot);
+
+            // Rotate handle
+            const handle = document.createElement('div');
+            handle.className = 'vb-rotate-handle';
+            handle.title = 'Girar (arraste)';
+            handle.addEventListener('pointerdown', onRotateHandlePointerDown);
+            el.appendChild(handle);
+
+            // Double-click → cycle foot: null → L → R → null
+            el.addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+                const cur = builderFrames[builderFrame][key].foot;
+                builderFrames[builderFrame][key].foot = cur === null ? 'L' : cur === 'L' ? 'R' : null;
+                renderBuilderPitch();
+            });
+
             vbPitch.appendChild(el);
         });
 
@@ -543,11 +567,48 @@
         renderBuilderPitch();
     }
 
+    // ── Rotate handle ─────────────────────────────────────────────
+    function propagateRotForward(fromFrame, key, oldRot, newRot) {
+        for (let i = fromFrame + 1; i < FRAME_COUNT; i++) {
+            if ((builderFrames[i][key].rot || 0) === oldRot) {
+                builderFrames[i][key].rot = newRot;
+            } else { break; }
+        }
+    }
+
+    function onRotateHandlePointerDown(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        const actorEl = e.currentTarget.parentElement;
+        const key     = actorEl.dataset.key;
+        const rect    = actorEl.getBoundingClientRect();
+        const cx = rect.left + rect.width  / 2;
+        const cy = rect.top  + rect.height / 2;
+        const initRot = builderFrames[builderFrame][key].rot || 0;
+
+        e.currentTarget.setPointerCapture(e.pointerId);
+
+        function onMove(ev) {
+            const angle = Math.round(Math.atan2(ev.clientX - cx, -(ev.clientY - cy)) * 180 / Math.PI);
+            builderFrames[builderFrame][key].rot = angle;
+            actorEl.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+        }
+        function onUp() {
+            const newRot = builderFrames[builderFrame][key].rot || 0;
+            propagateRotForward(builderFrame, key, initRot, newRot);
+            e.currentTarget.removeEventListener('pointermove', onMove);
+            e.currentTarget.removeEventListener('pointerup',   onUp);
+        }
+        e.currentTarget.addEventListener('pointermove', onMove);
+        e.currentTarget.addEventListener('pointerup',   onUp);
+    }
+
     // ── Generate JSON from frames ─────────────────────────────────
     function framesToJSON() {
         const f0 = builderFrames[0];
+        const pickPlayer = (p) => ({ x:p.x, y:p.y, rot: p.rot||0, foot: p.foot||null });
         const setup = {
-            players: { p1:{...f0.p1}, p2:{...f0.p2}, p3:{...f0.p3}, p4:{...f0.p4} },
+            players: { p1:pickPlayer(f0.p1), p2:pickPlayer(f0.p2), p3:pickPlayer(f0.p3), p4:pickPlayer(f0.p4) },
             ball: {...f0.ball},
             cones: f0.cones.map(c => ({...c}))
         };
@@ -561,8 +622,15 @@
             ['p1','p2','p3','p4','ball'].forEach(key => {
                 const p = key === 'ball' ? prev.ball : prev[key];
                 const c = key === 'ball' ? curr.ball : curr[key];
-                if (p.x !== c.x || p.y !== c.y) {
-                    moves.push({ actor: key, to: {x: c.x, y: c.y}, dur: 1000 });
+                const posChanged  = p.x !== c.x || p.y !== c.y;
+                const rotChanged  = key !== 'ball' && (p.rot || 0) !== (c.rot || 0);
+                const footChanged = key !== 'ball' && p.foot !== c.foot;
+                if (posChanged || rotChanged || footChanged) {
+                    const step = { actor: key, dur: 1000 };
+                    if (posChanged)  step.to   = {x: c.x, y: c.y};
+                    if (rotChanged)  step.rot  = c.rot  || 0;
+                    if (footChanged) step.foot = c.foot || null;
+                    moves.push(step);
                 }
             });
 

@@ -614,13 +614,29 @@
 
         .vb-actor {
             position: absolute;
-            width: 22px;
-            height: 29px;
+            width: 30px;
+            height: 41px;
             transform: translate(-50%, -50%);
             cursor: grab;
             user-select: none;
             touch-action: none;
             z-index: 2;
+        }
+
+        .vb-rotate-handle {
+            position: absolute;
+            top: -13px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            border: 1.5px solid rgba(0,0,0,.35);
+            cursor: crosshair;
+            z-index: 4;
+            box-shadow: 0 1px 3px rgba(0,0,0,.5);
+            touch-action: none;
         }
 
         .vb-actor:active { cursor: grabbing; }

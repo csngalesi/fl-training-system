@@ -526,14 +526,18 @@ h3 {
 }
 
 .player {
-    width: 22px;
-    height: 29px;
+    width: 30px;
+    height: 41px;
 }
 
 #actor-p1 { color: #ef4444; }
 #actor-p2 { color: #3b82f6; }
 #actor-p3 { color: #10b981; }
 #actor-p4 { color: #f59e0b; }
+
+/* Active foot highlight */
+.actor[data-foot="L"] .leg-l { fill: white; opacity: 1; }
+.actor[data-foot="R"] .leg-r { fill: white; opacity: 1; }
 
 .ball {
     width: 16px;

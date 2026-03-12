@@ -161,9 +161,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Reset Setup without Transitions
         Object.values(actorsObj).forEach(el => {
             el.style.transition = 'none';
-            // Default "away" position if something breaks, but all our 4p data has mapping
             el.style.setProperty('--x', 5);
             el.style.setProperty('--y', 10);
+            el.style.transform = 'translate(-50%, -50%)';
+            el.dataset.foot = '';
         });
 
         // Map 4 players from data
@@ -173,6 +174,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const el = actorsObj[pID];
                 el.style.setProperty('--x', ps[pID].x);
                 el.style.setProperty('--y', ps[pID].y);
+                if (ps[pID].rot) el.style.transform = `translate(-50%, -50%) rotate(${ps[pID].rot}deg)`;
+                if (ps[pID].foot) el.dataset.foot = ps[pID].foot;
             }
         });
 
@@ -228,8 +231,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Execute move
-            el.style.setProperty('--x', step.to.x);
-            el.style.setProperty('--y', step.to.y);
+            if (step.to) {
+                el.style.setProperty('--x', step.to.x);
+                el.style.setProperty('--y', step.to.y);
+            }
+            if (step.rot !== undefined) {
+                el.style.transform = `translate(-50%, -50%) rotate(${step.rot}deg)`;
+            }
+            if (step.foot !== undefined) {
+                el.dataset.foot = step.foot || '';
+            }
 
             // Wait if not synced with the next move
             if (!step.sync) {
