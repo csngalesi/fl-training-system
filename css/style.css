@@ -526,59 +526,14 @@ h3 {
 }
 
 .player {
-    width: 24px;
-    height: 28px;
-    background: var(--acc-secondary);
-    border-radius: 50%;          /* oval/ellipse body */
-    border: 2px solid #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 13px;
-    font-weight: 800;
-    font-family: 'Outfit';
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
-    overflow: visible;
+    width: 22px;
+    height: 29px;
 }
 
-/* Feet — two small rectangles below the oval body */
-.player::before,
-.player::after {
-    content: '';
-    position: absolute;
-    bottom: -9px;
-    width: 7px;
-    height: 9px;
-    background: inherit;
-    border-radius: 2px;
-    opacity: 0.85;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-.player::before { left: 1px; }
-.player::after  { right: 1px; }
-
-#actor-p1 {
-    background: #ef4444;
-}
-
-/* Red */
-#actor-p2 {
-    background: #3b82f6;
-}
-
-/* Blue */
-#actor-p3 {
-    background: #10b981;
-}
-
-/* Green */
-#actor-p4 {
-    background: #f59e0b;
-}
-
-/* Amber */
+#actor-p1 { color: #ef4444; }
+#actor-p2 { color: #3b82f6; }
+#actor-p3 { color: #10b981; }
+#actor-p4 { color: #f59e0b; }
 
 .ball {
     width: 16px;

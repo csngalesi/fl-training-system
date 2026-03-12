@@ -614,39 +614,14 @@
 
         .vb-actor {
             position: absolute;
-            width: 18px;
-            height: 22px;
-            border-radius: 50%;          /* oval/ellipse body */
-            border: 2px solid rgba(255,255,255,.7);
+            width: 22px;
+            height: 29px;
             transform: translate(-50%, -50%);
             cursor: grab;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: .62rem;
-            font-weight: 800;
-            color: #fff;
             user-select: none;
             touch-action: none;
             z-index: 2;
-            overflow: visible;
         }
-
-        /* Feet — two small rectangles below the oval body */
-        .vb-actor:not(.ball):not(.cone)::before,
-        .vb-actor:not(.ball):not(.cone)::after {
-            content: '';
-            position: absolute;
-            bottom: -7px;
-            width: 5px;
-            height: 7px;
-            background: inherit;
-            border-radius: 2px;
-            opacity: 0.85;
-        }
-
-        .vb-actor:not(.ball):not(.cone)::before { left: 1px; }
-        .vb-actor:not(.ball):not(.cone)::after  { right: 1px; }
 
         .vb-actor:active { cursor: grabbing; }
 
@@ -694,10 +669,10 @@
         }
 
         .vb-legend-dot {
-            width: 12px;
-            height: 16px;
-            border-radius: 50%;          /* oval, matches player shape */
+            width: 11px;
+            height: 14px;
             flex-shrink: 0;
+            border-radius: 50%;
             border: 2px solid rgba(255,255,255,.35);
         }
 

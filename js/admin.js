@@ -395,6 +395,21 @@
         if (builderFrame < FRAME_COUNT - 1) { builderFrame++; renderBuilderTabs(); renderBuilderPitch(); }
     });
 
+    // ── SVG player silhouette (top-down view) ─────────────────────
+    function playerSVG(num, color) {
+        return `<svg viewBox="0 0 24 32" width="22" height="29" style="display:block;filter:drop-shadow(0 1px 2px rgba(0,0,0,.55));">
+            <circle cx="12" cy="5.5" r="4.5" fill="${color}"/>
+            <ellipse cx="12" cy="16" rx="6" ry="7" fill="${color}"/>
+            <ellipse cx="3.5" cy="14" rx="4.5" ry="2" fill="${color}" opacity="0.82" transform="rotate(25,3.5,14)"/>
+            <ellipse cx="20.5" cy="14" rx="4.5" ry="2" fill="${color}" opacity="0.82" transform="rotate(-25,20.5,14)"/>
+            <ellipse cx="9" cy="27" rx="2.5" ry="4.5" fill="${color}" opacity="0.88"/>
+            <ellipse cx="15" cy="27" rx="2.5" ry="4.5" fill="${color}" opacity="0.88"/>
+            <circle cx="12" cy="5.5" r="4.5" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1"/>
+            <ellipse cx="12" cy="16" rx="6" ry="7" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1"/>
+            <text x="12" y="17" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="7" font-weight="900" font-family="'Outfit',sans-serif">${num}</text>
+        </svg>`;
+    }
+
     // ── Render pitch actors ───────────────────────────────────────
     function renderBuilderPitch() {
         vbPitch.innerHTML = `
@@ -422,10 +437,9 @@
             const el = document.createElement('div');
             el.className = 'vb-actor';
             el.dataset.key = key;
-            el.style.background = ACTOR_COLORS[key];
             el.style.left = px + 'px';
             el.style.top  = py + 'px';
-            el.textContent = key[1]; // '1' '2' '3' '4'
+            el.innerHTML = playerSVG(key[1], ACTOR_COLORS[key]);
             vbPitch.appendChild(el);
         });
 
