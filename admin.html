@@ -777,6 +777,66 @@
             background: rgba(16,185,129,.25);
             border-style: solid;
         }
+
+        /* ── Admin Layout (sidebar + main) ── */
+        #admin-section.page {
+            max-width: none;
+            padding: 0;
+        }
+
+        .admin-layout {
+            display: flex;
+            min-height: calc(100vh - 65px);
+        }
+
+        .admin-sidebar {
+            width: 200px;
+            flex-shrink: 0;
+            background: var(--glass-bg);
+            border-right: 1px solid var(--glass-border);
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 20px;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: .88rem;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            background: transparent;
+            border: none;
+            border-left: 3px solid transparent;
+            text-align: left;
+            width: 100%;
+            transition: all .15s ease;
+        }
+
+        .sidebar-item:hover { color: var(--text-main); background: rgba(255,255,255,.04); }
+
+        .sidebar-item.active {
+            color: var(--acc-primary);
+            background: rgba(16,185,129,.08);
+            border-left-color: var(--acc-primary);
+        }
+
+        .sidebar-item i { width: 16px; text-align: center; }
+
+        .admin-main {
+            flex: 1;
+            min-width: 0;
+            padding: 32px 28px;
+            max-width: 800px;
+        }
+
+        .admin-module { display: block; }
+        .admin-module.hidden { display: none !important; }
     </style>
 </head>
 
@@ -907,6 +967,23 @@
 
     <!-- ── Admin Section ── -->
     <section id="admin-section" class="page hidden">
+    <div class="admin-layout">
+
+        <!-- ── Sidebar ── -->
+        <nav class="admin-sidebar">
+            <button class="sidebar-item active" data-module="drills">
+                <i class="fa-solid fa-futbol"></i> Drills
+            </button>
+            <button class="sidebar-item" data-module="templates">
+                <i class="fa-solid fa-layer-group"></i> Templates
+            </button>
+        </nav>
+
+        <!-- ── Main Content ── -->
+        <div class="admin-main">
+
+        <!-- ══ Module: Drills ══ -->
+        <div id="module-drills" class="admin-module">
 
         <!-- Fundamental Selector + New Drill -->
         <div class="section-header">
@@ -987,7 +1064,57 @@
             </div>
         </div>
 
-        <!-- Visual Builder -->
+        <!-- Drill List -->
+        <div id="drill-list" class="drill-list">
+            <div class="empty-state">
+                <i class="fa-solid fa-futbol"></i>
+                Selecione um fundamental para ver os drills.
+            </div>
+        </div>
+
+        </div><!-- /#module-drills -->
+
+        <!-- ══ Module: Templates ══ -->
+        <div id="module-templates" class="admin-module hidden">
+        <div style="margin-bottom:20px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+                <h2 style="font-size:1.1rem;color:var(--acc-primary);margin:0">
+                    <i class="fa-solid fa-layer-group"></i> Templates de Movimentação
+                </h2>
+                <button id="btn-new-template" class="btn btn-primary btn-sm">
+                    <i class="fa-solid fa-plus"></i> Novo Template
+                </button>
+            </div>
+
+            <!-- Template form (new / edit) -->
+            <div id="template-form-panel" class="form-panel hidden">
+                <h3 id="template-form-title" style="font-size:.95rem;color:var(--acc-primary);margin-bottom:14px">Novo Template</h3>
+                <div class="form-group">
+                    <label class="form-label">Título</label>
+                    <input id="tpl-title" class="form-input" type="text" placeholder="Ex: Movimentação de Orientado">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Descrição</label>
+                    <input id="tpl-desc" class="form-input" type="text" placeholder="Breve descrição do padrão de movimentação">
+                </div>
+                <button id="btn-builder-template" class="btn-builder" type="button">
+                    <i class="fa-solid fa-paintbrush"></i> Construtor Visual
+                    <span style="font-weight:400;font-size:.75rem;color:var(--text-muted)">— desenhe os 15 momentos</span>
+                </button>
+                <div class="form-actions">
+                    <button id="btn-save-template" class="btn btn-primary">
+                        <i class="fa-solid fa-floppy-disk"></i> Salvar Template
+                    </button>
+                    <button id="btn-cancel-template" class="btn btn-secondary">Cancelar</button>
+                </div>
+            </div>
+
+            <!-- Template list -->
+            <div id="template-list"></div>
+        </div>
+        </div><!-- /#module-templates -->
+
+        <!-- Visual Builder (shared — shown by openBuilder, sits below active module) -->
         <div id="visual-builder" class="hidden">
             <h3>
                 <span><i class="fa-solid fa-paintbrush"></i> Construtor Visual</span>
@@ -1050,51 +1177,8 @@
             </div>
         </div>
 
-        <!-- Drill List -->
-        <div id="drill-list" class="drill-list">
-            <div class="empty-state">
-                <i class="fa-solid fa-futbol"></i>
-                Selecione um fundamental para ver os drills.
-            </div>
-        </div>
-
-        <!-- ── Templates de Movimentação ── -->
-        <div class="section-divider" style="margin:32px 0 20px;border-top:1px solid rgba(255,255,255,.08);padding-top:24px">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-                <h2 style="font-size:1.1rem;color:var(--acc-primary);margin:0">
-                    <i class="fa-solid fa-layer-group"></i> Templates de Movimentação
-                </h2>
-                <button id="btn-new-template" class="btn btn-primary btn-sm">
-                    <i class="fa-solid fa-plus"></i> Novo Template
-                </button>
-            </div>
-
-            <!-- Template form (new / edit) -->
-            <div id="template-form-panel" class="form-panel hidden">
-                <h3 id="template-form-title" style="font-size:.95rem;color:var(--acc-primary);margin-bottom:14px">Novo Template</h3>
-                <div class="form-group">
-                    <label class="form-label">Título</label>
-                    <input id="tpl-title" class="form-input" type="text" placeholder="Ex: Movimentação de Orientado">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Descrição</label>
-                    <input id="tpl-desc" class="form-input" type="text" placeholder="Breve descrição do padrão de movimentação">
-                </div>
-                <button id="btn-builder-template" class="btn-builder" type="button">
-                    <i class="fa-solid fa-paintbrush"></i> Construtor Visual
-                    <span style="font-weight:400;font-size:.75rem;color:var(--text-muted)">— desenhe os 15 momentos</span>
-                </button>
-                <div class="form-actions">
-                    <button id="btn-save-template" class="btn btn-primary">
-                        <i class="fa-solid fa-floppy-disk"></i> Salvar Template
-                    </button>
-                    <button id="btn-cancel-template" class="btn btn-secondary">Cancelar</button>
-                </div>
-            </div>
-
-            <!-- Template list -->
-            <div id="template-list"></div>
-        </div>
+        </div><!-- /.admin-main -->
+    </div><!-- /.admin-layout -->
     </section>
 
     <!-- Scripts -->

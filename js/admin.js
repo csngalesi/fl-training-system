@@ -849,6 +849,21 @@
             .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
+    // ── Sidebar navigation ────────────────────────────────────────
+    document.querySelectorAll('.sidebar-item').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const mod = btn.dataset.module;
+            // Update active state
+            document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            // Show/hide modules
+            document.querySelectorAll('.admin-module').forEach(m => m.classList.add('hidden'));
+            document.getElementById(`module-${mod}`).classList.remove('hidden');
+            // Close builder when switching modules
+            closeBuilder();
+        });
+    });
+
     // ── Boot ──────────────────────────────────────────────────────
     init();
 
