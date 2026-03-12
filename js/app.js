@@ -14,6 +14,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const pitchHeaderCaption = document.getElementById('visual-caption');
     const btnReplay = document.getElementById('btn-replay');
 
+    // Week plan elements
+    const btnModeFund   = document.getElementById('btn-mode-fundamentals');
+    const btnModeWeek   = document.getElementById('btn-mode-week');
+    const fundamentalsPanel = document.getElementById('fundamentals-panel');
+    const weekPanel     = document.getElementById('week-sessions-panel');
+    const weekPlanName  = document.getElementById('week-plan-name');
+    const weekSessionCount = document.getElementById('week-session-count');
+    const weekDrillsList = document.getElementById('week-drills-list');
+
+    let appMode = 'fundamentals';   // 'fundamentals' | 'week'
+
     // Modal Elements
     const btnTechBase = document.getElementById('btn-tech-base');
     const modalBase = document.getElementById('tech-modal');
@@ -70,6 +81,10 @@ document.addEventListener('DOMContentLoaded', () => {
             sidebarBackdrop.classList.add('hidden');
         }
 
+        // Mode switcher
+        btnModeFund.addEventListener('click', () => switchMode('fundamentals'));
+        btnModeWeek.addEventListener('click', () => switchMode('week'));
+
         // Event Listeners
         btnReplay.addEventListener('click', () => {
             if (currentDrill) playDrillAnimation(currentDrill);
@@ -114,6 +129,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Populate Drill Cards
+        const countBadge = document.getElementById('drill-count-badge');
+        if (countBadge) countBadge.textContent = `${currentFundamental.drills.length} exercícios`;
         drillsContainer.innerHTML = '';
         currentFundamental.drills.forEach((drill, dIdx) => {
             const card = document.createElement('div');
@@ -248,6 +265,89 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (seqId !== animationSequenceId) break;
             }
         }
+    }
+
+    // ==========================================================
+    // WEEK PLAN MODE
+    // ==========================================================
+
+    function switchMode(mode) {
+        appMode = mode;
+        btnModeFund.classList.toggle('active', mode === 'fundamentals');
+        btnModeWeek.classList.toggle('active', mode === 'week');
+        navMenu.classList.toggle('hidden', mode === 'week');
+        fundamentalsPanel.classList.toggle('hidden', mode === 'week');
+        weekPanel.classList.toggle('hidden', mode !== 'week');
+
+        if (mode === 'week') {
+            fundTitle.textContent = 'Treino da Semana';
+            workspace.classList.remove('hidden');
+            loadActivePlan();
+        } else {
+            // Restore fundamentals state
+            if (currentFundamental) {
+                fundTitle.textContent = currentFundamental.title;
+            } else {
+                fundTitle.textContent = 'Selecione um Fundamento';
+            }
+        }
+    }
+
+    async function loadActivePlan() {
+        weekDrillsList.innerHTML = '<p style="color:var(--text-muted);font-size:.9rem;padding:16px 0">Carregando...</p>';
+        let plans;
+        try {
+            plans = await window.FLApi.WeekPlans.getAll();
+        } catch (err) {
+            weekDrillsList.innerHTML = '<p style="color:#ef4444;font-size:.9rem">Erro ao carregar plano.</p>';
+            return;
+        }
+        const active = plans.find(p => p.is_active) || plans[plans.length - 1];
+        if (!active || !active.sessions || !active.sessions.length) {
+            weekPlanName.textContent = active ? active.title : 'Treino da Semana';
+            weekSessionCount.textContent = '0 sessões';
+            weekDrillsList.innerHTML = '<p style="color:var(--text-muted);font-size:.88rem;padding:16px 0">Nenhuma sessão no plano ativo.</p>';
+            return;
+        }
+        weekPlanName.textContent = active.title;
+        weekSessionCount.textContent = `${active.sessions.length} sessões`;
+        renderWeekSessions(active.sessions);
+    }
+
+    function renderWeekSessions(sessions) {
+        weekDrillsList.innerHTML = sessions.map((s, i) => `
+            <div class="week-session-card" data-drill-id="${s.drill_id}">
+                <div class="week-session-num">Sessão ${i + 1}</div>
+                <div class="week-session-title">${escHtml(s.title)}</div>
+                <div class="week-session-meta">
+                    ${s.fundamental_title ? escHtml(s.fundamental_title) : ''}
+                    ${s.duration ? ' · ' + escHtml(s.duration) : ''}
+                </div>
+            </div>`).join('');
+
+        weekDrillsList.querySelectorAll('.week-session-card').forEach(card => {
+            card.addEventListener('click', () => selectWeekSession(card, card.dataset.drillId));
+        });
+    }
+
+    async function selectWeekSession(cardEl, drillId) {
+        document.querySelectorAll('.week-session-card').forEach(c => c.classList.remove('active'));
+        cardEl.classList.add('active');
+        pitchHeaderCaption.innerHTML = '<p><i class="fa-solid fa-spinner fa-spin"></i> Carregando animação...</p>';
+        try {
+            const drill = await window.FLApi.Drills.getById(drillId);
+            currentDrill = drill;
+            pitchHeaderCaption.innerHTML = `<p><i class="fa-solid fa-play"></i> <strong>${drill.title}</strong></p>`;
+            playDrillAnimation(drill);
+        } catch (err) {
+            pitchHeaderCaption.innerHTML = `<p style="color:#ef4444">Erro: ${err.message}</p>`;
+        }
+    }
+
+    function escHtml(str) {
+        return String(str || '')
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
     // Run

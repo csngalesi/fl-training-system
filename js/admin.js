@@ -128,6 +128,7 @@
         btnLogout.classList.remove('hidden');
         await loadFundamentals();
         await loadTemplates();
+        await loadWeekPlans();
     }
 
     btnLogin.addEventListener('click', async () => {
@@ -166,6 +167,7 @@
             selFundamental.value = currentFundId;
             await loadDrills();
         }
+        buildWeekFundPills();
     }
 
     selFundamental.addEventListener('change', async () => {
@@ -873,6 +875,256 @@
             .replace(/&/g, '&amp;').replace(/</g, '&lt;')
             .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
+
+    // ══════════════════════════════════════════════════════════════
+    // WEEK PLAN BUILDER
+    // ══════════════════════════════════════════════════════════════
+
+    let weekPlans          = [];
+    let editingWeekPlanId  = null;   // null = new plan
+    let weekSessions       = [];     // sessions currently in editor
+    let weekDrillsCache    = {};     // fundamentalId → drills[]
+    let weekActiveFundId   = null;
+
+    // ── DOM refs (week) ───────────────────────────────────────────
+    const wbPlanList       = document.getElementById('wb-plan-list');
+    const wbFundPills      = document.getElementById('wb-fund-pills');
+    const wbDrillCards     = document.getElementById('wb-drill-cards');
+    const wbDropZone       = document.getElementById('wb-drop-zone');
+    const wbSessionList    = document.getElementById('wb-session-list');
+    const wbDropHint       = document.getElementById('wb-drop-hint');
+    const wbPlanEditor     = document.getElementById('wb-plan-editor');
+    const wbPlanSelectHint = document.getElementById('wb-plan-select-hint');
+    const wbPlanTitleInput = document.getElementById('wb-plan-title-input');
+
+    async function loadWeekPlans() {
+        try { weekPlans = await window.FLApi.WeekPlans.getAll(); }
+        catch (err) { console.error('[Admin] Erro ao carregar planos:', err); }
+        renderWeekPlanList();
+    }
+
+    function renderWeekPlanList() {
+        if (!weekPlans.length) {
+            wbPlanList.innerHTML = '<p style="color:var(--text-muted);font-size:.8rem">Nenhum plano.</p>';
+            return;
+        }
+        wbPlanList.innerHTML = weekPlans.map(p => `
+            <div class="wb-plan-item ${p.id === editingWeekPlanId ? 'active' : ''}"
+                 data-plan-id="${p.id}">
+                <div class="wb-plan-item-title">${esc(p.title)}</div>
+                ${p.is_active ? '<span class="wb-plan-item-active-badge">Ativo</span>' : ''}
+                <button class="wb-session-remove" onclick="window._wbEditPlan('${p.id}')" title="Editar">
+                    <i class="fa-solid fa-pen"></i>
+                </button>
+                <button class="wb-session-remove" onclick="window._wbDeletePlan('${p.id}')" title="Excluir">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>`).join('');
+    }
+
+    function openWeekPlanEditor(plan = null) {
+        editingWeekPlanId = plan ? plan.id : null;
+        weekSessions = plan ? JSON.parse(JSON.stringify(plan.sessions || [])) : [];
+        wbPlanTitleInput.value = plan ? plan.title : '';
+        wbPlanEditor.classList.remove('hidden');
+        wbPlanSelectHint.classList.add('hidden');
+        renderWeekPlanList();
+        renderWeekSessions();
+    }
+
+    function renderWeekSessions() {
+        wbDropHint.style.display = weekSessions.length ? 'none' : '';
+        wbSessionList.innerHTML = weekSessions.map((s, i) => `
+            <div class="wb-session-item" draggable="true" data-session-idx="${i}">
+                <span class="wb-session-num">${i + 1}</span>
+                <div class="wb-session-info">
+                    <div class="wb-session-title">${esc(s.title)}</div>
+                    <div class="wb-session-sub">${esc(s.fundamental_title || '')}${s.duration ? ' · ' + esc(s.duration) : ''}</div>
+                </div>
+                <button class="wb-session-remove" data-remove="${i}" title="Remover">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>`).join('');
+
+        // Remove buttons
+        wbSessionList.querySelectorAll('[data-remove]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const idx = parseInt(btn.dataset.remove);
+                weekSessions.splice(idx, 1);
+                renderWeekSessions();
+            });
+        });
+
+        // Drag-to-reorder within session list
+        let dragSrcIdx = null;
+        wbSessionList.querySelectorAll('.wb-session-item').forEach(item => {
+            item.addEventListener('dragstart', (e) => {
+                dragSrcIdx = parseInt(item.dataset.sessionIdx);
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('session-reorder', dragSrcIdx);
+                setTimeout(() => item.classList.add('dragging'), 0);
+            });
+            item.addEventListener('dragend', () => item.classList.remove('dragging'));
+            item.addEventListener('dragover', (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
+            item.addEventListener('drop', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const targetIdx = parseInt(item.dataset.sessionIdx);
+                if (dragSrcIdx !== null && dragSrcIdx !== targetIdx) {
+                    const moved = weekSessions.splice(dragSrcIdx, 1)[0];
+                    weekSessions.splice(targetIdx, 0, moved);
+                    dragSrcIdx = null;
+                    renderWeekSessions();
+                }
+            });
+        });
+    }
+
+    // Drop zone — accept drills from center panel
+    wbDropZone.addEventListener('dragover', (e) => {
+        if (e.dataTransfer.types.includes('drill')) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+            wbDropZone.classList.add('drag-over');
+        }
+    });
+    wbDropZone.addEventListener('dragleave', () => wbDropZone.classList.remove('drag-over'));
+    wbDropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        wbDropZone.classList.remove('drag-over');
+        if (!editingWeekPlanId && wbPlanTitleInput.value.trim() === '') {
+            toast('Crie ou selecione um plano antes de adicionar sessões.', 'error');
+            return;
+        }
+        const raw = e.dataTransfer.getData('drill');
+        if (!raw) return;
+        try {
+            const drill = JSON.parse(raw);
+            weekSessions.push(drill);
+            renderWeekSessions();
+        } catch { /* ignore */ }
+    });
+
+    // Render drills in center panel
+    async function loadWeekDrills(fundamentalId) {
+        weekActiveFundId = fundamentalId;
+        wbFundPills.querySelectorAll('.wb-fund-pill').forEach(p => {
+            p.classList.toggle('active', p.dataset.fundId === fundamentalId);
+        });
+        if (weekDrillsCache[fundamentalId]) {
+            renderWeekDrillCards(weekDrillsCache[fundamentalId], fundamentalId);
+            return;
+        }
+        wbDrillCards.innerHTML = '<p style="color:var(--text-muted);font-size:.82rem">Carregando...</p>';
+        try {
+            const drills = await window.FLApi.Drills.getByFundamental(fundamentalId);
+            weekDrillsCache[fundamentalId] = drills;
+            renderWeekDrillCards(drills, fundamentalId);
+        } catch (err) {
+            wbDrillCards.innerHTML = `<p style="color:var(--acc-danger);font-size:.82rem">${err.message}</p>`;
+        }
+    }
+
+    function renderWeekDrillCards(drills, fundamentalId) {
+        const fundTitle = fundamentals.find(f => f.id === fundamentalId)?.title || '';
+        if (!drills.length) {
+            wbDrillCards.innerHTML = '<p style="color:var(--text-muted);font-size:.82rem">Nenhum drill neste fundamental.</p>';
+            return;
+        }
+        wbDrillCards.innerHTML = drills.map(d => `
+            <div class="wb-drill-card" draggable="true" data-drill='${JSON.stringify({
+                drill_id: d.id,
+                title: d.title,
+                description: d.description || '',
+                duration: d.duration || '',
+                fundamental_title: fundTitle,
+            }).replace(/'/g, "&#39;")}'>
+                <div class="wb-drill-card-title">${esc(d.title)}</div>
+                <div class="wb-drill-card-meta">${esc(fundTitle)}${d.duration ? ' · ' + esc(d.duration) : ''}</div>
+            </div>`).join('');
+
+        wbDrillCards.querySelectorAll('.wb-drill-card').forEach(card => {
+            card.addEventListener('dragstart', (e) => {
+                const data = card.dataset.drill;
+                e.dataTransfer.setData('drill', data);
+                e.dataTransfer.effectAllowed = 'copy';
+                setTimeout(() => card.classList.add('dragging'), 0);
+            });
+            card.addEventListener('dragend', () => card.classList.remove('dragging'));
+        });
+    }
+
+    function buildWeekFundPills() {
+        wbFundPills.innerHTML = fundamentals.map(f => `
+            <button class="wb-fund-pill" data-fund-id="${f.id}">
+                <i class="fa-solid ${f.icon}"></i> ${esc(f.title)}
+            </button>`).join('');
+        wbFundPills.querySelectorAll('.wb-fund-pill').forEach(pill => {
+            pill.addEventListener('click', () => loadWeekDrills(pill.dataset.fundId));
+        });
+    }
+
+    document.getElementById('wb-btn-new-plan').addEventListener('click', () => {
+        openWeekPlanEditor(null);
+    });
+
+    document.getElementById('wb-btn-save-plan').addEventListener('click', async () => {
+        const title = wbPlanTitleInput.value.trim();
+        if (!title) { toast('Informe o título do plano.', 'error'); wbPlanTitleInput.focus(); return; }
+        const payload = { title, sessions: weekSessions };
+        try {
+            if (editingWeekPlanId) {
+                await window.FLApi.WeekPlans.update(editingWeekPlanId, payload);
+                toast('Plano atualizado!');
+            } else {
+                const created = await window.FLApi.WeekPlans.create(payload);
+                editingWeekPlanId = created.id;
+                toast('Plano criado!');
+            }
+            await loadWeekPlans();
+        } catch (err) { toast('Erro: ' + err.message, 'error'); }
+    });
+
+    document.getElementById('wb-btn-activate-plan').addEventListener('click', async () => {
+        if (!editingWeekPlanId) { toast('Salve o plano antes de ativá-lo.', 'error'); return; }
+        try {
+            await window.FLApi.WeekPlans.setActive(editingWeekPlanId);
+            toast('Plano marcado como ativo!');
+            await loadWeekPlans();
+        } catch (err) { toast('Erro: ' + err.message, 'error'); }
+    });
+
+    document.getElementById('wb-btn-cancel-plan').addEventListener('click', () => {
+        editingWeekPlanId = null;
+        weekSessions = [];
+        wbPlanEditor.classList.add('hidden');
+        wbPlanSelectHint.classList.remove('hidden');
+        wbDropHint.style.display = '';
+        wbSessionList.innerHTML = '';
+        renderWeekPlanList();
+    });
+
+    window._wbEditPlan = (id) => {
+        const plan = weekPlans.find(p => p.id === id);
+        if (plan) openWeekPlanEditor(plan);
+    };
+
+    window._wbDeletePlan = async (id) => {
+        if (!confirm('Excluir este plano?')) return;
+        try {
+            await window.FLApi.WeekPlans.delete(id);
+            if (editingWeekPlanId === id) {
+                editingWeekPlanId = null;
+                weekSessions = [];
+                wbPlanEditor.classList.add('hidden');
+                wbPlanSelectHint.classList.remove('hidden');
+                wbSessionList.innerHTML = '';
+            }
+            toast('Plano excluído.');
+            await loadWeekPlans();
+        } catch (err) { toast('Erro: ' + err.message, 'error'); }
+    };
 
     // ── Sidebar navigation ────────────────────────────────────────
     document.querySelectorAll('.sidebar-item').forEach(btn => {

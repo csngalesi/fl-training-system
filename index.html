@@ -47,14 +47,21 @@
                     <img src="https://footballlab.com.br/favicon.svg" alt="FL" style="width: 48px; height: 48px;">
                     <h2 style="font-size: 1.4rem;">FL Training System</h2>
                 </div>
-                <span class="badge">Pro Training</span>
+                <!-- Mode switcher -->
+                <div class="mode-switcher">
+                    <button id="btn-mode-fundamentals" class="mode-btn active">
+                        <i class="fa-solid fa-futbol"></i> Fundamentos
+                    </button>
+                    <button id="btn-mode-week" class="mode-btn">
+                        <i class="fa-solid fa-calendar-week"></i> Treino da Semana
+                    </button>
+                </div>
             </div>
 
             <nav class="nav-menu" id="nav-fundamentals">
                 <div class="nav-label">FUNDAMENTOS TÉCNICOS</div>
                 <!-- Buttons injected by JS -->
             </nav>
-
 
         </aside>
 
@@ -81,12 +88,26 @@
 
                 <!-- Left: Exercise List -->
                 <div class="exercise-list custom-scrollbar">
-                    <div class="list-header">
-                        <h2>Sessões Táticas (4 Alunos)</h2>
-                        <span class="drill-count">10 exercícios</span>
+                    <!-- Fundamentals mode -->
+                    <div id="fundamentals-panel">
+                        <div class="list-header">
+                            <h2>Sessões Táticas (4 Alunos)</h2>
+                            <span class="drill-count" id="drill-count-badge">0 exercícios</span>
+                        </div>
+                        <div class="drills-container" id="drills-container">
+                            <!-- Drill cards injected by JS -->
+                        </div>
                     </div>
-                    <div class="drills-container" id="drills-container">
-                        <!-- Drill cards injected by JS -->
+
+                    <!-- Week plan mode -->
+                    <div id="week-sessions-panel" class="hidden">
+                        <div class="list-header">
+                            <h2 id="week-plan-name">Treino da Semana</h2>
+                            <span class="drill-count" id="week-session-count">0 sessões</span>
+                        </div>
+                        <div class="drills-container" id="week-drills-list">
+                            <!-- Session cards injected by JS -->
+                        </div>
                     </div>
                 </div>
 

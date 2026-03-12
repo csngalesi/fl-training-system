@@ -61,6 +61,16 @@
                 .eq('id', id);
             if (error) throw error;
         },
+
+        async getById(id) {
+            const { data, error } = await db()
+                .from('fl_drills')
+                .select('id, fundamental_id, title, description, duration, setup, anim')
+                .eq('id', id)
+                .single();
+            if (error) throw error;
+            return data;
+        },
     };
 
     // ── Templates ─────────────────────────────────────────────────
@@ -104,7 +114,62 @@
         },
     };
 
-    window.FLApi = { Fundamentals, Drills, Templates };
+    // ── Week Plans ────────────────────────────────────────────────
+    const WeekPlans = {
+        async getAll() {
+            const { data, error } = await db()
+                .from('fl_week_plans')
+                .select('id, title, sessions, is_active, created_at')
+                .order('created_at', { ascending: true });
+            if (error) throw error;
+            return data || [];
+        },
+
+        async create(payload) {
+            const { data, error } = await db()
+                .from('fl_week_plans')
+                .insert(payload)
+                .select()
+                .single();
+            if (error) throw error;
+            return data;
+        },
+
+        async update(id, payload) {
+            const { data, error } = await db()
+                .from('fl_week_plans')
+                .update(payload)
+                .eq('id', id)
+                .select()
+                .single();
+            if (error) throw error;
+            return data;
+        },
+
+        async delete(id) {
+            const { error } = await db()
+                .from('fl_week_plans')
+                .delete()
+                .eq('id', id);
+            if (error) throw error;
+        },
+
+        async setActive(id) {
+            // Deactivate all, then activate the selected one
+            const { error: e1 } = await db()
+                .from('fl_week_plans')
+                .update({ is_active: false })
+                .neq('id', id);
+            if (e1) throw e1;
+            const { error: e2 } = await db()
+                .from('fl_week_plans')
+                .update({ is_active: true })
+                .eq('id', id);
+            if (e2) throw e2;
+        },
+    };
+
+    window.FLApi = { Fundamentals, Drills, Templates, WeekPlans };
 
     console.info('[FL] API module loaded.');
 })();
