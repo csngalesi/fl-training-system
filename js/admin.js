@@ -488,10 +488,10 @@
             const f = builderFrames[i];
             const pos = key === 'ball' ? f.ball : f[key];
             if (pos.x === oldPos.x && pos.y === oldPos.y) {
-                if (key === 'ball') f.ball = { ...newPos };
-                else f[key] = { ...newPos };
+                if (key === 'ball') f.ball = { ...f.ball, x: newPos.x, y: newPos.y };
+                else f[key] = { ...f[key], x: newPos.x, y: newPos.y };
             } else {
-                break; // frame was manually changed — stop propagating
+                break;
             }
         }
     }
@@ -550,10 +550,10 @@
                 } else { break; }
             }
         } else if (key === 'ball') {
-            frame.ball = {x, y};
+            frame.ball = { ...frame.ball, x, y };
             propagateForward(builderFrame, 'ball', initPos, {x, y});
         } else {
-            frame[key] = {x, y};
+            frame[key] = { ...frame[key], x, y };
             propagateForward(builderFrame, key, initPos, {x, y});
         }
 
