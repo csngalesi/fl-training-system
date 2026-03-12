@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda Navas e Galesi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --surface: #ffffff;
+            --primary: #5c6bc0;
+            --accent: #ffb74d;
+            --text-main: #333333;
+            --text-muted: #777777;
+            --board-bg: #e8eaf6;
+            --line-color: #c5cae9;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Quicksand', sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, #3f51b5, var(--primary));
+            padding: 1.5rem 1rem;
+            text-align: center;
+            border-bottom: 4px solid var(--accent);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #e0e0e0;
+            margin-top: 5px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .board-layout {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .board-main {
+            flex: 2;
+            min-width: 300px;
+        }
+
+        .tools-sidebar {
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+            background: var(--surface);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--line-color);
+            margin-bottom: 1rem;
+            width: 100%;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .tool-btn {
+            background: transparent;
+            color: var(--text-muted);
+            border: 2px solid transparent;
+            width: 45px;
+            height: 45px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tool-btn:hover {
+            background: rgba(92, 107, 192, 0.1);
+            color: var(--primary);
+        }
+
+        .tool-btn.active {
+            color: var(--primary);
+            border-color: var(--primary);
+            background: rgba(92, 107, 192, 0.1);
+        }
+
+        .schedule-container {
+            background: var(--surface);
+            border: 2px solid var(--line-color);
+            border-radius: 8px;
+            position: relative;
+            width: 100%;
+            height: 900px; /* Taller to fit more blocks */
+            margin: 0 auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            display: grid;
+            grid-template-columns: repeat(5, 1fr); /* 5 days */
+            grid-template-rows: 70px auto; /* Header (taller for nested names), Content area */
+        }
+
+        .grid-content-area {
+            grid-column: 1 / -1;
+            grid-row: 2 / 3;
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr); /* 5 days */
+            height: 100%;
+        }
+
+        .time-divider {
+            position: absolute;
+            top: 37.5%; /* 360 units (morning) / 960 total units = 37.5% */
+            left: 0;
+            width: 100%;
+            border-top: 2px dashed var(--accent);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .time-label {
+            position: absolute;
+            background: var(--surface);
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            border: 1px solid var(--accent);
+        }
+
+        .time-label.morning {
+            top: 5px;
+            left: 5px;
+            background: transparent;
+            border: none;
+            opacity: 0.5;
+        }
+
+        .time-label.afternoon {
+            top: -12px;
+            left: 5px;
+        }
+
+        .schedule-header {
+            display: contents;
+        }
+
+        .day-header {
+            background: var(--primary);
+            color: white;
+            text-align: center;
+            border-right: 1px solid rgba(255,255,255,0.2);
+            border-bottom: 2px solid var(--line-color);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .day-title {
+            font-weight: bold;
+            font-size: 0.9rem;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .kids-header-row {
+            display: flex;
+            flex: 1;
+        }
+
+        .kid-head {
+            flex: 1;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-right: 1px dashed rgba(255,255,255,0.2);
+        }
+        .kid-head:last-child {
+            border-right: none;
+        }
+
+        .day-header:last-child {
+            border-right: none;
+        }
+
+        .day-col {
+            border-right: 1px dashed var(--line-color);
+            position: relative;
+            display: flex; /* split into 4 visual tracks */
+        }
+        
+        .kid-track {
+            flex: 1;
+            border-right: 1px dashed rgba(0,0,0,0.05);
+            height: 100%;
+        }
+        .kid-track:last-child { border-right: none; }
+
+        .day-col:last-child {
+            border-right: none;
+        }
+
+        /* DRAGGABLE CARDS / ITEMS */
+        .event-card {
+            position: absolute;
+            background-color: var(--accent);
+            color: #333;
+            padding: 4px 6px; /* tighter padding */
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            width: 4.5%; /* Apx width to fit inside a single kid track: (100% / 5 days) / 4 kids = ~5%. We use 4.5% to leave a tiny gap */
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            box-sizing: border-box;
+            overflow: hidden;
+            border-left: 3px solid rgba(0,0,0,0.3);
+        }
+
+        .event-card .card-title {
+            font-size: 0.8rem;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            padding-bottom: 2px;
+            line-height: 1.1;
+            margin-bottom: 2px;
+            flex-grow: 1;
+            word-break: break-word;
+        }
+
+        .event-card .card-time {
+            font-size: 0.7rem;
+            font-weight: normal;
+            display: flex;
+            justify-content: space-between;
+            background: rgba(255,255,255,0.3);
+            padding: 2px 4px;
+            border-radius: 4px;
+            margin-bottom: 2px;
+        }
+
+        .event-card .card-child-bottom {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            font-weight: bold;
+            color: rgba(0,0,0,0.7);
+            margin-top: auto;
+            text-align: right;
+            padding-top: 2px;
+        }
+
+        .event-card[contenteditable="true"] {
+            outline: none;
+            cursor: text;
+        }
+
+        .event-card.draggable {
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+        }
+
+        .event-card.dragging {
+            cursor: grabbing;
+            transform: scale(1.02);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            z-index: 100 !important;
+        }
+        
+        /* Different categories */
+        .event-card.cat-school { background-color: #81c784; color: #fff; }
+        .event-card.cat-sport { background-color: #64b5f6; color: #fff; }
+        .event-card.cat-health { background-color: #e57373; color: #fff; }
+        .event-card.cat-family { background-color: #ffb74d; color: #fff; }
+
+        /* BENCH / DRAG SOURCE */
+        .info-panel {
+            background-color: var(--surface);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-top: 5px solid var(--primary);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .info-panel h2 {
+            color: var(--primary);
+            margin-top: 0;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        .palette {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: var(--bg-color);
+            border-radius: 8px;
+            border: 1px dashed var(--line-color);
+        }
+
+        .generator-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .generator-btn:hover {
+            opacity: 0.8;
+        }
+
+        #drawing-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 50;
+            pointer-events: none;
+            touch-action: none;
+        }
+
+        /* --- FULLSCREEN --- */
+        .schedule-container.fullscreen {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 95vw;
+            height: 90vh;
+            z-index: 9999;
+            background: white;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .tools-sidebar.fullscreen {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: auto;
+            z-index: 10000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1><i class="fa-solid fa-calendar-days"></i> Agenda Navas e Galesi</h1>
+        <div class="subtitle">Organizador Semanal Interativo</div>
+    </header>
+
+    <div class="container">
+        <div class="board-layout">
+            <div class="board-main">
+                <div class="tools-sidebar">
+                    <button class="tool-btn active" id="tool-drag" title="Arrastar Eventos"
+                        onclick="setBoardMode('drag')"><i class="fa-solid fa-hand"></i></button>
+                    <button class="tool-btn" id="tool-draw" title="Modo Lápis Livre" onclick="setBoardMode('draw')"><i
+                            class="fa-solid fa-pen"></i></button>
+                    <div style="width: 2px; background: #eee; margin: 0 5px;"></div>
+                    <button class="tool-btn" id="tool-fullscreen" title="Tela Cheia"
+                        onclick="toggleFullscreen()"><i class="fa-solid fa-expand"></i></button>
+                    <button class="tool-btn" title="Limpar Tudo" onclick="clearCanvas()"><i
+                            class="fa-solid fa-trash-can"></i></button>
+                    <button class="tool-btn" title="Salvar Agenda" onclick="saveSchedule()"><i
+                            class="fa-solid fa-floppy-disk"></i></button>
+                </div>
+
+                <div class="schedule-container" id="main-board">
+                    <div class="schedule-header">
+                        <!-- MON -->
+                        <div class="day-header">
+                            <div class="day-title">Segunda</div>
+                            <div class="kids-header-row">
+                                <span class="kid-head">Camila</span><span class="kid-head">Bruno</span><span class="kid-head">Bella</span><span class="kid-head">Lêlê</span>
+                            </div>
+                        </div>
+                        <!-- TUE -->
+                        <div class="day-header">
+                            <div class="day-title">Terça</div>
+                            <div class="kids-header-row">
+                                <span class="kid-head">Camila</span><span class="kid-head">Bruno</span><span class="kid-head">Bella</span><span class="kid-head">Lêlê</span>
+                            </div>
+                        </div>
+                        <!-- WED -->
+                        <div class="day-header">
+                            <div class="day-title">Quarta</div>
+                            <div class="kids-header-row">
+                                <span class="kid-head">Camila</span><span class="kid-head">Bruno</span><span class="kid-head">Bella</span><span class="kid-head">Lêlê</span>
+                            </div>
+                        </div>
+                        <!-- THU -->
+                        <div class="day-header">
+                            <div class="day-title">Quinta</div>
+                            <div class="kids-header-row">
+                                <span class="kid-head">Camila</span><span class="kid-head">Bruno</span><span class="kid-head">Bella</span><span class="kid-head">Lêlê</span>
+                            </div>
+                        </div>
+                        <!-- FRI -->
+                        <div class="day-header">
+                            <div class="day-title">Sexta</div>
+                            <div class="kids-header-row">
+                                <span class="kid-head">Camila</span><span class="kid-head">Bruno</span><span class="kid-head">Bella</span><span class="kid-head">Lêlê</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid-content-area">
+                        <!-- 5 days, each with 4 visual tracks -->
+                        <div class="day-col"><div class="kid-track"></div><div class="kid-track"></div><div class="kid-track"></div><div class="kid-track"></div></div>
+                        <div class="day-col"><div class="kid-track"></div><div class="kid-track"></div><div class="kid-track"></div><div class="kid-track"></div></div>
+                        <div class="day-col"><div class="kid-track"></div><div class="kid-track"></div><div class="kid-track"></div><div class="kid-track"></div></div>
+                        <div class="day-col"><div class="kid-track"></div><div class="kid-track"></div><div class="kid-track"></div><div class="kid-track"></div></div>
+                        <div class="day-col"><div class="kid-track"></div><div class="kid-track"></div><div class="kid-track"></div><div class="kid-track"></div></div>
+
+                    <!-- Divisores Visuais de Tempo -->
+                    <div class="time-divider">
+                        <div class="time-label">TARDE &amp; NOITE</div>
+                    </div>
+
+                    <!-- Canvas para rabiscos -->
+                    <canvas id="drawing-canvas"></canvas>
+
+                    <!-- Event cards will live here -->
+                    <div id="events-layer"
+                        style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 60; pointer-events: none;">
+                        <!-- pointer-events:none on layer, but active on children so grid is clickable under them -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <h2>Novos Eventos</h2>
+                
+                <div style="background: var(--bg-color); padding: 15px; border-radius: 8px; border: 1px solid var(--line-color); margin-bottom: 15px;">
+                    <div style="margin-bottom: 10px;">
+                        <label style="display:block; font-size:0.9rem; font-weight:bold; margin-bottom:5px;">Para quem?</label>
+                        <div id="child-select-group" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <label><input type="checkbox" value="Bruno" class="child-cb" checked> Bruno</label>
+                            <label><input type="checkbox" value="Camila" class="child-cb"> Camila</label>
+                            <label><input type="checkbox" value="Bella" class="child-cb"> Bella</label>
+                            <label><input type="checkbox" value="Lêlê" class="child-cb"> Lêlê</label>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <div style="flex: 1;">
+                            <label style="display:block; font-size:0.9rem; font-weight:bold; margin-bottom:5px;">Início</label>
+                            <input type="time" id="time-start" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box; font-family: inherit;">
+                        </div>
+                        <div style="flex: 1;">
+                            <label style="display:block; font-size:0.9rem; font-weight:bold; margin-bottom:5px;">Fim</label>
+                            <input type="time" id="time-end" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box; font-family: inherit;">
+                        </div>
+                    </div>
+                    
+                    <p style="font-size: 0.85rem; color: #666; margin-bottom: 10px; margin-top: 0;">2. Escolha o tipo para criar o card:</p>
+
+                    <div class="palette">
+                        <button class="generator-btn" style="background-color: #81c784;" onclick="createNewEvent('Escola', 'cat-school')"><i class="fa-solid fa-graduation-cap"></i> Escola</button>
+                        <button class="generator-btn" style="background-color: #64b5f6;" onclick="createNewEvent('Esporte', 'cat-sport')"><i class="fa-solid fa-futbol"></i> Esporte</button>
+                        <button class="generator-btn" style="background-color: #e57373;" onclick="createNewEvent('Saúde', 'cat-health')"><i class="fa-solid fa-stethoscope"></i> Saúde</button>
+                        <button class="generator-btn" style="background-color: #ffb74d;" onclick="createNewEvent('Evento', 'cat-family')"><i class="fa-solid fa-calendar-check"></i> Evento</button>
+                        <button class="generator-btn" style="background-color: #9575cd;" onclick="createNewEvent('Outro', '')"><i class="fa-solid fa-plus"></i> Outro</button>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 1rem; padding: 1rem; background: #fff3e0; border-radius: 8px; border-left: 3px solid #ff9800;">
+                    <p style="font-size: 0.85rem; margin: 0; color: #d84315;">
+                        <i>Dica: Dê um duplo clique no título do card gerado para editar a tarefa livremente. <b>Para excluir um card</b>, arraste-o totalmente para fora da grade.</i>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const boardNode = document.getElementById('main-board');
+        const eventsLayer = document.getElementById('events-layer');
+        let boardMode = 'drag'; // 'drag' or 'draw'
+
+        function timeToUnit(timeStr) {
+            if(!timeStr || timeStr === '--:--') return 0;
+            const [h, m] = timeStr.split(':').map(Number);
+            const mins = h * 60 + m;
+            
+            if (mins <= 420) return 0; // Cap at 7:00
+            if (mins <= 780) return (mins - 420) * 1; // Morning 7h to 13h -> weight 1
+            if (mins <= 840) return 360; // Lunch break gap 13h-14h stays bundled
+            if (mins <= 1140) return 360 + (mins - 840) * 2; // Afternoon 14h to 19h -> weight 2
+            return 960; // Max units
+        }
+
+        function buildEventElement(childText, text, categoryClass, tStart, tEnd, leftPos, topPos) {
+            let containerHeightPct = 5;
+            
+            // Generate the scale unit
+            if(tStart && tEnd && tStart !== '--:--' && tEnd !== '--:--') {
+                const uStart = timeToUnit(tStart);
+                const uEnd = timeToUnit(tEnd);
+                let uDuration = uEnd - uStart;
+                if (uDuration <= 0) uDuration = 60; // default to 1 generic hour if broken
+                
+                // Proportion out of 960 total weighted units
+                containerHeightPct = (uDuration / 960) * 100;
+            }
+
+            const el = document.createElement('div');
+            el.className = `event-card draggable ${categoryClass}`;
+            // Use Math.max to at least show a thin slice, then percentage for proportional scaling
+            el.style.height = `max(32px, ${containerHeightPct}%)`;
+            
+            el.innerHTML = `
+                <div class="card-time"><span><i class="fa-regular fa-clock"></i> ${tStart}-${tEnd}</span></div>
+                <div class="card-title">${text}</div>
+                <div class="card-child-bottom">${childText}</div>
+            `;
+            
+            el.style.left = leftPos;
+            el.style.top = topPos;
+            el.style.pointerEvents = 'auto';
+
+            const titleNode = el.querySelector('.card-title');
+
+            el.addEventListener('dblclick', function(e) {
+                if(boardMode !== 'drag') return;
+                e.stopPropagation();
+                titleNode.setAttribute('contenteditable', 'true');
+                titleNode.focus();
+                
+                const range = document.createRange();
+                range.selectNodeContents(titleNode);
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(range);
+                
+                el.classList.remove('draggable');
+            });
+
+            titleNode.addEventListener('blur', function() {
+                titleNode.removeAttribute('contenteditable');
+                el.classList.add('draggable');
+            });
+            
+            el.addEventListener('mousedown', function(e) {
+                if(titleNode.getAttribute('contenteditable') === 'true') {
+                    e.stopPropagation();
+                }
+            });
+
+            eventsLayer.appendChild(el);
+            makeDraggable(el);
+        }
+
+        function createNewEvent(text, categoryClass) {
+            const childCheckboxes = document.querySelectorAll('.child-cb:checked');
+            const selectedChildren = Array.from(childCheckboxes).map(cb => cb.value);
+            const childText = selectedChildren.length > 0 ? selectedChildren.join(', ') : 'Ninguém';
+
+            const tStart = document.getElementById('time-start').value || '00:00';
+            const tEnd = document.getElementById('time-end').value || '00:00';
+
+            const randomOffset = Math.floor(Math.random() * 5);
+            const leftPos = `${10 + randomOffset}%`;
+            const topPos = `${10 + randomOffset}%`;
+
+            buildEventElement(childText, text, categoryClass, tStart, tEnd, leftPos, topPos);
+        }
+
+        // --- Drag and Drop Logic ---
+        function makeDraggable(el) {
+            let isDragging = false;
+            let offsetXPct = 0;
+            let offsetYPct = 0;
+            let boardRect;
+
+            // Touch support
+            el.addEventListener('touchstart', dragStart, { passive: false });
+            document.addEventListener('touchmove', drag, { passive: false });
+            document.addEventListener('touchend', dragEnd);
+
+            // Mouse support
+            el.addEventListener('mousedown', dragStart);
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', dragEnd);
+
+            function dragStart(e) {
+                if (boardMode === 'draw') return;
+                
+                // Block drag if clicking inside editable title
+                let target = e.target;
+                while (target && target !== el) {
+                    if (target.getAttribute && target.getAttribute('contenteditable') === 'true') {
+                        return;
+                    }
+                    target = target.parentNode;
+                }
+                
+                if (e.target !== el && !el.contains(e.target)) return;
+                
+                isDragging = true;
+                el.classList.add('dragging');
+
+                const rect = el.getBoundingClientRect();
+                boardRect = boardNode.getBoundingClientRect();
+
+                let clientX = e.clientX;
+                let clientY = e.clientY;
+
+                if (e.touches && e.touches.length > 0) {
+                    clientX = e.touches[0].clientX;
+                    clientY = e.touches[0].clientY;
+                }
+
+                // Offset relative to the clicked corner inside the card
+                const offsetX = clientX - rect.left;
+                const offsetY = clientY - rect.top;
+
+                // Precompute that offset footprint in % to prevent resizing jumps
+                offsetXPct = (offsetX / boardRect.width) * 100;
+                offsetYPct = (offsetY / boardRect.height) * 100;
+            }
+
+            function drag(e) {
+                if (!isDragging) return;
+                e.preventDefault(); // Prevent scrolling on touch
+
+                let clientX = e.clientX;
+                let clientY = e.clientY;
+
+                if (e.type === 'touchmove') {
+                    clientX = e.touches[0].clientX;
+                    clientY = e.touches[0].clientY;
+                }
+                
+                if(!boardRect) boardRect = boardNode.getBoundingClientRect();
+
+                let x = clientX - boardRect.left;
+                let y = clientY - boardRect.top;
+
+                const pctX = (x / boardRect.width) * 100;
+                const pctY = (y / boardRect.height) * 100;
+
+                // Adjust positioning exactly by the grab distance so it never jumps!
+                el.style.left = (pctX - offsetXPct) + '%';
+                el.style.top = (pctY - offsetYPct) + '%';
+            }
+
+            function dragEnd(e) {
+                if (!isDragging) return;
+                isDragging = false;
+                el.classList.remove('dragging');
+                
+                const rect = boardNode.getBoundingClientRect();
+                
+                // Get the final dropped coordinates of the element's center
+                const elRect = el.getBoundingClientRect();
+                const centerX = elRect.left + (elRect.width / 2);
+                const centerY = elRect.top + (elRect.height / 2);
+
+                // If the center of the card is dropped outside the schedule container, delete it!
+                if (centerX < rect.left - 20 || centerX > rect.right + 20 || centerY < rect.top - 20 || centerY > rect.bottom + 20) {
+                    el.remove();
+                }
+            }
+        }
+
+        // --- Fullscreen ---
+        let isFullscreen = false;
+        function toggleFullscreen() {
+            isFullscreen = !isFullscreen;
+            const pitch = document.getElementById('main-board');
+            const sidebar = document.querySelector('.tools-sidebar');
+            const icon = document.querySelector('#tool-fullscreen i');
+
+            if (isFullscreen) {
+                pitch.classList.add('fullscreen');
+                sidebar.classList.add('fullscreen');
+                icon.classList.remove('fa-expand');
+                icon.classList.add('fa-compress');
+            } else {
+                pitch.classList.remove('fullscreen');
+                sidebar.classList.remove('fullscreen');
+                icon.classList.remove('fa-compress');
+                icon.classList.add('fa-expand');
+            }
+            setTimeout(resizeCanvas, 350);
+        }
+
+        // --- Drawing Logic ---
+        const canvas = document.getElementById('drawing-canvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+
+        function resizeCanvas() {
+            const rect = boardNode.getBoundingClientRect();
+            const tempCanvas = document.createElement('canvas');
+            const tCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
+            if (canvas.width > 0 && canvas.height > 0) tCtx.drawImage(canvas, 0, 0);
+
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            ctx.strokeStyle = '#ffb74d'; 
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            if (tempCanvas.width > 0) ctx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, 0, 0, canvas.width, canvas.height);
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        setTimeout(resizeCanvas, 100);
+
+        function setBoardMode(mode) {
+            boardMode = mode;
+            document.getElementById('tool-drag').classList.remove('active');
+            document.getElementById('tool-draw').classList.remove('active');
+            document.getElementById(`tool-${mode}`).classList.add('active');
+
+            if (mode === 'draw') {
+                canvas.style.pointerEvents = 'auto';
+                canvas.style.zIndex = '70'; 
+                eventsLayer.style.pointerEvents = 'none'; 
+            } else {
+                canvas.style.pointerEvents = 'none';
+                canvas.style.zIndex = '50'; 
+                eventsLayer.style.pointerEvents = 'auto'; // allow clicks on cards
+            }
+        }
+
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            let clientX = e.clientX;
+            let clientY = e.clientY;
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            }
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        }
+
+        function startDrawing(e) {
+            if (boardMode !== 'draw') return;
+            e.preventDefault();
+            isDrawing = true;
+            const pos = getMousePos(e);
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+        }
+
+        function draw(e) {
+            if (!isDrawing || boardMode !== 'draw') return;
+            e.preventDefault();
+            const pos = getMousePos(e);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+        }
+
+        function stopDrawing() {
+            if (!isDrawing) return;
+            isDrawing = false;
+        }
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+        canvas.addEventListener('touchstart', startDrawing, { passive: false });
+        canvas.addEventListener('touchmove', draw, { passive: false });
+        canvas.addEventListener('touchend', stopDrawing);
+        canvas.addEventListener('touchcancel', stopDrawing);
+
+        function clearCanvas() {
+            if(confirm('Tem certeza que deseja apagar toda a agenda e rabiscos?')) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                eventsLayer.innerHTML = '';
+                localStorage.removeItem('family_schedule_v4');
+            }
+        }
+
+        function saveSchedule() {
+            const dataUrl = canvas.toDataURL();
+            const events = [];
+            
+            document.querySelectorAll('#events-layer .event-card').forEach(el => {
+                events.push({
+                    className: el.className,
+                    innerHTML: el.innerHTML,
+                    left: el.style.left,
+                    top: el.style.top,
+                    height: el.style.height
+                });
+            });
+
+            const state = { drawing: dataUrl, events: JSON.stringify(events) };
+            localStorage.setItem('family_schedule_v4', JSON.stringify(state));
+            alert('Agenda salva com sucesso no navegador!');
+        }
+
+        // Restore State
+        (function restoreState() {
+            const saved = localStorage.getItem('family_schedule_v4');
+            if(saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    if (data.drawing && data.drawing.startsWith('data:image')) {
+                        const img = new Image();
+                        img.onload = () => { setTimeout(() => { ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvas.width, canvas.height); }, 150); };
+                        img.src = data.drawing;
+                    }
+                    if (data.events && data.events.startsWith('[')) {
+                        const savedEvents = JSON.parse(data.events);
+                        savedEvents.forEach(eData => {
+                            const el = document.createElement('div');
+                            el.className = eData.className.replace('dragging', ''); // avoid frozen dragged state
+                            
+                            // Restore full html payload (name, title, times)
+                            el.innerHTML = eData.innerHTML;
+                            el.style.left = eData.left;
+                            el.style.top = eData.top;
+                            if(eData.height) el.style.height = eData.height;
+                            el.style.pointerEvents = 'auto';
+                            
+                            const titleNode = el.querySelector('.card-title') || el;
+
+                            el.addEventListener('dblclick', function(e) {
+                                if(boardMode !== 'drag') return;
+                                e.stopPropagation();
+                                titleNode.setAttribute('contenteditable', 'true');
+                                titleNode.focus();
+                                
+                                const range = document.createRange();
+                                range.selectNodeContents(titleNode);
+                                const sel = window.getSelection();
+                                sel.removeAllRanges();
+                                sel.addRange(range);
+
+                                el.classList.remove('draggable');
+                            });
+                            titleNode.addEventListener('blur', function() {
+                                titleNode.removeAttribute('contenteditable');
+                                el.classList.add('draggable');
+                            });
+                            el.addEventListener('mousedown', function(e) {
+                                if(titleNode.getAttribute('contenteditable') === 'true') { e.stopPropagation(); }
+                            });
+
+                            eventsLayer.appendChild(el);
+                            makeDraggable(el);
+                        });
+                    }
+                } catch(e) {
+                    console.error('Failed to load state', e);
+                }
+            } else {
+                const initialEvents = [
+                    // Camila
+                    { person: 'Camila', text: 'Santa Cruz', cat: 'cat-school', start: '07:20', end: '12:50', day: 0 },
+                    { person: 'Camila', text: 'Andrea', cat: 'cat-family', start: '14:00', end: '15:00', day: 0 },
+                    { person: 'Camila', text: 'Santa Cruz', cat: 'cat-school', start: '07:20', end: '12:50', day: 1 },
+                    { person: 'Camila', text: 'Vôlei Pinheiros', cat: 'cat-sport', start: '16:00', end: '19:00', day: 1 },
+                    { person: 'Camila', text: 'Santa Cruz', cat: 'cat-school', start: '07:20', end: '12:50', day: 2 },
+                    { person: 'Camila', text: 'VP Pinheiros', cat: 'cat-sport', start: '16:00', end: '17:00', day: 2 },
+                    { person: 'Camila', text: 'Santa Cruz', cat: 'cat-school', start: '07:20', end: '12:50', day: 3 },
+                    { person: 'Camila', text: 'Inglês (Carmen)', cat: 'cat-school', start: '14:45', end: '15:45', day: 3 },
+                    { person: 'Camila', text: 'Santa Cruz', cat: 'cat-school', start: '07:20', end: '12:50', day: 4 },
+                    { person: 'Camila', text: 'Vôlei Pinheiros', cat: 'cat-sport', start: '16:00', end: '19:00', day: 4 },
+                    
+                    // Bruno
+                    { person: 'Bruno', text: 'Santa Cruz', cat: 'cat-school', start: '07:20', end: '12:50', day: 0 },
+                    { person: 'Bruno', text: 'Futebol Santa', cat: 'cat-sport', start: '15:15', end: '16:30', day: 0 },
+                    { person: 'Bruno', text: 'Santa Cruz', cat: 'cat-school', start: '07:20', end: '12:50', day: 1 },
+                    { person: 'Bruno', text: 'Henrique Pinheiros', cat: 'cat-sport', start: '15:00', end: '16:00', day: 1 },
+                    { person: 'Bruno', text: 'Gui/Futebol sub 13', cat: 'cat-sport', start: '17:00', end: '18:15', day: 1 },
+                    { person: 'Bruno', text: 'Santa Cruz', cat: 'cat-school', start: '07:20', end: '12:50', day: 2 },
+                    { person: 'Bruno', text: 'Futebol Sub 12', cat: 'cat-sport', start: '17:00', end: '18:15', day: 2 },
+                    { person: 'Bruno', text: 'Santa Cruz', cat: 'cat-school', start: '07:20', end: '12:50', day: 3 },
+                    { person: 'Bruno', text: 'Inglês (Carmen)', cat: 'cat-school', start: '13:45', end: '14:45', day: 3 },
+                    { person: 'Bruno', text: 'Gui/Futebol sub 13', cat: 'cat-sport', start: '17:00', end: '18:15', day: 3 },
+                    { person: 'Bruno', text: 'Santa Cruz', cat: 'cat-school', start: '07:20', end: '12:50', day: 4 },
+                    { person: 'Bruno', text: 'Futebol Santa', cat: 'cat-sport', start: '14:00', end: '15:15', day: 4 },
+                    { person: 'Bruno', text: 'Futebol Sub 12', cat: 'cat-sport', start: '17:00', end: '18:15', day: 4 }
+                ];
+
+                setTimeout(() => {
+                    initialEvents.forEach(ev => {
+                        // 5 days total => each day is 20% width
+                        // Inside each day, 4 kids => each kid is 5% width relative to the full board
+                        // Kids order: 0=Camila, 1=Bruno, 2=Bella, 3=Lêlê
+                        
+                        let kidIndex = 0;
+                        if(ev.person === 'Bruno') kidIndex = 1;
+                        if(ev.person === 'Bella') kidIndex = 2;
+                        if(ev.person === 'Lêlê') kidIndex = 3;
+
+                        // Base day offset
+                        const dayOffsetPct = ev.day * 20; 
+                        
+                        // Exact child track offset. It starts at `dayOffsetPct` + (`kidIndex` * 5%)
+                        // We add a tiny 0.25% padding so it centers inside the 5% column.
+                        const xPct = dayOffsetPct + (kidIndex * 5) + 0.25;
+
+                        // Apply our morning vs afternoon unit scaling logic
+                        const timeUnit = timeToUnit(ev.start);
+                        const yPct = (timeUnit / 960) * 100;
+
+                        buildEventElement(ev.person, ev.text, ev.cat, ev.start, ev.end, `${xPct}%`, `${yPct}%`);
+                    });
+                }, 500);
+            }
+        })();
+    </script>
+</body>
+
+</html>
