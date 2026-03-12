@@ -526,10 +526,10 @@ h3 {
 }
 
 .player {
-    width: 26px;
-    height: 26px;
+    width: 24px;
+    height: 28px;
     background: var(--acc-secondary);
-    border-radius: 50%;
+    border-radius: 50%;          /* oval/ellipse body */
     border: 2px solid #fff;
     display: flex;
     align-items: center;
@@ -539,7 +539,25 @@ h3 {
     font-weight: 800;
     font-family: 'Outfit';
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+    overflow: visible;
 }
+
+/* Feet — two small rectangles below the oval body */
+.player::before,
+.player::after {
+    content: '';
+    position: absolute;
+    bottom: -9px;
+    width: 7px;
+    height: 9px;
+    background: inherit;
+    border-radius: 2px;
+    opacity: 0.85;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.player::before { left: 1px; }
+.player::after  { right: 1px; }
 
 #actor-p1 {
     background: #ef4444;
