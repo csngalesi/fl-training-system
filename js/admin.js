@@ -1239,6 +1239,160 @@
         } catch (err) { toast('Erro: ' + err.message, 'error'); }
     };
 
+    // ══════════════════════════════════════════════════════════════
+    // FUNDAMENTALS MODULE
+    // ══════════════════════════════════════════════════════════════
+
+    let fundModuleList  = [];   // list from Supabase
+    let editingFundId   = null; // null = new
+    let fundVideos      = [];   // videos in editor
+
+    // DOM refs
+    const fundList          = document.getElementById('fund-list');
+    const fundEditorHeading = document.getElementById('fund-editor-heading');
+    const fundEditorHint    = document.getElementById('fund-editor-hint');
+    const fundEditorForm    = document.getElementById('fund-editor-form');
+    const fundInputTitle    = document.getElementById('fund-input-title');
+    const fundInputIcon     = document.getElementById('fund-input-icon');
+    const fundIconPreview   = document.getElementById('fund-icon-preview');
+    const fundInputBaseTech = document.getElementById('fund-input-base-tech');
+    const fundVideosList    = document.getElementById('fund-videos-list');
+    const fundVideoTitleInp = document.getElementById('fund-video-title-input');
+    const fundVideoUrlInp   = document.getElementById('fund-video-url-input');
+    const fundBtnDelete     = document.getElementById('fund-btn-delete');
+
+    async function loadFundModuleList() {
+        fundList.innerHTML = '<p style="color:var(--text-muted);font-size:.8rem">Carregando...</p>';
+        try { fundModuleList = await window.FLApi.Fundamentals.getAll(); }
+        catch (err) { fundList.innerHTML = `<p style="color:var(--acc-danger);font-size:.8rem">${esc(err.message)}</p>`; return; }
+        renderFundModuleList();
+    }
+
+    function renderFundModuleList() {
+        if (!fundModuleList.length) {
+            fundList.innerHTML = '<p style="color:var(--text-muted);font-size:.8rem">Nenhum fundamento.</p>';
+            return;
+        }
+        fundList.innerHTML = fundModuleList.map(f => `
+            <div class="fund-item ${f.id === editingFundId ? 'active' : ''}" data-fund-id="${f.id}">
+                <i class="fa-solid ${esc(f.icon || 'fa-circle-question')}"></i>
+                <span class="fund-item-title">${esc(f.title)}</span>
+            </div>`).join('');
+        fundList.querySelectorAll('.fund-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const f = fundModuleList.find(x => x.id === item.dataset.fundId);
+                if (f) openFundEditor(f);
+            });
+        });
+    }
+
+    function openFundEditor(fund = null) {
+        editingFundId = fund ? fund.id : null;
+        fundVideos = fund ? JSON.parse(JSON.stringify(fund.videos || [])) : [];
+        fundInputTitle.value   = fund ? fund.title    : '';
+        fundInputIcon.value    = fund ? (fund.icon || '') : '';
+        fundInputBaseTech.value = fund ? (fund.base_tech || '') : '';
+        updateFundIconPreview();
+        fundEditorHeading.innerHTML = `<i class="fa-solid fa-pen"></i> ${fund ? esc(fund.title) : 'Novo Fundamento'}`;
+        fundEditorHint.classList.add('hidden');
+        fundEditorForm.classList.remove('hidden');
+        fundBtnDelete.classList.toggle('hidden', !fund);
+        renderFundModuleList();
+        renderFundVideos();
+    }
+
+    function renderFundVideos() {
+        if (!fundVideos.length) {
+            fundVideosList.innerHTML = '<p style="color:var(--text-muted);font-size:.78rem;margin-bottom:8px">Nenhum vídeo adicionado.</p>';
+            return;
+        }
+        fundVideosList.innerHTML = fundVideos.map((v, i) => `
+            <div class="fund-video-card">
+                <img class="fund-video-thumb"
+                     src="https://img.youtube.com/vi/${esc(v.youtube_id)}/mqdefault.jpg"
+                     alt="" onerror="this.style.display='none'">
+                <div class="fund-video-info">
+                    <div class="fund-video-title-text">${esc(v.title)}</div>
+                    <div class="fund-video-id-text">${esc(v.youtube_id)}</div>
+                </div>
+                <button class="wb-session-remove" data-remove="${i}" title="Remover vídeo">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>`).join('');
+        fundVideosList.querySelectorAll('[data-remove]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                fundVideos.splice(parseInt(btn.dataset.remove), 1);
+                renderFundVideos();
+            });
+        });
+    }
+
+    function updateFundIconPreview() {
+        const cls = fundInputIcon.value.trim();
+        fundIconPreview.innerHTML = cls
+            ? `<i class="fa-solid ${esc(cls)}"></i>`
+            : '<i class="fa-solid fa-circle-question"></i>';
+    }
+
+    function extractYouTubeId(input) {
+        input = input.trim();
+        if (/^[A-Za-z0-9_-]{11}$/.test(input)) return input;
+        const m = input.match(/(?:youtu\.be\/|[?&]v=|embed\/)([A-Za-z0-9_-]{11})/);
+        return m ? m[1] : null;
+    }
+
+    fundInputIcon.addEventListener('input', updateFundIconPreview);
+
+    document.getElementById('fund-btn-new').addEventListener('click', () => openFundEditor(null));
+
+    document.getElementById('fund-btn-add-video').addEventListener('click', () => {
+        const title = fundVideoTitleInp.value.trim();
+        const ytId  = extractYouTubeId(fundVideoUrlInp.value);
+        if (!title) { toast('Informe o título do vídeo.', 'error'); fundVideoTitleInp.focus(); return; }
+        if (!ytId)  { toast('URL ou ID do YouTube inválido.', 'error'); fundVideoUrlInp.focus(); return; }
+        fundVideos.push({ title, youtube_id: ytId });
+        fundVideoTitleInp.value = '';
+        fundVideoUrlInp.value   = '';
+        renderFundVideos();
+    });
+
+    document.getElementById('fund-btn-save').addEventListener('click', async () => {
+        const title    = fundInputTitle.value.trim();
+        const icon     = fundInputIcon.value.trim();
+        const base_tech = fundInputBaseTech.value.trim();
+        if (!title) { toast('Informe o título do fundamento.', 'error'); fundInputTitle.focus(); return; }
+        const payload = { title, icon, base_tech, videos: fundVideos };
+        try {
+            if (editingFundId) {
+                await window.FLApi.Fundamentals.update(editingFundId, payload);
+                toast('Fundamento atualizado!');
+            } else {
+                const maxOrder = fundModuleList.reduce((m, f) => Math.max(m, f.sort_order || 0), 0);
+                const created = await window.FLApi.Fundamentals.create({ ...payload, sort_order: maxOrder + 1 });
+                editingFundId = created.id;
+                toast('Fundamento criado!');
+            }
+            await loadFundModuleList();
+            await loadFundamentals(); // refresh selectors in Drills/Templates/Week
+            fundEditorHeading.innerHTML = `<i class="fa-solid fa-pen"></i> ${esc(title)}`;
+            fundBtnDelete.classList.remove('hidden');
+        } catch (err) { toast('Erro: ' + err.message, 'error'); }
+    });
+
+    document.getElementById('fund-btn-delete').addEventListener('click', async () => {
+        const fund = fundModuleList.find(f => f.id === editingFundId);
+        if (!fund || !confirm(`Excluir "${fund.title}"? Drills associados serão desvinculados.`)) return;
+        try {
+            await window.FLApi.Fundamentals.delete(editingFundId);
+            toast('Fundamento excluído.');
+            editingFundId = null;
+            fundEditorForm.classList.add('hidden');
+            fundEditorHint.classList.remove('hidden');
+            await loadFundModuleList();
+            await loadFundamentals();
+        } catch (err) { toast('Erro: ' + err.message, 'error'); }
+    });
+
     // ── Sidebar navigation ────────────────────────────────────────
     document.querySelectorAll('.sidebar-item').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1251,6 +1405,7 @@
             document.getElementById(`module-${mod}`).classList.remove('hidden');
             // Close builder when switching modules
             closeBuilder();
+            if (mod === 'fundamentals') loadFundModuleList();
         });
     });
 

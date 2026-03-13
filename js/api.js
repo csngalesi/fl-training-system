@@ -12,10 +12,39 @@
         async getAll() {
             const { data, error } = await db()
                 .from('fl_fundamentals')
-                .select('id, title, icon, base_tech, sort_order')
+                .select('id, title, icon, base_tech, sort_order, videos')
                 .order('sort_order', { ascending: true });
             if (error) throw error;
             return data || [];
+        },
+
+        async create(payload) {
+            const { data, error } = await db()
+                .from('fl_fundamentals')
+                .insert(payload)
+                .select()
+                .single();
+            if (error) throw error;
+            return data;
+        },
+
+        async update(id, payload) {
+            const { data, error } = await db()
+                .from('fl_fundamentals')
+                .update(payload)
+                .eq('id', id)
+                .select()
+                .single();
+            if (error) throw error;
+            return data;
+        },
+
+        async delete(id) {
+            const { error } = await db()
+                .from('fl_fundamentals')
+                .delete()
+                .eq('id', id);
+            if (error) throw error;
         },
     };
 

@@ -1019,6 +1019,72 @@
         .wb-session-remove.wb-eye-on { color: var(--acc-primary); }
         .wb-session-remove.wb-eye-on:hover { color: #34d399; }
 
+        /* ── Fundamentals Module ── */
+        #module-fundamentals {
+            margin: -32px -28px;
+            height: calc(100vh - 65px);
+            display: flex;
+            overflow: hidden;
+        }
+        .fund-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 11px;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+            margin-bottom: 6px;
+            background: var(--glass-bg);
+            cursor: pointer;
+            transition: border-color .15s;
+        }
+        .fund-item:hover { border-color: rgba(255,255,255,.2); }
+        .fund-item.active { border-color: var(--acc-primary); background: rgba(16,185,129,.08); }
+        .fund-item i { color: var(--text-muted); font-size: .85rem; width: 16px; text-align: center; }
+        .fund-item.active i { color: var(--acc-primary); }
+        .fund-item-title { flex: 1; font-size: .83rem; font-weight: 600; }
+        .fund-video-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            margin-bottom: 6px;
+        }
+        .fund-video-thumb {
+            width: 80px;
+            height: 45px;
+            border-radius: 4px;
+            object-fit: cover;
+            flex-shrink: 0;
+            background: #000;
+        }
+        .fund-video-info { flex: 1; min-width: 0; }
+        .fund-video-title-text { font-size: .82rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .fund-video-id-text { font-size: .72rem; color: var(--text-muted); margin-top: 2px; }
+        .fund-add-video-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+        .fund-add-video-row .form-input { min-width: 0; }
+        .fund-form-label {
+            font-size: .75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 4px;
+        }
+        .fund-section-title {
+            font-size: .75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            color: var(--text-muted);
+            margin: 16px 0 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
         /* Toggle row in plan editor */
         .wb-toggle-row {
             display: flex;
@@ -1185,6 +1251,9 @@
             </button>
             <button class="sidebar-item" data-module="week">
                 <i class="fa-solid fa-calendar-week"></i> Semana
+            </button>
+            <button class="sidebar-item" data-module="fundamentals">
+                <i class="fa-solid fa-list-check"></i> Fundamentos
             </button>
         </nav>
 
@@ -1467,6 +1536,89 @@
             </div>
 
         </div><!-- /#module-week -->
+
+        <!-- ══ Module: Fundamentals ══ -->
+        <div id="module-fundamentals" class="admin-module hidden">
+
+            <!-- Left: list -->
+            <div class="wb-col wb-left">
+                <div class="wb-col-header">
+                    <h3><i class="fa-solid fa-list-check"></i> Fundamentos</h3>
+                    <button id="fund-btn-new" class="btn btn-primary btn-sm" style="width:100%;justify-content:center;margin-top:8px">
+                        <i class="fa-solid fa-plus"></i> Novo
+                    </button>
+                </div>
+                <div class="wb-col-body" id="fund-list">
+                    <p style="color:var(--text-muted);font-size:.8rem">Carregando...</p>
+                </div>
+            </div>
+
+            <!-- Right: editor -->
+            <div class="wb-col" style="flex:1;min-width:0">
+                <div class="wb-col-header">
+                    <h3 id="fund-editor-heading"><i class="fa-solid fa-pen"></i> Editor</h3>
+                </div>
+                <div class="wb-col-body">
+                    <p id="fund-editor-hint" style="color:var(--text-muted);font-size:.88rem;padding:8px 0">
+                        Selecione um fundamento ou crie um novo.
+                    </p>
+                    <div id="fund-editor-form" class="hidden">
+
+                        <!-- Title + Icon -->
+                        <div style="display:flex;gap:12px;margin-bottom:14px">
+                            <div style="flex:1">
+                                <label class="fund-form-label">Título</label>
+                                <input id="fund-input-title" class="form-input" type="text" placeholder="Ex: Domínio de Bola">
+                            </div>
+                            <div>
+                                <label class="fund-form-label">Ícone (FA class)</label>
+                                <div style="display:flex;gap:8px;align-items:center">
+                                    <input id="fund-input-icon" class="form-input" type="text" placeholder="fa-magnet" style="width:120px">
+                                    <span id="fund-icon-preview" style="font-size:1.5rem;color:var(--acc-primary);width:24px;text-align:center">
+                                        <i class="fa-solid fa-circle-question"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Base tech -->
+                        <div style="margin-bottom:14px">
+                            <label class="fund-form-label">Base Técnica</label>
+                            <textarea id="fund-input-base-tech" class="form-input" rows="5"
+                                placeholder="Descreva os princípios técnicos deste fundamento..."></textarea>
+                        </div>
+
+                        <!-- Videos -->
+                        <div class="fund-section-title">
+                            <i class="fa-brands fa-youtube" style="color:#ef4444"></i> Vídeos
+                        </div>
+                        <div id="fund-videos-list"></div>
+                        <div class="fund-add-video-row">
+                            <input id="fund-video-title-input" class="form-input" type="text"
+                                placeholder="Título do vídeo" style="flex:1;min-width:120px">
+                            <input id="fund-video-url-input" class="form-input" type="text"
+                                placeholder="URL ou ID do YouTube" style="flex:2;min-width:160px">
+                            <button id="fund-btn-add-video" class="btn btn-secondary btn-sm" style="white-space:nowrap">
+                                <i class="fa-solid fa-plus"></i> Adicionar
+                            </button>
+                        </div>
+
+                        <!-- Save / Delete -->
+                        <div style="display:flex;gap:8px;margin-top:20px">
+                            <button id="fund-btn-save" class="btn btn-success btn-sm" style="flex:1;justify-content:center">
+                                <i class="fa-solid fa-floppy-disk"></i> Salvar
+                            </button>
+                            <button id="fund-btn-delete" class="btn btn-secondary btn-sm hidden"
+                                    style="color:var(--acc-danger)" title="Excluir fundamento">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /#module-fundamentals -->
 
         </div><!-- /.admin-main -->
     </div><!-- /.admin-layout -->
