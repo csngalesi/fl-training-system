@@ -966,8 +966,10 @@
                 setTimeout(() => item.classList.add('dragging'), 0);
             });
             item.addEventListener('dragend', () => item.classList.remove('dragging'));
-            item.addEventListener('dragover', (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
+            item.addEventListener('dragover', (e) => { e.preventDefault(); });
             item.addEventListener('drop', (e) => {
+                // If it's a drill card drop, let it bubble to the drop zone
+                if (e.dataTransfer.types.includes('drill')) return;
                 e.preventDefault();
                 e.stopPropagation();
                 const targetIdx = parseInt(item.dataset.sessionIdx);
