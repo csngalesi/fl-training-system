@@ -28,11 +28,13 @@
         },
 
         async update(id, payload) {
-            const { error } = await db()
+            const { data, error } = await db()
                 .from('fl_fundamentals')
                 .update(payload)
-                .eq('id', id);
+                .eq('id', id)
+                .select('id');
             if (error) throw error;
+            if (!data || data.length === 0) throw new Error('Nenhuma linha atualizada — verifique autenticação/RLS no Supabase.');
         },
 
         async delete(id) {
