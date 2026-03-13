@@ -129,6 +129,7 @@
         await loadFundamentals();
         await loadTemplates();
         await loadWeekPlans();
+        await loadFundModuleList(); // default module is fundamentals
     }
 
     btnLogin.addEventListener('click', async () => {
