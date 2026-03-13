@@ -925,7 +925,7 @@
         }
         wbPlanList.innerHTML = weekPlans.map(p => `
             <div class="wb-plan-item ${p.id === editingWeekPlanId ? 'active' : ''}"
-                 data-plan-id="${p.id}" title="Clique para editar">
+                 data-plan-id="${p.id}" title="Clique para abrir · Duplo clique para renomear">
                 <div class="wb-plan-item-title">${esc(p.title)}</div>
                 ${p.is_active ? '<span class="wb-plan-item-active-badge">Ativo</span>' : ''}
                 <button class="wb-session-remove" data-action="delete" data-id="${p.id}" title="Excluir">
@@ -934,15 +934,74 @@
             </div>`).join('');
 
         wbPlanList.querySelectorAll('.wb-plan-item').forEach(item => {
+            const titleEl = item.querySelector('.wb-plan-item-title');
+
             item.addEventListener('click', (e) => {
-                if (e.target.closest('[data-action="delete"]')) return; // handled separately
+                if (e.target.closest('[data-action="delete"]')) return;
+                if (titleEl.contentEditable === 'true') return; // editing inline
                 const plan = weekPlans.find(p => p.id === item.dataset.planId);
                 if (plan) openWeekPlanEditor(plan);
             });
+
+            // Double-click on title → inline rename
+            titleEl.addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+                const plan = weekPlans.find(p => p.id === item.dataset.planId);
+                if (!plan) return;
+
+                titleEl.contentEditable = 'true';
+                titleEl.style.cssText += ';border-bottom:1px solid var(--acc-primary);outline:none;cursor:text';
+                titleEl.focus();
+                const range = document.createRange();
+                range.selectNodeContents(titleEl);
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(range);
+
+                const cancelEdit = () => {
+                    titleEl.contentEditable = 'false';
+                    titleEl.style.borderBottom = '';
+                    titleEl.style.cursor = '';
+                    titleEl.textContent = plan.title;
+                };
+
+                const saveEdit = async () => {
+                    titleEl.contentEditable = 'false';
+                    titleEl.style.borderBottom = '';
+                    titleEl.style.cursor = '';
+                    const newTitle = titleEl.textContent.trim();
+                    if (!newTitle || newTitle === plan.title) {
+                        titleEl.textContent = plan.title;
+                        return;
+                    }
+                    try {
+                        await window.FLApi.WeekPlans.update(plan.id, { title: newTitle, sessions: plan.sessions });
+                        if (editingWeekPlanId === plan.id) wbPlanTitleInput.value = newTitle;
+                        await loadWeekPlans();
+                    } catch (err) {
+                        toast('Erro ao renomear: ' + err.message, 'error');
+                        await loadWeekPlans();
+                    }
+                };
+
+                titleEl.addEventListener('blur', saveEdit, { once: true });
+                titleEl.addEventListener('keydown', (ke) => {
+                    if (ke.key === 'Enter') { ke.preventDefault(); titleEl.removeEventListener('blur', saveEdit); titleEl.blur(); saveEdit(); }
+                    if (ke.key === 'Escape') { ke.preventDefault(); titleEl.removeEventListener('blur', saveEdit); cancelEdit(); }
+                });
+            });
+
             item.querySelector('[data-action="delete"]').addEventListener('click', (e) => {
                 e.stopPropagation();
                 window._wbDeletePlan(item.dataset.planId);
             });
+        });
+    }
+
+    // Update highlight without rebuilding DOM (preserves elements for dblclick)
+    function updatePlanListHighlight() {
+        wbPlanList.querySelectorAll('.wb-plan-item').forEach(item => {
+            item.classList.toggle('active', item.dataset.planId === editingWeekPlanId);
         });
     }
 
@@ -952,7 +1011,7 @@
         wbPlanTitleInput.value = plan ? plan.title : '';
         wbPlanEditor.classList.remove('hidden');
         wbPlanSelectHint.classList.add('hidden');
-        renderWeekPlanList();
+        updatePlanListHighlight(); // don't rebuild DOM — preserves elements for dblclick
         renderWeekSessions();
     }
 
