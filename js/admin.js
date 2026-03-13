@@ -1273,17 +1273,55 @@
             fundList.innerHTML = '<p style="color:var(--text-muted);font-size:.8rem">Nenhum fundamento.</p>';
             return;
         }
-        fundList.innerHTML = fundModuleList.map(f => `
-            <div class="fund-item ${f.id === editingFundId ? 'active' : ''}" data-fund-id="${f.id}">
+        fundList.innerHTML = fundModuleList.map((f, i) => `
+            <div class="fund-item ${f.id === editingFundId ? 'active' : ''}"
+                 data-fund-id="${f.id}" data-idx="${i}" draggable="true">
+                <i class="fa-solid fa-grip-vertical fund-grip"></i>
                 <i class="fa-solid ${esc(f.icon || 'fa-circle-question')}"></i>
                 <span class="fund-item-title">${esc(f.title)}</span>
             </div>`).join('');
-        fundList.querySelectorAll('.fund-item').forEach(item => {
+
+        let dragSrcIdx = null;
+        fundList.querySelectorAll('.fund-item').forEach((item, idx) => {
             item.addEventListener('click', () => {
                 const f = fundModuleList.find(x => x.id === item.dataset.fundId);
                 if (f) openFundEditor(f);
             });
+            item.addEventListener('dragstart', () => {
+                dragSrcIdx = idx;
+                setTimeout(() => item.classList.add('dragging'), 0);
+            });
+            item.addEventListener('dragend', () => {
+                item.classList.remove('dragging');
+                fundList.querySelectorAll('.fund-item').forEach(i => i.classList.remove('drag-over'));
+            });
+            item.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                if (dragSrcIdx !== idx) {
+                    fundList.querySelectorAll('.fund-item').forEach(i => i.classList.remove('drag-over'));
+                    item.classList.add('drag-over');
+                }
+            });
+            item.addEventListener('drop', async (e) => {
+                e.preventDefault();
+                item.classList.remove('drag-over');
+                if (dragSrcIdx === null || dragSrcIdx === idx) return;
+                const moved = fundModuleList.splice(dragSrcIdx, 1)[0];
+                fundModuleList.splice(idx, 0, moved);
+                dragSrcIdx = null;
+                renderFundModuleList();
+                await saveFundOrder();
+            });
         });
+    }
+
+    async function saveFundOrder() {
+        try {
+            await Promise.all(fundModuleList.map((f, i) =>
+                window.FLApi.Fundamentals.update(f.id, { sort_order: i + 1 })
+            ));
+            await loadFundamentals(); // refresh selectors
+        } catch (err) { toast('Erro ao salvar ordem: ' + err.message, 'error'); }
     }
 
     function openFundEditor(fund = null) {

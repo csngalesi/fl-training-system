@@ -22,21 +22,17 @@
             const { data, error } = await db()
                 .from('fl_fundamentals')
                 .insert(payload)
-                .select()
-                .single();
+                .select();
             if (error) throw error;
-            return data;
+            return (data || [])[0];
         },
 
         async update(id, payload) {
-            const { data, error } = await db()
+            const { error } = await db()
                 .from('fl_fundamentals')
                 .update(payload)
-                .eq('id', id)
-                .select()
-                .single();
+                .eq('id', id);
             if (error) throw error;
-            return data;
         },
 
         async delete(id) {
