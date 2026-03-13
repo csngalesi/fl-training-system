@@ -108,10 +108,15 @@ document.addEventListener('DOMContentLoaded', () => {
             // Load videos from Supabase (cached after first call)
             if (!fundSupaCache) {
                 try { fundSupaCache = await window.FLApi.Fundamentals.getAll(); }
-                catch { fundSupaCache = []; }
+                catch (e) {
+                    console.error('[FL] Fundamentals.getAll() error:', e);
+                    fundSupaCache = [];
+                }
             }
             const supaFund = fundSupaCache.find(f => f.title === currentFundamental.title);
+            console.log('[FL] modal videos — supaFund:', supaFund, '| currentFundamental.title:', currentFundamental.title);
             const videos = supaFund?.videos || [];
+            modalVideos.classList.remove('hidden');
             if (videos.length) {
                 modalVideosList.innerHTML = videos.map(v => `
                     <a class="modal-video-card"
@@ -129,7 +134,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         <i class="fa-solid fa-arrow-up-right-from-square" style="color:var(--text-muted);font-size:.8rem"></i>
                     </a>`).join('');
-                modalVideos.classList.remove('hidden');
+            } else {
+                modalVideosList.innerHTML = '<p style="color:var(--text-muted);font-size:.85rem">Nenhum vídeo cadastrado para este fundamento.</p>';
             }
         });
 
