@@ -1088,8 +1088,23 @@
         else wbDrillCards.innerHTML = '<p style="color:var(--text-muted);font-size:.82rem">Selecione um fundamento acima.</p>';
     });
 
-    document.getElementById('wb-btn-new-plan').addEventListener('click', () => {
-        openWeekPlanEditor(null);
+    document.getElementById('wb-btn-new-plan').addEventListener('click', async () => {
+        const btn = document.getElementById('wb-btn-new-plan');
+        btn.disabled = true;
+        try {
+            const created = await window.FLApi.WeekPlans.create({ title: 'Novo Plano', sessions: [] });
+            editingWeekPlanId = created.id; // set before loadWeekPlans to suppress auto-open
+            await loadWeekPlans();
+            const newPlan = weekPlans.find(p => p.id === created.id);
+            if (newPlan) {
+                openWeekPlanEditor(newPlan);
+                wbPlanTitleInput.select(); // select default title so user can type immediately
+            }
+        } catch (err) {
+            toast('Erro ao criar plano: ' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+        }
     });
 
     document.getElementById('wb-btn-save-plan').addEventListener('click', async () => {
