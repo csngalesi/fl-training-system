@@ -287,6 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (mode === 'week') {
             fundTitle.textContent = 'Treino da Semana';
             fundDesc.textContent = 'Selecione um plano no menu lateral.';
+            btnTechBase.classList.add('hidden');
             loadVisiblePlans();
         } else {
             navMenu.classList.remove('hidden'); // ensure nav-fundamentals stays visible
@@ -335,8 +336,9 @@ document.addEventListener('DOMContentLoaded', () => {
         weekPlansNavList.querySelectorAll('.week-plan-nav-btn').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.planId === plan.id);
         });
-        fundTitle.textContent = plan.title;
+        // Keep header fixed as "Treino da Semana" — don't overwrite with plan title
         fundDesc.textContent = `${plan.sessions ? plan.sessions.length : 0} sessões`;
+        btnTechBase.classList.add('hidden');
         workspace.classList.remove('hidden');
         weekPanel.classList.remove('hidden');
         fundamentalsPanel.classList.add('hidden');
