@@ -374,6 +374,7 @@ h3 {
     font-size: 1.05rem;
     line-height: 1.6;
     color: #e2e8f0;
+    white-space: pre-wrap;
 }
 
 .modal-videos-title {
