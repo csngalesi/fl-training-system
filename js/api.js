@@ -34,7 +34,7 @@
                 .eq('id', id)
                 .select('id');
             if (error) throw error;
-            if (!data || data.length === 0) throw new Error('Nenhuma linha atualizada — verifique autenticação/RLS no Supabase.');
+            return data && data.length > 0; // true = updated, false = 0 rows matched
         },
 
         async delete(id) {

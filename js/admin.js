@@ -1317,10 +1317,14 @@
 
     async function saveFundOrder() {
         try {
-            await Promise.all(fundModuleList.map((f, i) =>
-                window.FLApi.Fundamentals.update(f.id, { sort_order: i + 1 })
-            ));
-            await loadFundamentals(); // refresh selectors
+            for (let i = 0; i < fundModuleList.length; i++) {
+                const f = fundModuleList[i];
+                console.log('[FL] saveFundOrder', i, f.id, f.title);
+                if (!f.id) { console.warn('[FL] skipping item without id:', f); continue; }
+                const ok = await window.FLApi.Fundamentals.update(f.id, { sort_order: i + 1 });
+                if (!ok) console.warn('[FL] sort_order not updated for', f.id, f.title);
+            }
+            await loadFundamentals();
         } catch (err) { toast('Erro ao salvar ordem: ' + err.message, 'error'); }
     }
 
@@ -1402,7 +1406,8 @@
         const payload = { title, icon, base_tech, videos: fundVideos };
         try {
             if (editingFundId) {
-                await window.FLApi.Fundamentals.update(editingFundId, payload);
+                const ok = await window.FLApi.Fundamentals.update(editingFundId, payload);
+                if (!ok) throw new Error('Nenhuma linha atualizada — verifique autenticação/RLS.');
                 toast('Fundamento atualizado!');
             } else {
                 const maxOrder = fundModuleList.reduce((m, f) => Math.max(m, f.sort_order || 0), 0);
