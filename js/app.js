@@ -15,15 +15,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnReplay = document.getElementById('btn-replay');
 
     // Week plan elements
-    const btnModeFund   = document.getElementById('btn-mode-fundamentals');
-    const btnModeWeek   = document.getElementById('btn-mode-week');
+    const btnModeFund      = document.getElementById('btn-mode-fundamentals');
+    const btnModeWeek      = document.getElementById('btn-mode-week');
+    const navFundamentals  = document.getElementById('nav-fundamentals');
+    const navWeekPlans     = document.getElementById('nav-week-plans');
+    const weekPlansNavList = document.getElementById('week-plans-nav-list');
     const fundamentalsPanel = document.getElementById('fundamentals-panel');
-    const weekPanel     = document.getElementById('week-sessions-panel');
-    const weekPlanName  = document.getElementById('week-plan-name');
+    const weekPanel        = document.getElementById('week-sessions-panel');
+    const weekPlanName     = document.getElementById('week-plan-name');
     const weekSessionCount = document.getElementById('week-session-count');
-    const weekDrillsList = document.getElementById('week-drills-list');
+    const weekDrillsList   = document.getElementById('week-drills-list');
 
     let appMode = 'fundamentals';   // 'fundamentals' | 'week'
+    let selectedPlanId = null;
 
     // Modal Elements
     const btnTechBase = document.getElementById('btn-tech-base');
@@ -275,43 +279,76 @@ document.addEventListener('DOMContentLoaded', () => {
         appMode = mode;
         btnModeFund.classList.toggle('active', mode === 'fundamentals');
         btnModeWeek.classList.toggle('active', mode === 'week');
-        navMenu.classList.toggle('hidden', mode === 'week');
+        navFundamentals.classList.toggle('hidden', mode === 'week');
+        navWeekPlans.classList.toggle('hidden', mode !== 'week');
         fundamentalsPanel.classList.toggle('hidden', mode === 'week');
         weekPanel.classList.toggle('hidden', mode !== 'week');
 
         if (mode === 'week') {
             fundTitle.textContent = 'Treino da Semana';
-            workspace.classList.remove('hidden');
-            loadActivePlan();
+            fundDesc.textContent = 'Selecione um plano no menu lateral.';
+            loadVisiblePlans();
         } else {
-            // Restore fundamentals state
+            navMenu.classList.remove('hidden'); // ensure nav-fundamentals stays visible
             if (currentFundamental) {
                 fundTitle.textContent = currentFundamental.title;
             } else {
                 fundTitle.textContent = 'Selecione um Fundamento';
+                fundDesc.textContent = 'Escolha uma opção no menu lateral para visualizar os exercícios de grupo.';
             }
         }
     }
 
-    async function loadActivePlan() {
-        weekDrillsList.innerHTML = '<p style="color:var(--text-muted);font-size:.9rem;padding:16px 0">Carregando...</p>';
+    async function loadVisiblePlans() {
+        weekPlansNavList.innerHTML = '<p style="color:var(--text-muted);font-size:.8rem;padding:4px 0">Carregando...</p>';
         let plans;
         try {
-            plans = await window.FLApi.WeekPlans.getAll();
+            plans = await window.FLApi.WeekPlans.getVisible();
         } catch (err) {
-            weekDrillsList.innerHTML = '<p style="color:#ef4444;font-size:.9rem">Erro ao carregar plano.</p>';
+            weekPlansNavList.innerHTML = '<p style="color:#ef4444;font-size:.8rem">Erro ao carregar planos.</p>';
             return;
         }
-        const active = plans.find(p => p.is_active) || plans[plans.length - 1];
-        if (!active || !active.sessions || !active.sessions.length) {
-            weekPlanName.textContent = active ? active.title : 'Treino da Semana';
+        if (!plans.length) {
+            weekPlansNavList.innerHTML = '<p style="color:var(--text-muted);font-size:.8rem">Nenhum plano visível configurado.</p>';
+            return;
+        }
+        weekPlansNavList.innerHTML = plans.map(p => `
+            <button class="week-plan-nav-btn ${p.id === selectedPlanId ? 'active' : ''}" data-plan-id="${p.id}">
+                <i class="fa-solid fa-calendar-check"></i>
+                <div>
+                    <div class="week-plan-nav-title">${escHtml(p.title)}</div>
+                    <div class="week-plan-nav-meta">${p.sessions ? p.sessions.length : 0} sessões</div>
+                </div>
+            </button>`).join('');
+
+        weekPlansNavList.querySelectorAll('.week-plan-nav-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const plan = plans.find(p => p.id === btn.dataset.planId);
+                if (plan) selectWeekPlan(plan);
+            });
+        });
+    }
+
+    function selectWeekPlan(plan) {
+        selectedPlanId = plan.id;
+        // Update active state in nav
+        weekPlansNavList.querySelectorAll('.week-plan-nav-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.planId === plan.id);
+        });
+        fundTitle.textContent = plan.title;
+        fundDesc.textContent = `${plan.sessions ? plan.sessions.length : 0} sessões`;
+        workspace.classList.remove('hidden');
+        weekPanel.classList.remove('hidden');
+        fundamentalsPanel.classList.add('hidden');
+        if (!plan.sessions || !plan.sessions.length) {
+            weekPlanName.textContent = plan.title;
             weekSessionCount.textContent = '0 sessões';
-            weekDrillsList.innerHTML = '<p style="color:var(--text-muted);font-size:.88rem;padding:16px 0">Nenhuma sessão no plano ativo.</p>';
+            weekDrillsList.innerHTML = '<p style="color:var(--text-muted);font-size:.88rem;padding:16px 0">Nenhuma sessão neste plano.</p>';
             return;
         }
-        weekPlanName.textContent = active.title;
-        weekSessionCount.textContent = `${active.sessions.length} sessões`;
-        renderWeekSessions(active.sessions);
+        weekPlanName.textContent = plan.title;
+        weekSessionCount.textContent = `${plan.sessions.length} sessões`;
+        renderWeekSessions(plan.sessions);
     }
 
     function renderWeekSessions(sessions) {

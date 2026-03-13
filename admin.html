@@ -1016,6 +1016,31 @@
         }
 
         .wb-session-remove:hover { color: var(--acc-danger); }
+
+        /* Toggle row in plan editor */
+        .wb-toggle-row {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: .78rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            user-select: none;
+        }
+        .wb-toggle-row input[type=checkbox] { accent-color: var(--acc-primary); width: 14px; height: 14px; cursor: pointer; }
+        .wb-toggle-row:hover { color: var(--text-main); }
+
+        /* Visible badge in plan list */
+        .wb-plan-visible-badge {
+            font-size: .6rem;
+            font-weight: 700;
+            letter-spacing: .04em;
+            padding: 2px 5px;
+            border-radius: 4px;
+            background: rgba(59,130,246,.18);
+            color: #60a5fa;
+            text-transform: uppercase;
+        }
     </style>
 </head>
 
@@ -1029,7 +1054,7 @@
         </div>
         <div class="admin-header-actions">
             <a href="index.html" class="btn btn-secondary btn-sm">
-                <i class="fa-solid fa-arrow-left"></i> Voltar ao App
+                <i class="fa-solid fa-arrow-left"></i> Ir ao App
             </a>
             <button id="btn-logout" class="btn btn-secondary btn-sm hidden">
                 <i class="fa-solid fa-right-from-bracket"></i> Logout
@@ -1394,7 +1419,11 @@
                     <div id="wb-plan-editor" class="hidden">
                         <input id="wb-plan-title-input" class="form-input" type="text"
                                placeholder="Nome do plano" style="margin-bottom:8px">
-                        <div style="display:flex;gap:6px">
+                        <label class="wb-toggle-row" title="Exibir este plano na seleção do app">
+                            <input type="checkbox" id="wb-chk-visible">
+                            <span>Visível na semana</span>
+                        </label>
+                        <div style="display:flex;gap:6px;margin-top:8px">
                             <button id="wb-btn-save-plan" class="btn btn-success btn-sm" style="flex:1;justify-content:center">
                                 <i class="fa-solid fa-floppy-disk"></i> Salvar
                             </button>

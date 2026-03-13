@@ -136,26 +136,27 @@ h3 {
 /* ── Mode switcher ── */
 .mode-switcher {
     display: flex;
+    flex-direction: column;
     gap: 6px;
     margin-top: 10px;
 }
 
 .mode-btn {
-    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    padding: 7px 10px;
-    border-radius: 8px;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 10px;
     border: 1px solid rgba(255,255,255,.1);
     background: transparent;
     color: var(--text-muted);
-    font-size: .78rem;
+    font-size: .85rem;
     font-weight: 600;
     font-family: 'Inter', sans-serif;
     cursor: pointer;
     transition: all .15s ease;
+    white-space: nowrap;
 }
 
 .mode-btn:hover { color: var(--text-main); border-color: rgba(255,255,255,.25); }
@@ -165,6 +166,28 @@ h3 {
     border-color: var(--acc-primary);
     color: var(--acc-primary);
 }
+
+/* ── Week plan nav cards (sidebar) ── */
+.week-plan-nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+    text-align: left;
+}
+.week-plan-nav-btn:hover { border-color: rgba(255,255,255,.2); background: rgba(255,255,255,.05); }
+.week-plan-nav-btn.active { border-color: var(--acc-primary); background: rgba(16,185,129,.1); }
+.week-plan-nav-btn i { color: var(--acc-primary); font-size: .85rem; flex-shrink: 0; }
+.week-plan-nav-title { font-size: .85rem; font-weight: 600; }
+.week-plan-nav-meta { font-size: .72rem; color: var(--text-muted); margin-top: 1px; }
 
 /* ── Week session cards ── */
 .week-session-card {

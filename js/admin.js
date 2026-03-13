@@ -906,6 +906,7 @@
     const wbPlanEditor     = document.getElementById('wb-plan-editor');
     const wbPlanSelectHint = document.getElementById('wb-plan-select-hint');
     const wbPlanTitleInput = document.getElementById('wb-plan-title-input');
+    const wbChkVisible     = document.getElementById('wb-chk-visible');
 
     async function loadWeekPlans() {
         try { weekPlans = await window.FLApi.WeekPlans.getAll(); }
@@ -928,6 +929,7 @@
                  data-plan-id="${p.id}" title="Clique para abrir · Duplo clique para renomear">
                 <div class="wb-plan-item-title">${esc(p.title)}</div>
                 ${p.is_active ? '<span class="wb-plan-item-active-badge">Ativo</span>' : ''}
+                ${p.visible_in_week ? '<span class="wb-plan-visible-badge">Visível</span>' : ''}
                 <button class="wb-session-remove" data-action="delete" data-id="${p.id}" title="Excluir">
                     <i class="fa-solid fa-trash"></i>
                 </button>
@@ -1009,6 +1011,7 @@
         editingWeekPlanId = plan ? plan.id : null;
         weekSessions = plan ? JSON.parse(JSON.stringify(plan.sessions || [])) : [];
         wbPlanTitleInput.value = plan ? plan.title : '';
+        wbChkVisible.checked = plan ? !!plan.visible_in_week : false;
         wbPlanEditor.classList.remove('hidden');
         wbPlanSelectHint.classList.add('hidden');
         updatePlanListHighlight(); // don't rebuild DOM — preserves elements for dblclick
@@ -1169,7 +1172,7 @@
     document.getElementById('wb-btn-save-plan').addEventListener('click', async () => {
         const title = wbPlanTitleInput.value.trim();
         if (!title) { toast('Informe o título do plano.', 'error'); wbPlanTitleInput.focus(); return; }
-        const payload = { title, sessions: weekSessions };
+        const payload = { title, sessions: weekSessions, visible_in_week: wbChkVisible.checked };
         try {
             if (editingWeekPlanId) {
                 await window.FLApi.WeekPlans.update(editingWeekPlanId, payload);

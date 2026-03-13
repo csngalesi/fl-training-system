@@ -119,7 +119,17 @@
         async getAll() {
             const { data, error } = await db()
                 .from('fl_week_plans')
-                .select('id, title, sessions, is_active, created_at')
+                .select('id, title, sessions, is_active, visible_in_week, created_at')
+                .order('created_at', { ascending: true });
+            if (error) throw error;
+            return data || [];
+        },
+
+        async getVisible() {
+            const { data, error } = await db()
+                .from('fl_week_plans')
+                .select('id, title, sessions, is_active, visible_in_week, created_at')
+                .eq('visible_in_week', true)
                 .order('created_at', { ascending: true });
             if (error) throw error;
             return data || [];
