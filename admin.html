@@ -882,35 +882,7 @@
         .wb-center { flex: 1; min-width: 0; }
 
         /* Right col */
-        .wb-right { width: 280px; flex-shrink: 0; background: rgba(16,185,129,.03); }
-
-        /* Fundamental pills */
-        .wb-fund-pill {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 9px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: .83rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            transition: all .15s;
-            margin-bottom: 3px;
-            border: none;
-            background: transparent;
-            width: 100%;
-            text-align: left;
-        }
-
-        .wb-fund-pill:hover { color: var(--text-main); background: rgba(255,255,255,.06); }
-
-        .wb-fund-pill.active {
-            color: var(--text-main);
-            background: rgba(59,130,246,.15);
-            border-left: 3px solid var(--acc-blue);
-            padding-left: 9px;
-        }
+        .wb-right { width: 300px; flex-shrink: 0; background: rgba(16,185,129,.03); }
 
         /* Drill cards (draggable) */
         .wb-drill-card {
@@ -1415,21 +1387,8 @@
                 </div>
             </div>
 
-            <!-- Center: Fundamentals + Drills -->
+            <!-- Center: Week plan sessions (drop zone) -->
             <div class="wb-col wb-center">
-                <div class="wb-col-header">
-                    <h3><i class="fa-solid fa-futbol"></i> Sessões</h3>
-                    <div id="wb-fund-pills" style="display:flex;flex-wrap:wrap;gap:4px"></div>
-                </div>
-                <div class="wb-col-body">
-                    <div id="wb-drill-cards">
-                        <p style="color:var(--text-muted);font-size:.82rem">Selecione um fundamental acima.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right: Session drop zone -->
-            <div class="wb-col wb-right">
                 <div class="wb-col-header">
                     <h3><i class="fa-solid fa-list-check"></i> Treino da Semana</h3>
                     <div id="wb-plan-editor" class="hidden">
@@ -1457,6 +1416,21 @@
                             Arraste sessões aqui
                         </p>
                         <div id="wb-session-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Drill picker -->
+            <div class="wb-col wb-right">
+                <div class="wb-col-header">
+                    <h3><i class="fa-solid fa-futbol"></i> Sessões</h3>
+                    <select id="wb-fund-select" class="form-input" style="margin-top:6px">
+                        <option value="">Selecione um fundamento...</option>
+                    </select>
+                </div>
+                <div class="wb-col-body">
+                    <div id="wb-drill-cards">
+                        <p style="color:var(--text-muted);font-size:.82rem">Selecione um fundamento acima.</p>
                     </div>
                 </div>
             </div>

@@ -898,7 +898,7 @@
 
     // ── DOM refs (week) ───────────────────────────────────────────
     const wbPlanList       = document.getElementById('wb-plan-list');
-    const wbFundPills      = document.getElementById('wb-fund-pills');
+    const wbFundSelect     = document.getElementById('wb-fund-select');
     const wbDrillCards     = document.getElementById('wb-drill-cards');
     const wbDropZone       = document.getElementById('wb-drop-zone');
     const wbSessionList    = document.getElementById('wb-session-list');
@@ -1018,12 +1018,9 @@
         } catch { /* ignore */ }
     });
 
-    // Render drills in center panel
+    // Render drills in right panel
     async function loadWeekDrills(fundamentalId) {
         weekActiveFundId = fundamentalId;
-        wbFundPills.querySelectorAll('.wb-fund-pill').forEach(p => {
-            p.classList.toggle('active', p.dataset.fundId === fundamentalId);
-        });
         if (weekDrillsCache[fundamentalId]) {
             renderWeekDrillCards(weekDrillsCache[fundamentalId], fundamentalId);
             return;
@@ -1068,14 +1065,14 @@
     }
 
     function buildWeekFundPills() {
-        wbFundPills.innerHTML = fundamentals.map(f => `
-            <button class="wb-fund-pill" data-fund-id="${f.id}">
-                <i class="fa-solid ${f.icon}"></i> ${esc(f.title)}
-            </button>`).join('');
-        wbFundPills.querySelectorAll('.wb-fund-pill').forEach(pill => {
-            pill.addEventListener('click', () => loadWeekDrills(pill.dataset.fundId));
-        });
+        wbFundSelect.innerHTML = '<option value="">Selecione um fundamento...</option>' +
+            fundamentals.map(f => `<option value="${f.id}">${esc(f.title)}</option>`).join('');
     }
+
+    wbFundSelect.addEventListener('change', () => {
+        if (wbFundSelect.value) loadWeekDrills(wbFundSelect.value);
+        else wbDrillCards.innerHTML = '<p style="color:var(--text-muted);font-size:.82rem">Selecione um fundamento acima.</p>';
+    });
 
     document.getElementById('wb-btn-new-plan').addEventListener('click', () => {
         openWeekPlanEditor(null);
