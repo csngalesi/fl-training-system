@@ -929,7 +929,11 @@
                  data-plan-id="${p.id}" title="Clique para abrir · Duplo clique para renomear">
                 <div class="wb-plan-item-title">${esc(p.title)}</div>
                 ${p.is_active ? '<span class="wb-plan-item-active-badge">Ativo</span>' : ''}
-                ${p.visible_in_week ? '<span class="wb-plan-visible-badge">Visível</span>' : ''}
+                <button class="wb-session-remove ${p.visible_in_week ? 'wb-eye-on' : ''}"
+                        data-action="toggle-visible" data-id="${p.id}"
+                        title="${p.visible_in_week ? 'Visível no app (clique para ocultar)' : 'Oculto no app (clique para tornar visível)'}">
+                    <i class="fa-solid ${p.visible_in_week ? 'fa-eye' : 'fa-eye-slash'}"></i>
+                </button>
                 <button class="wb-session-remove" data-action="delete" data-id="${p.id}" title="Excluir">
                     <i class="fa-solid fa-trash"></i>
                 </button>
@@ -940,9 +944,23 @@
 
             item.addEventListener('click', (e) => {
                 if (e.target.closest('[data-action="delete"]')) return;
+                if (e.target.closest('[data-action="toggle-visible"]')) return;
                 if (titleEl.contentEditable === 'true') return; // editing inline
                 const plan = weekPlans.find(p => p.id === item.dataset.planId);
                 if (plan) openWeekPlanEditor(plan);
+            });
+
+            item.querySelector('[data-action="toggle-visible"]').addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const plan = weekPlans.find(p => p.id === item.dataset.planId);
+                if (!plan) return;
+                const newVal = !plan.visible_in_week;
+                try {
+                    await window.FLApi.WeekPlans.update(plan.id, { title: plan.title, sessions: plan.sessions, visible_in_week: newVal });
+                    plan.visible_in_week = newVal; // update cache immediately
+                    if (editingWeekPlanId === plan.id) wbChkVisible.checked = newVal;
+                    renderWeekPlanList(); // rebuild to reflect icon change
+                } catch (err) { toast('Erro: ' + err.message, 'error'); }
             });
 
             // Double-click on title → inline rename
