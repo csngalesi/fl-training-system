@@ -230,12 +230,14 @@
         newDuration.value = '';
         newSetup.value = JSON.stringify(EXAMPLE_SETUP, null, 2);
         newAnim.value  = JSON.stringify(EXAMPLE_ANIM,  null, 2);
+        drillList.classList.add('hidden');
         formNew.classList.remove('hidden');
         newTitle.focus();
     });
 
     btnCancelNew.addEventListener('click', () => {
         formNew.classList.add('hidden');
+        drillList.classList.remove('hidden');
         closeBuilder();
     });
 
@@ -259,6 +261,7 @@
             });
             toast('Drill criado!');
             formNew.classList.add('hidden');
+            drillList.classList.remove('hidden');
             closeBuilder();
             currentFundId = newFundamental.value;
             selFundamental.value = currentFundId;
@@ -285,6 +288,7 @@
         editAnim.value        = JSON.stringify(drill.anim,  null, 2);
         formNew.classList.add('hidden');
         closeBuilder();
+        drillList.classList.add('hidden');
         formEdit.classList.remove('hidden');
         editTitle.focus();
         formEdit.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -292,6 +296,7 @@
 
     btnCancelEdit.addEventListener('click', () => {
         formEdit.classList.add('hidden');
+        drillList.classList.remove('hidden');
         closeBuilder();
         editingId = null;
     });
@@ -316,6 +321,7 @@
             });
             toast('Drill atualizado!');
             formEdit.classList.add('hidden');
+            drillList.classList.remove('hidden');
             closeBuilder();
             editingId = null;
             currentFundId = editFundamental.value;
@@ -769,6 +775,7 @@
         } else {
             resetBuilderFrames();
         }
+        tplList.classList.add('hidden');
         tplFormPanel.classList.remove('hidden');
         tplFormPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -783,6 +790,7 @@
 
     document.getElementById('btn-cancel-template').addEventListener('click', () => {
         tplFormPanel.classList.add('hidden');
+        tplList.classList.remove('hidden');
         editingTemplateId = null;
         closeBuilder();
     });
@@ -800,6 +808,7 @@
                 toast('Template criado!');
             }
             tplFormPanel.classList.add('hidden');
+            tplList.classList.remove('hidden');
             editingTemplateId = null;
             closeBuilder();
             await loadTemplates();
@@ -826,6 +835,7 @@
                 toast('Template criado!');
             }
             tplFormPanel.classList.add('hidden');
+            tplList.classList.remove('hidden');
             editingTemplateId = null;
             closeBuilder();
             await loadTemplates();
