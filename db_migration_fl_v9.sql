@@ -9,7 +9,7 @@ ALTER TABLE fl_fundamentals
 -- Assign sequential sort_order to rows where it is still 0
 -- (preserves existing non-zero values)
 WITH ranked AS (
-    SELECT id, ROW_NUMBER() OVER (ORDER BY created_at ASC) AS rn
+    SELECT id, ROW_NUMBER() OVER (ORDER BY id ASC) AS rn
     FROM fl_fundamentals
     WHERE sort_order = 0
 )
