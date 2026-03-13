@@ -911,6 +911,11 @@
         try { weekPlans = await window.FLApi.WeekPlans.getAll(); }
         catch (err) { console.error('[Admin] Erro ao carregar planos:', err); }
         renderWeekPlanList();
+        // Auto-open the active plan (or the first) when nothing is in edit yet
+        if (!editingWeekPlanId && weekPlans.length) {
+            const auto = weekPlans.find(p => p.is_active) || weekPlans[0];
+            openWeekPlanEditor(auto);
+        }
     }
 
     function renderWeekPlanList() {
@@ -920,16 +925,25 @@
         }
         wbPlanList.innerHTML = weekPlans.map(p => `
             <div class="wb-plan-item ${p.id === editingWeekPlanId ? 'active' : ''}"
-                 data-plan-id="${p.id}">
+                 data-plan-id="${p.id}" title="Clique para editar">
                 <div class="wb-plan-item-title">${esc(p.title)}</div>
                 ${p.is_active ? '<span class="wb-plan-item-active-badge">Ativo</span>' : ''}
-                <button class="wb-session-remove" onclick="window._wbEditPlan('${p.id}')" title="Editar">
-                    <i class="fa-solid fa-pen"></i>
-                </button>
-                <button class="wb-session-remove" onclick="window._wbDeletePlan('${p.id}')" title="Excluir">
+                <button class="wb-session-remove" data-action="delete" data-id="${p.id}" title="Excluir">
                     <i class="fa-solid fa-trash"></i>
                 </button>
             </div>`).join('');
+
+        wbPlanList.querySelectorAll('.wb-plan-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                if (e.target.closest('[data-action="delete"]')) return; // handled separately
+                const plan = weekPlans.find(p => p.id === item.dataset.planId);
+                if (plan) openWeekPlanEditor(plan);
+            });
+            item.querySelector('[data-action="delete"]').addEventListener('click', (e) => {
+                e.stopPropagation();
+                window._wbDeletePlan(item.dataset.planId);
+            });
+        });
     }
 
     function openWeekPlanEditor(plan = null) {
@@ -1113,11 +1127,6 @@
         wbSessionList.innerHTML = '';
         renderWeekPlanList();
     });
-
-    window._wbEditPlan = (id) => {
-        const plan = weekPlans.find(p => p.id === id);
-        if (plan) openWeekPlanEditor(plan);
-    };
 
     window._wbDeletePlan = async (id) => {
         if (!confirm('Excluir este plano?')) return;
