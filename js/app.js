@@ -30,10 +30,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedPlanId = null;
 
     // Modal Elements
-    const btnTechBase = document.getElementById('btn-tech-base');
-    const modalBase = document.getElementById('tech-modal');
-    const btnCloseModal = document.getElementById('btn-close-modal');
-    const modalText = document.getElementById('modal-text');
+    const btnTechBase     = document.getElementById('btn-tech-base');
+    const modalBase       = document.getElementById('tech-modal');
+    const btnCloseModal   = document.getElementById('btn-close-modal');
+    const modalText       = document.getElementById('modal-text');
+    const modalVideos     = document.getElementById('modal-videos');
+    const modalVideosList = document.getElementById('modal-videos-list');
+
+    let fundSupaCache = null; // fundamentals from Supabase (loaded on first modal open)
 
     // Pitch / Animation Elements (4 Players now)
     const actorsObj = {
@@ -95,10 +99,37 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Modal Logic
-        btnTechBase.addEventListener('click', () => {
-            if (currentFundamental) {
-                modalText.textContent = currentFundamental.base_tech || currentFundamental.baseTech || '';
-                modalBase.classList.remove('hidden');
+        btnTechBase.addEventListener('click', async () => {
+            if (!currentFundamental) return;
+            modalText.textContent = currentFundamental.base_tech || currentFundamental.baseTech || '';
+            modalVideos.classList.add('hidden');
+            modalBase.classList.remove('hidden');
+
+            // Load videos from Supabase (cached after first call)
+            if (!fundSupaCache) {
+                try { fundSupaCache = await window.FLApi.Fundamentals.getAll(); }
+                catch { fundSupaCache = []; }
+            }
+            const supaFund = fundSupaCache.find(f => f.title === currentFundamental.title);
+            const videos = supaFund?.videos || [];
+            if (videos.length) {
+                modalVideosList.innerHTML = videos.map(v => `
+                    <a class="modal-video-card"
+                       href="https://www.youtube.com/watch?v=${escHtml(v.youtube_id)}"
+                       target="_blank" rel="noopener">
+                        <img class="modal-video-thumb"
+                             src="https://img.youtube.com/vi/${escHtml(v.youtube_id)}/mqdefault.jpg"
+                             alt="" loading="lazy">
+                        <div class="modal-video-info">
+                            <div class="modal-video-name">${escHtml(v.title)}</div>
+                            <div class="modal-video-hint">
+                                <i class="fa-brands fa-youtube" style="color:#ef4444"></i>
+                                Abrir no YouTube
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-arrow-up-right-from-square" style="color:var(--text-muted);font-size:.8rem"></i>
+                    </a>`).join('');
+                modalVideos.classList.remove('hidden');
             }
         });
 
