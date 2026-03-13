@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
             modalVideos.classList.add('hidden');
             modalBase.classList.remove('hidden');
 
-            // Load videos from Supabase (cached after first call)
+            // Load from Supabase (cached after first call)
             if (!fundSupaCache) {
                 try { fundSupaCache = await window.FLApi.Fundamentals.getAll(); }
                 catch (e) {
@@ -114,7 +114,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             const supaFund = fundSupaCache.find(f => f.title === currentFundamental.title);
-            console.log('[FL] modal videos — supaFund:', supaFund, '| currentFundamental.title:', currentFundamental.title);
+            // Override static base_tech with Supabase version if available
+            if (supaFund?.base_tech) modalText.textContent = supaFund.base_tech;
             const videos = supaFund?.videos || [];
             modalVideos.classList.remove('hidden');
             if (videos.length) {
