@@ -376,8 +376,15 @@
 
     function openBuilder(target, frames = null) {
         builderTarget = target;
-        if (frames) {
-            builderFrames = frames.map(f => JSON.parse(JSON.stringify(f)));
+        builderFrame = 0;
+        if (frames && frames.length) {
+            const loaded = frames.map(f => JSON.parse(JSON.stringify(f)));
+            // Pad to FRAME_COUNT with copies of last frame if template is shorter
+            const last = loaded[loaded.length - 1];
+            while (loaded.length < FRAME_COUNT) {
+                loaded.push(JSON.parse(JSON.stringify(last)));
+            }
+            builderFrames = loaded;
         } else {
             resetBuilderFrames();
         }
@@ -413,7 +420,10 @@
             item.innerHTML = `<div class="vb-template-item-title">${tpl.title}</div>
                 <div class="vb-template-item-desc">${tpl.description}</div>`;
             item.addEventListener('click', () => {
-                builderFrames = tpl.frames.map(f => JSON.parse(JSON.stringify(f)));
+                const loaded = tpl.frames.map(f => JSON.parse(JSON.stringify(f)));
+                const last = loaded[loaded.length - 1];
+                while (loaded.length < FRAME_COUNT) loaded.push(JSON.parse(JSON.stringify(last)));
+                builderFrames = loaded;
                 builderFrame  = 0;
                 renderBuilderTabs();
                 renderBuilderPitch();
