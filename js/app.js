@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const conesContainer = document.getElementById('dynamic-elements');
 
     // State
-    const fData = window.FLData.fundamentals;
+    let fData = window.FLData.fundamentals; // fallback; replaced by Supabase on init
     let currentFundamental = null;
     let currentDrill = null;
     let animationSequenceId = 0;
@@ -60,18 +60,41 @@ document.addEventListener('DOMContentLoaded', () => {
     // INITIALIZATION & UI ROUTING
     // ==========================================================
 
-    function init() {
-        // Build Sidebar Menu
+    function closeMobileSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+        if (sidebar) sidebar.classList.remove('open');
+        if (sidebarBackdrop) sidebarBackdrop.classList.add('hidden');
+    }
+
+    function buildFundMenu() {
+        navMenu.innerHTML = '';
         fData.forEach((fund, index) => {
             const btn = document.createElement('button');
             btn.className = 'nav-btn';
-            btn.innerHTML = `<i class="fa-solid ${fund.icon}"></i> ${fund.title}`;
+            btn.innerHTML = `<i class="fa-solid ${fund.icon || 'fa-futbol'}"></i> ${fund.title}`;
             btn.addEventListener('click', () => {
                 selectFundamental(index, btn);
                 closeMobileSidebar();
             });
             navMenu.appendChild(btn);
         });
+    }
+
+    async function init() {
+        // Load fundamentals from Supabase; fall back to hardcoded data on error
+        try {
+            const supaFunds = await window.FLApi.Fundamentals.getAll();
+            if (supaFunds && supaFunds.length) {
+                fData = supaFunds;
+                fundSupaCache = supaFunds; // pre-warm modal cache
+            }
+        } catch (e) {
+            console.warn('[FL] Fundamentals.getAll() failed, using static data:', e);
+        }
+
+        // Build Sidebar Menu
+        buildFundMenu();
 
         // Mobile sidebar toggle
         const btnMenu = document.getElementById('btn-menu');
@@ -83,10 +106,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 sidebarBackdrop.classList.toggle('hidden');
             });
             sidebarBackdrop.addEventListener('click', closeMobileSidebar);
-        }
-        function closeMobileSidebar() {
-            sidebar.classList.remove('open');
-            sidebarBackdrop.classList.add('hidden');
         }
 
         // Mode switcher
