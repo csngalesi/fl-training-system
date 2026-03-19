@@ -659,6 +659,69 @@
         }
 
 
+        /* ── Palette (extra items to drag onto field) ── */
+        .vb-palette {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+            background: rgba(0,0,0,.25);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 10px 8px;
+            flex-shrink: 0;
+            min-width: 48px;
+        }
+
+        .vb-palette-title {
+            font-size: .6rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            text-align: center;
+            margin-bottom: 2px;
+        }
+
+        .vb-palette-item {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            border-radius: 6px;
+            border: 1px solid var(--glass-border);
+            background: rgba(0,0,0,.2);
+            transition: background .1s;
+            touch-action: none;
+            user-select: none;
+        }
+
+        .vb-palette-item:hover { background: rgba(255,255,255,.07); }
+        .vb-palette-item:active { cursor: grabbing; }
+
+        .vb-palette-cone {
+            width: 14px;
+            height: 14px;
+            background: #f97316;
+            border-radius: 2px;
+            pointer-events: none;
+        }
+
+        /* Ghost cone that follows the cursor while dragging from palette */
+        .vb-palette-ghost {
+            position: fixed;
+            width: 14px;
+            height: 14px;
+            background: #f97316;
+            border-radius: 2px;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            opacity: .85;
+        }
+
         .vb-legend {
             display: flex;
             flex-direction: column;
@@ -1433,6 +1496,16 @@
             <div id="vb-frame-label" class="vb-frame-label"></div>
             <div class="vb-body">
                 <div id="vb-pitch" class="vb-pitch"></div>
+
+                <!-- Palette: extra items to drag onto the field -->
+                <div class="vb-palette" id="vb-palette">
+                    <div class="vb-palette-title">+</div>
+                    <div class="vb-palette-item" data-palette="cone" title="Arraste para o campo"><div class="vb-palette-cone"></div></div>
+                    <div class="vb-palette-item" data-palette="cone" title="Arraste para o campo"><div class="vb-palette-cone"></div></div>
+                    <div class="vb-palette-item" data-palette="cone" title="Arraste para o campo"><div class="vb-palette-cone"></div></div>
+                    <div class="vb-palette-item" data-palette="cone" title="Arraste para o campo"><div class="vb-palette-cone"></div></div>
+                </div>
+
                 <div class="vb-legend">
                     <div class="vb-legend-title">Legenda</div>
                     <div class="vb-legend-item">

@@ -642,6 +642,54 @@
         renderBuilderPitch();
     }
 
+    // ── Palette drag (external items → field) ────────────────────
+    let paletteGhost = null;
+
+    document.getElementById('vb-palette').addEventListener('pointerdown', (e) => {
+        const item = e.target.closest('.vb-palette-item');
+        if (!item) return;
+        const type = item.dataset.palette;
+        if (type !== 'cone') return;
+
+        e.preventDefault();
+        item.setPointerCapture(e.pointerId);
+
+        // Create ghost element
+        paletteGhost = document.createElement('div');
+        paletteGhost.className = 'vb-palette-ghost';
+        paletteGhost.style.left = e.clientX + 'px';
+        paletteGhost.style.top  = e.clientY + 'px';
+        document.body.appendChild(paletteGhost);
+
+        function onMove(ev) {
+            paletteGhost.style.left = ev.clientX + 'px';
+            paletteGhost.style.top  = ev.clientY + 'px';
+        }
+
+        function onUp(ev) {
+            item.removeEventListener('pointermove', onMove);
+            item.removeEventListener('pointerup',   onUp);
+            if (paletteGhost) { paletteGhost.remove(); paletteGhost = null; }
+
+            // Check if dropped inside the pitch
+            const pitchRect = vbPitch.getBoundingClientRect();
+            const px = ev.clientX - pitchRect.left;
+            const py = ev.clientY - pitchRect.top;
+            if (px >= 0 && px <= PITCH_W && py >= 0 && py <= PITCH_H) {
+                const {x, y} = pixelToField(px, py);
+                // Add cone to all frames (propagate from current forward)
+                const newCone = {x, y};
+                for (let i = builderFrame; i < FRAME_COUNT; i++) {
+                    builderFrames[i].cones.push({...newCone});
+                }
+                renderBuilderPitch();
+            }
+        }
+
+        item.addEventListener('pointermove', onMove);
+        item.addEventListener('pointerup',   onUp);
+    });
+
     // ── Rotate handle ─────────────────────────────────────────────
     function propagateRotForward(fromFrame, key, oldRot, newRot) {
         for (let i = fromFrame + 1; i < FRAME_COUNT; i++) {
