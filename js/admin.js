@@ -474,6 +474,16 @@
     document.getElementById('vb-next').addEventListener('click', () => {
         if (builderFrame < FRAME_COUNT - 1) { builderFrame++; renderBuilderTabs(); renderBuilderPitch(); }
     });
+    document.getElementById('vb-reset-future').addEventListener('click', () => {
+        if (builderFrame >= FRAME_COUNT - 1) return;
+        const snapshot = JSON.parse(JSON.stringify(builderFrames[builderFrame]));
+        for (let i = builderFrame + 1; i < FRAME_COUNT; i++) {
+            builderFrames[i] = JSON.parse(JSON.stringify(snapshot));
+        }
+        renderBuilderTabs();
+        renderBuilderPitch();
+        toast(`Momentos ${builderFrame + 2}–${FRAME_COUNT} igualados ao Momento ${builderFrame + 1}.`);
+    });
 
     // ── SVG player silhouette (top-down view) ─────────────────────
     function playerSVG(num, color, foot = null) {
