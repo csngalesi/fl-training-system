@@ -19,9 +19,10 @@
         },
 
         async create(payload) {
+            const row = { id: crypto.randomUUID(), ...payload };
             const { data, error } = await db()
                 .from('fl_fundamentals')
-                .insert(payload)
+                .insert(row)
                 .select();
             if (error) throw error;
             return (data || [])[0];
