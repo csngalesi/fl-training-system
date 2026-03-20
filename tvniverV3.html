@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Lab - Painel de Fotos V3 (Aniversário)</title>
+    <!-- Força a TV a recarregar a página sozinha a cada 5 minutos (300 segundos).
+         Assim, quando você subir fotos novas pro Vercel, a TV já engole a atualização! -->
+    <meta http-equiv="refresh" content="300">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;600&family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            /* Usamos slide 2 de fundo com uma textura mais escura por cima para dar foco nas fotos */
+            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('assets/img/slide%202.jpg') center/cover no-repeat;
+            background-color: #111;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        .slideshow-wrapper {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+        }
+
+        .photo-slide {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Um display bonito como se fosse uma moldura polaroid escura e suspensa */
+        .photo-container {
+            width: 75%;
+            height: 80%;
+            border-radius: 20px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.9), 0 0 0 10px rgba(255,255,255,0.1);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .photo-slide.active {
+            opacity: 1;
+        }
+        
+        .marca-dagua {
+            position: absolute;
+            bottom: 40px;
+            right: 50px;
+            font-size: 55px;
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.85);
+            text-shadow: 2px 2px 15px rgba(0,0,0,0.9);
+            font-family: 'Montserrat', sans-serif;
+            text-transform: uppercase;
+            z-index: 10;
+        }
+    </style>
+</head>
+
+<body>
+    
+    <!-- Onde as fotos vao cruzar em fade-in -->
+    <div id="slideshow" class="slideshow-wrapper"></div>
+    
+    <!-- Assinatura decorativa no canto inferior direito -->
+    <div class="marca-dagua">Niver Bruno e Pietro 🎂</div>
+
+    <script>
+        // Array fixo de fotos já mapeadas pela pasta /Aniversario/fotos do sistema.
+        // Toda vez que você mandar subir fotos novas na festa, eu atualizo essa listinha
+        // e dou o deploy da nova versão!
+        const fotos = [
+            "Aniversario/fotos/WhatsApp Image 2026-03-20 at 00.03.38.jpeg",
+            "Aniversario/fotos/WhatsApp Image 2026-03-20 at 00.03.38 (1).jpeg",
+            "Aniversario/fotos/WhatsApp Image 2026-03-20 at 00.03.38 (2).jpeg",
+            "Aniversario/fotos/WhatsApp Image 2026-03-20 at 00.03.38 (3).jpeg"
+        ];
+
+        const container = document.getElementById('slideshow');
+        
+        // Se a pasta estiver vazia, avisa. Se não, monta as divs da TV
+        if (fotos.length === 0) {
+            container.innerHTML = '<h1 style="color:white;text-align:center;margin-top:20%">Aguardando fotos...</h1>';
+        } else {
+            fotos.forEach((foto, index) => {
+                const slide = document.createElement('div');
+                slide.className = 'photo-slide' + (index === 0 ? ' active' : '');
+                
+                const frame = document.createElement('div');
+                frame.className = 'photo-container';
+                frame.style.backgroundImage = `url('${foto.replace(/'/g, "\\'")}')`; // Escapa aspas simples
+                
+                slide.appendChild(frame);
+                container.appendChild(slide);
+            });
+
+            const slideElements = document.querySelectorAll('.photo-slide');
+            let current = 0;
+
+            // Roda infinitamente trocando de painel a cada 6 segundos
+            setInterval(() => {
+                slideElements[current].classList.remove('active');
+                current = (current + 1) % slideElements.length;
+                slideElements[current].classList.add('active');
+            }, 6000); 
+        }
+    </script>
+
+</body>
+</html>
