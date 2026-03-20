@@ -117,67 +117,67 @@
     </div>
 
     <script>
-        // Array fixo de fotos já mapeadas pela pasta /Aniversario/fotos do sistema.
-        const fotos = [
-            "Aniversario/fotos/WhatsApp Image 2026-03-20 at 00.03.38.jpeg",
-            "Aniversario/fotos/WhatsApp Image 2026-03-20 at 00.03.38 (1).jpeg",
-            "Aniversario/fotos/WhatsApp Image 2026-03-20 at 00.03.38 (2).jpeg",
-            "Aniversario/fotos/WhatsApp Image 2026-03-20 at 00.03.38 (3).jpeg"
-        ];
-
         const container = document.getElementById('slideshow');
         const counterElement = document.getElementById('slide-counter');
         const CHUNK_SIZE = 12; // 12 fotos por slide (Mural 4x3)
-        const totalSlides = Math.ceil(fotos.length / CHUNK_SIZE);
-        
-        // Se a pasta estiver vazia, avisa. Se não, monta as divs da TV
-        if (fotos.length === 0) {
-            container.innerHTML = '<h1 style="color:white;text-align:center;margin-top:20%">Aguardando fotos...</h1>';
-            counterElement.style.display = 'none';
-        } else {
-            // Fatiar a lista de fotos em blocos de 12 para formar os slides
-            for (let i = 0; i < totalSlides; i++) {
-                const slide = document.createElement('div');
-                slide.className = 'photo-slide' + (i === 0 ? ' active' : '');
-                
-                const grid = document.createElement('div');
-                grid.className = 'photo-grid';
-                
-                // Quebra o array (do começo da página atual até o fim dela)
-                const currentFotos = fotos.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
-                
-                currentFotos.forEach(foto => {
-                    const item = document.createElement('div');
-                    item.className = 'grid-item';
-                    item.style.backgroundImage = `url('${foto.replace(/'/g, "\\'")}')`; // Escapa aspas para seguranca
-                    grid.appendChild(item);
-                });
-                
-                slide.appendChild(grid);
-                container.appendChild(slide);
-            }
 
-            const slideElements = document.querySelectorAll('.photo-slide');
-            let current = 0;
-
-            function updateCounterLabel() {
-                if (counterElement) {
-                    counterElement.innerHTML = `Página ${current + 1} de ${totalSlides}`;
+        // Busca silenciosamente a lista de fotos da API rodando na Vercel
+        fetch('/api/fotos')
+            .then(response => response.json())
+            .then(fotos => {
+                const totalSlides = Math.ceil(fotos.length / CHUNK_SIZE);
+                
+                if (!fotos || fotos.length === 0) {
+                    container.innerHTML = '<h1 style="color:white;text-align:center;margin-top:20%">Aguardando fotos...</h1>';
+                    counterElement.style.display = 'none';
+                    return;
                 }
-            }
-            updateCounterLabel(); // Seta inicial
 
-            // Só ativa o intervalo se houver mais de 1 página de fotos
-            if (totalSlides > 1) {
-                // Como 12 fotos demoram mais pra ler, deixamos 10 segundos!
-                setInterval(() => {
-                    slideElements[current].classList.remove('active');
-                    current = (current + 1) % slideElements.length;
-                    slideElements[current].classList.add('active');
-                    updateCounterLabel();
-                }, 10000); 
-            }
-        }
+                // Fatiar a lista de fotos em blocos de 12 para formar os slides
+                for (let i = 0; i < totalSlides; i++) {
+                    const slide = document.createElement('div');
+                    slide.className = 'photo-slide' + (i === 0 ? ' active' : '');
+                    
+                    const grid = document.createElement('div');
+                    grid.className = 'photo-grid';
+                    
+                    const currentFotos = fotos.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+                    
+                    currentFotos.forEach(foto => {
+                        const item = document.createElement('div');
+                        item.className = 'grid-item';
+                        item.style.backgroundImage = `url('${foto.replace(/'/g, "\\'")}')`;
+                        grid.appendChild(item);
+                    });
+                    
+                    slide.appendChild(grid);
+                    container.appendChild(slide);
+                }
+
+                const slideElements = document.querySelectorAll('.photo-slide');
+                let current = 0;
+
+                function updateCounterLabel() {
+                    if (counterElement) {
+                        counterElement.innerHTML = `Página ${current + 1} de ${totalSlides}`;
+                    }
+                }
+                updateCounterLabel(); // Seta inicial
+
+                // Roda o carrossel se tiver mais de 1 página
+                if (totalSlides > 1) {
+                    setInterval(() => {
+                        slideElements[current].classList.remove('active');
+                        current = (current + 1) % slideElements.length;
+                        slideElements[current].classList.add('active');
+                        updateCounterLabel();
+                    }, 10000); 
+                }
+            })
+            .catch(err => {
+                console.error("Erro ao carregar as fotos da Vercel:", err);
+                container.innerHTML = '<h1 style="color:white;text-align:center;margin-top:20%">Erro ao carregar fotos.</h1>';
+            });
     </script>
 
 </body>
