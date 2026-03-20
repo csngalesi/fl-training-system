@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Lab - TV Portal</title>
+    <!-- Usaremos a mesma fonte que já deve estar rolando no projeto principal -->
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;600&family=Montserrat:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/tv.css">
+</head>
+
+<body>
+
+    <!-- Slide 1: Welcome -->
+    <div id="slide-video" class="tv-slide active">
+        <div class="overlay-text" style="display: flex; flex-direction: column; align-items: flex-start; margin-left: 100px;">
+            <img src="assets/img/logo-football-lab.svg" alt="FL Logo"
+                style="width: 700px; margin-bottom: 0px;">
+            <p style="font-size: 3rem; margin-top: -15px;">Gerando sua melhor versão</p>
+        </div>
+    </div>
+
+    <!-- Slide 2: Próxima Turma (Grade de Alunos) -->
+    <div id="slide-schedule" class="tv-slide">
+        <div class="content-wrapper">
+            <h2>PRÓXIMA TURMA</h2>
+            <h3 id="current-time">14:00 - Categoria Sub-12</h3>
+
+            <div class="players-grid" id="players-list">
+                <!-- Esses cards são gerados dinamicamente via JS (ou hardcoded como mockup aqui) -->
+                <div class="player-card">
+                    <div class="player-icon">⚽</div>
+                    <div class="player-name">Enzo Gabriel</div>
+                </div>
+                <div class="player-card">
+                    <div class="player-icon">⚽</div>
+                    <div class="player-name">Lucas Silva</div>
+                </div>
+                <div class="player-card">
+                    <div class="player-icon">⚽</div>
+                    <div class="player-name">Matheus Costa</div>
+                </div>
+                <div class="player-card">
+                    <div class="player-icon">⚽</div>
+                    <div class="player-name">João Pedro</div>
+                </div>
+            </div>
+            <div class="status-bar">
+                <span class="blinking-dot"></span> Turma Formada - Dirijam-se ao campo
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: Patrocinadores e Parceiros -->
+    <div id="slide-sponsors" class="tv-slide">
+        <div class="content-wrapper">
+            <h2>NOSSOS PARCEIROS</h2>
+            <div class="sponsors-grid">
+                <div class="sponsor-card placeholder-logo">PATROCÍNIO 01</div>
+                <div class="sponsor-card placeholder-logo">PATROCÍNIO 02</div>
+                <div class="sponsor-card placeholder-logo">PATROCÍNIO 03</div>
+                <div class="sponsor-card placeholder-logo">PATROCÍNIO 04</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barra inferior (Ticker) rodando notícias/avisos -->
+    <div class="ticker-wrap">
+        <div class="ticker">
+            <div class="ticker__item">AVISO: Tragam chuteira society para o treino de amanhã!</div>
+            <div class="ticker__item">MATRÍCULAS ABERTAS PARA A CATEGORIA SUB-15</div>
+            <div class="ticker__item">FOOTBALL LAB: Desenvolvendo Inteligência Tática e Técnica.</div>
+        </div>
+    </div>
+
+    <!-- Injeta o motor do portal da TV -->
+    <script src="js/tv.js"></script>
+</body>
+
+</html>

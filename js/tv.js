@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Configurações de tempo (em milissegundos)
     const TIME_VIDEO = 7500; // Tempo do slide principal (logo)
     const TIME_SCHEDULE = 5000; // Tempo do slide 2 (aniversário ou turma)
-    const TIME_SPONSORS = 4000;  // Tempo mostrando os patrocínios (se existir)
+    const TIME_SPONSORS = 15000;  // Tempo mostrando os patrocínios ou timeline (expandimos para ver a estrada)
 
     // Considera apenas as durações dos slides que realmente existem
     const slideDurations = [TIME_VIDEO, TIME_SCHEDULE, TIME_SPONSORS].slice(0, slides.length);
@@ -50,6 +50,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Função auxiliar para enfeitar o horário
     function updateScheduleTime() {
         const timeHeader = document.getElementById('current-time');
+        
+        // Proteção contra erro de null caso o slide não tenha um relógio na tela (ex: convite)
+        if (!timeHeader) return;
+        
         const now = new Date();
         const future = new Date(now.getTime() + 15 * 60000); // 15 mins p/ frente (Próxima Turma)
 
