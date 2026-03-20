@@ -14,12 +14,13 @@
         body {
             margin: 0;
             padding: 0;
-            /* Usamos slide 2 de fundo com uma textura mais escura por cima para dar foco nas fotos */
-            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('assets/img/slide%202.jpg') center/cover no-repeat;
+            /* Usamos slide 2 de fundo com uma textura super escura por cima para dar foco no mural de fotos */
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('assets/img/slide%202.jpg') center/cover no-repeat;
             background-color: #111;
             height: 100vh;
             width: 100vw;
             overflow: hidden;
+            font-family: 'Montserrat', sans-serif;
         }
 
         .slideshow-wrapper {
@@ -37,50 +38,86 @@
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-
-        /* Um display bonito como se fosse uma moldura polaroid escura e suspensa */
-        .photo-container {
-            width: 75%;
-            height: 80%;
-            border-radius: 20px;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.9), 0 0 0 10px rgba(255,255,255,0.1);
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
+            flex-direction: column;
         }
 
         .photo-slide.active {
             opacity: 1;
         }
         
-        .marca-dagua {
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 15px;
+            width: 90%;
+            height: 80%;
+            margin-top: 2%; /* para desgarrar um pouco do teto */
+        }
+
+        .grid-item {
+            border-radius: 12px;
+            /* Box shadow para simular porta-retrato ou tela profunda */
+            box-shadow: 0 10px 20px rgba(0,0,0,0.6);
+            /* Usamos contain para garantir que a foto retrato não perca cabeças/pés */
+            background-size: contain; 
+            background-position: center;
+            background-repeat: no-repeat;
+            /* Fundo sutil para as partes 16:9 que sobrarem nas bordas das fotos retrato */
+            background-color: rgba(255, 255, 255, 0.05);
+            width: 100%;
+            height: 100%;
+            transition: transform 0.3s;
+        }
+
+        .grid-item:hover {
+            transform: scale(1.05); /* Um efeitinho leve se alguém encostar ou passar mouse */
+        }
+
+        .footer-bar {
             position: absolute;
-            bottom: 40px;
-            right: 50px;
+            bottom: 30px;
+            width: 90%;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 0 5%;
+        }
+
+        .slide-counter {
+            font-size: 35px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.7);
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.9);
+            background: rgba(0, 0, 0, 0.4);
+            padding: 5px 20px;
+            border-radius: 10px;
+        }
+
+        .marca-dagua {
             font-size: 55px;
             font-weight: 900;
-            color: rgba(255, 255, 255, 0.85);
+            color: rgba(255, 255, 255, 0.9);
             text-shadow: 2px 2px 15px rgba(0,0,0,0.9);
-            font-family: 'Montserrat', sans-serif;
             text-transform: uppercase;
-            z-index: 10;
+            text-align: right;
         }
     </style>
 </head>
 
 <body>
     
-    <!-- Onde as fotos vao cruzar em fade-in -->
+    <!-- Onde os grids de fotos vao cruzar em fade-in -->
     <div id="slideshow" class="slideshow-wrapper"></div>
     
-    <!-- Assinatura decorativa no canto inferior direito -->
-    <div class="marca-dagua">Niver Bruno e Pietro 🎂</div>
+    <!-- Rodapé contendo o Contador de Slides na esquerda, e a Assinatura na direita -->
+    <div class="footer-bar">
+        <div class="slide-counter" id="slide-counter">Página 1 / 1</div>
+        <div class="marca-dagua">Niver Bruno e Pietro 🎂</div>
+    </div>
 
     <script>
         // Array fixo de fotos já mapeadas pela pasta /Aniversario/fotos do sistema.
-        // Toda vez que você mandar subir fotos novas na festa, eu atualizo essa listinha
-        // e dou o deploy da nova versão!
         const fotos = [
             "Aniversario/fotos/WhatsApp Image 2026-03-20 at 00.03.38.jpeg",
             "Aniversario/fotos/WhatsApp Image 2026-03-20 at 00.03.38 (1).jpeg",
@@ -89,32 +126,57 @@
         ];
 
         const container = document.getElementById('slideshow');
+        const counterElement = document.getElementById('slide-counter');
+        const CHUNK_SIZE = 12; // 12 fotos por slide (Mural 4x3)
+        const totalSlides = Math.ceil(fotos.length / CHUNK_SIZE);
         
         // Se a pasta estiver vazia, avisa. Se não, monta as divs da TV
         if (fotos.length === 0) {
             container.innerHTML = '<h1 style="color:white;text-align:center;margin-top:20%">Aguardando fotos...</h1>';
+            counterElement.style.display = 'none';
         } else {
-            fotos.forEach((foto, index) => {
+            // Fatiar a lista de fotos em blocos de 12 para formar os slides
+            for (let i = 0; i < totalSlides; i++) {
                 const slide = document.createElement('div');
-                slide.className = 'photo-slide' + (index === 0 ? ' active' : '');
+                slide.className = 'photo-slide' + (i === 0 ? ' active' : '');
                 
-                const frame = document.createElement('div');
-                frame.className = 'photo-container';
-                frame.style.backgroundImage = `url('${foto.replace(/'/g, "\\'")}')`; // Escapa aspas simples
+                const grid = document.createElement('div');
+                grid.className = 'photo-grid';
                 
-                slide.appendChild(frame);
+                // Quebra o array (do começo da página atual até o fim dela)
+                const currentFotos = fotos.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+                
+                currentFotos.forEach(foto => {
+                    const item = document.createElement('div');
+                    item.className = 'grid-item';
+                    item.style.backgroundImage = `url('${foto.replace(/'/g, "\\'")}')`; // Escapa aspas para seguranca
+                    grid.appendChild(item);
+                });
+                
+                slide.appendChild(grid);
                 container.appendChild(slide);
-            });
+            }
 
             const slideElements = document.querySelectorAll('.photo-slide');
             let current = 0;
 
-            // Roda infinitamente trocando de painel a cada 6 segundos
-            setInterval(() => {
-                slideElements[current].classList.remove('active');
-                current = (current + 1) % slideElements.length;
-                slideElements[current].classList.add('active');
-            }, 6000); 
+            function updateCounterLabel() {
+                if (counterElement) {
+                    counterElement.innerHTML = `Página ${current + 1} de ${totalSlides}`;
+                }
+            }
+            updateCounterLabel(); // Seta inicial
+
+            // Só ativa o intervalo se houver mais de 1 página de fotos
+            if (totalSlides > 1) {
+                // Como 12 fotos demoram mais pra ler, deixamos 10 segundos!
+                setInterval(() => {
+                    slideElements[current].classList.remove('active');
+                    current = (current + 1) % slideElements.length;
+                    slideElements[current].classList.add('active');
+                    updateCounterLabel();
+                }, 10000); 
+            }
         }
     </script>
 
