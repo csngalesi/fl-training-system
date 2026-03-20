@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const videoElement = document.getElementById('promo-video');
 
     // Configurações de tempo (em milissegundos)
-    const TIME_VIDEO = 7500; // Tempo do slide principal (logo)
+    const TIME_VIDEO = 5000; // Tempo do slide principal (logo)
     const TIME_SCHEDULE = 5000; // Tempo do slide 2 (aniversário ou turma)
     const TIME_SPONSORS = 15000;  // Tempo mostrando os patrocínios ou timeline (expandimos para ver a estrada)
 
