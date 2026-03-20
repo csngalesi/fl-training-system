@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Lab - Mapa do Torneio V4 (Aniversário)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;600&family=Montserrat:wght@400;700;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/tv.css">
+
+    <style>
+        body {
+            /* Fundo da imagem com overaly branco 85% para não ocultar os textos da gincana */
+            background: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url('assets/img/slide%203.jpg') center/cover no-repeat;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            color: #333;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .timeline-scale-wrapper {
+            /* Trocamos Transform.Scale por Zoom: O Zoom recalcula todo o documento, forçando a página inteira a encolher */
+            zoom: 0.55;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center; /* Como a página encolhe de verdade, agora podemos centralizar com folga */
+            position: relative;
+        }
+
+        .timeline-container {
+            width: 900px;
+            position: relative;
+            padding-top: 100px; /* Reduzi mais o topo da esteira para o troféu descer */
+            padding-bottom: 20px;
+            font-family: 'Montserrat', sans-serif;
+            margin-bottom: 100px; /* leave space for ticker if needed */
+        }
+
+        /* A linha azul central com tracejado branco */
+        .timeline-line {
+            position: absolute;
+            left: 50%;
+            top: 105px; /* A linha d'agua agora começa mais próxima do troféu */
+            bottom: 0;
+            width: 30px;
+            background-color: #3b82f6; /* Azul parecido da imagem */
+            transform: translateX(-50%);
+            border-radius: 15px;
+            z-index: 1;
+        }
+
+        .timeline-line::after {
+            content: '';
+            position: absolute;
+            top: 0; bottom: 0;
+            left: 50%;
+            width: 4px;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent,
+                transparent 15px,
+                #ffffff 15px,
+                #ffffff 30px
+            );
+            transform: translateX(-50%);
+        }
+
+        .trophy {
+            position: absolute;
+            top: -40px; /* Sobe o troféu pra perto da linha */
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 130px; /* Cerca de 10px menor pra caber limpo */
+            text-align: center;
+            z-index: 10;
+        }
+
+        .event-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 30px; /* SUPER COMPACTO. Era 80px! Vai colar os quadradinhos sem perder leitura */
+            position: relative;
+            z-index: 5;
+        }
+        
+        .side {
+            width: 42%;
+            position: relative;
+        }
+        
+        /* O "balão" dos pontos ligado ao centro */
+        .points-bubble {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background-color: white;
+            border: 8px solid #ccc;
+            font-weight: 800;
+            font-size: 20px;
+            color: #333;
+            text-align: center;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .connector {
+            position: absolute;
+            top: 50%;
+            width: 40px;
+            height: 16px;
+            background-color: #ccc;
+            transform: translateY(-50%);
+            z-index: -1;
+        }
+
+        .title-block {
+            font-size: 32px;
+            font-weight: 900;
+            color: #000;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .desc-text {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        /* Cores de Linha de texto */
+        .text-blue { color: #3b82f6; }
+        .text-orange { color: #f59e0b; }
+        .text-green { color: #84cc16; }
+        .text-red { color: #ef4444; }
+
+        /* Variação p/ Esquerda */
+        .left-event .content-box { text-align: right; padding-right: 120px; }
+        .left-event .points-bubble { right: 0; }
+        .left-event .connector { right: -40px; }
+
+        /* Variação p/ Direita */
+        .right-event .content-box { text-align: left; padding-left: 120px; }
+        .right-event .points-bubble { left: 0; }
+        .right-event .connector { left: -40px; }
+
+        /* Cores Específicas dos Eventos */
+        .theme-red .points-bubble { border-color: #dc2626; color: #555;}
+        .theme-red .connector { background-color: #dc2626; }
+        
+        .theme-orange .points-bubble { border-color: #f59e0b; color: #555;}
+        .theme-orange .connector { background-color: #f59e0b; }
+        
+        .theme-green .points-bubble { border-color: #84cc16; color: #555;}
+        .theme-green .connector { background-color: #84cc16; }
+        
+        .center-node {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 24px;
+            height: 24px;
+            background-color: white;
+            border-radius: 50%;
+            z-index: 10;
+            border: 5px solid transparent; 
+        }
+
+        .theme-red-node .center-node { border-color: #dc2626; }
+        .theme-orange-node .center-node { border-color: #f59e0b; }
+        .theme-green-node .center-node { border-color: #84cc16; }
+    </style>
+</head>
+
+<body>
+
+    <div class="timeline-scale-wrapper">
+        <div class="timeline-container">
+            <!-- Título na lateral niquelado e decorativo (Movido para cima para não sobrepor o texto) -->
+            <h1 style="position: absolute; top: -10px; left: 20px; font-size: 55px; font-weight: 900; color: #3b82f6; text-transform: uppercase; margin: 0; line-height: 1; text-shadow: 2px 2px 0px #fff, -2px -2px 0px #fff, 2px -2px 0px #fff, -2px 2px 0px #fff;">TORNEIO BP12</h1>
+
+            <!-- Linha da Pista -->
+            <div class="timeline-line"></div>
+            
+            <!-- Troféu Topo -->
+            <div class="trophy">🏆</div>
+
+            <!-- EVENTO 1: Kings League -->
+            <div class="event-row theme-red-node">
+                <div class="center-node"></div>
+                <!-- Lado Esquerdo -->
+                <div class="side" style="text-align: right; padding-top: 10px;">
+                    <div class="desc-text text-orange">1º minuto X1 / 2º minuto X2</div>
+                    <div class="desc-text text-orange">3º minuto X3 (Vitória 3 pts) Derrota (1)</div>
+                </div>
+                <!-- Lado Direito -->
+                <div class="side right-event theme-red">
+                    <div class="points-bubble">
+                        3 ou 1<br>pts
+                    </div>
+                    <div class="connector"></div>
+                    <div class="content-box">
+                        <div class="title-block">kings League<br>Little Box</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EVENTO 2: Torneio de Falta -->
+            <div class="event-row theme-orange-node">
+                <div class="center-node"></div>
+                <!-- Lado Esquerdo -->
+                <div class="side left-event theme-orange">
+                    <div class="points-bubble">
+                        1 a 5<br>pts
+                    </div>
+                    <div class="connector"></div>
+                    <div class="content-box">
+                        <div class="title-block">Torneio<br>de Falta</div>
+                    </div>
+                </div>
+                <!-- Lado Direito -->
+                <div class="side" style="text-align: left; padding-top: 10px;">
+                    <div class="desc-text text-blue">Monte seu time e some o maior<br>número de pontos para ser o time de<br>maior qualidade técnica da Turma</div>
+                    <div class="desc-text text-orange" style="margin-top: 10px;">Gol = 1; Trave/Travessão + gol = 2</div>
+                    <div class="desc-text text-orange">Cor = 3; Alvo = 5 pontos</div>
+                </div>
+            </div>
+
+            <!-- EVENTO 3: Skills Game -->
+            <div class="event-row theme-green-node">
+                <div class="center-node"></div>
+                <!-- Lado Esquerdo -->
+                <div class="side" style="text-align: right; padding-top: 10px;">
+                    <div class="desc-text text-green">Voleio + gol = 2</div>
+                    <div class="desc-text text-green">Bike + Gol = 4</div>
+                </div>
+                <!-- Lado Direito -->
+                <div class="side right-event theme-green">
+                    <div class="points-bubble">
+                        1 ou 4<br>pts
+                    </div>
+                    <div class="connector"></div>
+                    <div class="content-box">
+                        <div class="title-block">Skills Game<br>Voleio e Bike</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EVENTO 4: Penalties Cup -->
+            <div class="event-row theme-orange-node">
+                <div class="center-node"></div>
+                <!-- Lado Esquerdo -->
+                <div class="side left-event theme-orange">
+                    <div class="points-bubble">
+                        1 a 3<br>pts
+                    </div>
+                    <div class="connector"></div>
+                    <div class="content-box">
+                        <div class="title-block">Penalties Cup</div>
+                    </div>
+                </div>
+                <!-- Lado Direito -->
+                <div class="side" style="text-align: left; padding-top: 20px;">
+                    <div class="desc-text text-orange">Cada gol 1 ponto</div>
+                </div>
+            </div>
+
+            <!-- EVENTO 5: Controle de Bola -->
+            <div class="event-row theme-red-node">
+                <div class="center-node"></div>
+                <!-- Lado Esquerdo -->
+                <div class="side" style="text-align: right; padding-top: 20px;">
+                    <div class="desc-text text-blue">
+                        Cada time participa dos desafios<br>escolhendo quem é o Star Player<br>(pontuação dobrada)
+                    </div>
+                </div>
+                <!-- Lado Direito -->
+                <div class="side right-event theme-red">
+                    <div class="points-bubble">
+                        1 a 4<br>pts
+                    </div>
+                    <div class="connector"></div>
+                    <div class="content-box">
+                        <div class="desc-text text-red" style="margin-bottom:10px;">Controlar a bola da máquina no<br>espaço 1 ; gol +1; alvo +2</div>
+                        <div class="title-block">Controle de Bola<br>e Chute a Gol</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EVENTO 6: Old School Caixote -->
+            <div class="event-row theme-green-node">
+                <div class="center-node"></div>
+                <!-- Lado Esquerdo -->
+                <div class="side left-event theme-green">
+                    <div class="points-bubble">
+                        10<br>pts
+                    </div>
+                    <div class="connector"></div>
+                    <div class="content-box">
+                        <div class="title-block">Old school<br>caixote</div>
+                    </div>
+                </div>
+                <!-- Lado Direito -->
+                <div class="side" style="text-align: left; padding-top: 25px;">
+                    <div class="desc-text text-blue">1 vitória, 10 pontos<br>para a equipe</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Barra inferior (Ticker) rodando notícias/avisos -->
+    <div class="ticker-wrap">
+        <div class="ticker">
+            <div class="ticker__item">MATRÍCULAS ABERTAS</div>
+        </div>
+    </div>
+
+</body>
+
+</html>
