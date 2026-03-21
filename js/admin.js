@@ -1168,6 +1168,7 @@
     function closeAllForms() {
         formNew.classList.add('hidden');
         formEdit.classList.add('hidden');
+        drillList.classList.remove('hidden');
         closeBuilder();
         editingId = null;
     }
@@ -1732,14 +1733,14 @@
     document.querySelectorAll('.sidebar-item').forEach(btn => {
         btn.addEventListener('click', () => {
             const mod = btn.dataset.module;
+            // Reset all open forms/builders before switching
+            closeAllForms();
             // Update active state
             document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             // Show/hide modules
             document.querySelectorAll('.admin-module').forEach(m => m.classList.add('hidden'));
             document.getElementById(`module-${mod}`).classList.remove('hidden');
-            // Close builder when switching modules
-            closeBuilder();
             if (mod === 'fundamentals') loadFundModuleList();
         });
     });

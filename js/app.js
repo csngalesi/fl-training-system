@@ -259,8 +259,8 @@ document.addEventListener('DOMContentLoaded', () => {
             el.style.transform = 'translate(-50%, -50%)';
             el.dataset.foot = '';
         });
-        // Hide extended actors; shown only if this drill uses them
-        ['p5','p6','p7','p8','ball2','ball3','ball4','ball5','ball6'].forEach(key => {
+        // Hide ALL players and extended balls; shown only if this drill uses them
+        ['p1','p2','p3','p4','p5','p6','p7','p8','ball2','ball3','ball4','ball5','ball6'].forEach(key => {
             if (actorsObj[key]) actorsObj[key].style.display = 'none';
         });
 
