@@ -24,7 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const fundamentalsPanel = document.getElementById('fundamentals-panel');
     const weekPanel        = document.getElementById('week-sessions-panel');
     const pranchetaPanel   = document.getElementById('prancheta-panel');
-    const fundamentalHeader = document.getElementById('fundamental-header');
     const weekPlanName     = document.getElementById('week-plan-name');
     const weekSessionCount = document.getElementById('week-session-count');
     const weekDrillsList   = document.getElementById('week-drills-list');
@@ -395,9 +394,10 @@ document.addEventListener('DOMContentLoaded', () => {
             pitchEl.classList.remove('prancheta-mode');
         }
 
-        fundamentalHeader.classList.toggle('hidden', mode === 'week');
-
         if (mode === 'week') {
+            fundTitle.textContent = 'Treino da Semana';
+            fundDesc.textContent = 'Selecione um plano no menu lateral.';
+            btnTechBase.classList.add('hidden');
             workspace.classList.remove('hidden');
             loadVisiblePlans();
         } else if (mode === 'fundamentals') {
