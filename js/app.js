@@ -43,11 +43,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Pitch / Animation Elements (4 Players now)
     const actorsObj = {
-        ball: document.getElementById('actor-ball'),
+        ball:  document.getElementById('actor-ball'),
+        ball2: document.getElementById('actor-ball2'),
+        ball3: document.getElementById('actor-ball3'),
+        ball4: document.getElementById('actor-ball4'),
+        ball5: document.getElementById('actor-ball5'),
+        ball6: document.getElementById('actor-ball6'),
         p1: document.getElementById('actor-p1'),
         p2: document.getElementById('actor-p2'),
         p3: document.getElementById('actor-p3'),
-        p4: document.getElementById('actor-p4')
+        p4: document.getElementById('actor-p4'),
+        p5: document.getElementById('actor-p5'),
+        p6: document.getElementById('actor-p6'),
+        p7: document.getElementById('actor-p7'),
+        p8: document.getElementById('actor-p8')
     };
 
     const conesContainer = document.getElementById('dynamic-elements');
@@ -251,22 +260,30 @@ document.addEventListener('DOMContentLoaded', () => {
             el.dataset.foot = '';
         });
 
-        // Map 4 players from data
-        const ps = drill.setup.players || { p1: { x: 5, y: 10 }, p2: { x: 5, y: 12 }, p3: { x: 3, y: 10 }, p4: { x: 7, y: 10 } };
-        ['p1', 'p2', 'p3', 'p4'].forEach(pID => {
-            if (ps[pID]) {
-                const el = actorsObj[pID];
-                el.style.setProperty('--x', ps[pID].x);
-                el.style.setProperty('--y', ps[pID].y);
-                if (ps[pID].rot) el.style.transform = `translate(-50%, -50%) rotate(${ps[pID].rot}deg)`;
-                if (ps[pID].foot) el.dataset.foot = ps[pID].foot;
+        // Map players from data (p1-p8)
+        const ps = drill.setup.players || {};
+        ['p1','p2','p3','p4','p5','p6','p7','p8'].forEach(pID => {
+            const el = actorsObj[pID];
+            if (!el) return;
+            const pos = ps[pID];
+            if (pos) {
+                el.style.setProperty('--x', pos.x);
+                el.style.setProperty('--y', pos.y);
+                if (pos.rot) el.style.transform = `translate(-50%, -50%) rotate(${pos.rot}deg)`;
+                if (pos.foot) el.dataset.foot = pos.foot;
             }
         });
 
-        // Ball setup
-        const bStart = drill.setup.ball || { x: 0.5, y: 0 };
-        actorsObj['ball'].style.setProperty('--x', bStart.x);
-        actorsObj['ball'].style.setProperty('--y', bStart.y);
+        // Ball setup (ball + ball2-ball6)
+        ['ball','ball2','ball3','ball4','ball5','ball6'].forEach(bKey => {
+            const el = actorsObj[bKey];
+            if (!el) return;
+            const bPos = bKey === 'ball' ? (drill.setup.ball || { x: 0.5, y: 0 }) : drill.setup[bKey];
+            if (bPos) {
+                el.style.setProperty('--x', bPos.x);
+                el.style.setProperty('--y', bPos.y);
+            }
+        });
 
         // Map Cones
         conesContainer.innerHTML = '';
@@ -284,9 +301,13 @@ document.addEventListener('DOMContentLoaded', () => {
         await sleep(50);
         if (seqId !== animationSequenceId) return;
 
-        // Restore transitions heavily easing for players, linear for ball
-        ['p1', 'p2', 'p3', 'p4'].forEach(pID => { actorsObj[pID].style.transition = 'all 0.5s ease-in-out'; });
-        actorsObj['ball'].style.transition = 'all 0.4s ease-out';
+        // Restore transitions
+        ['p1','p2','p3','p4','p5','p6','p7','p8'].forEach(pID => {
+            if (actorsObj[pID]) actorsObj[pID].style.transition = 'all 0.5s ease-in-out';
+        });
+        ['ball','ball2','ball3','ball4','ball5','ball6'].forEach(bKey => {
+            if (actorsObj[bKey]) actorsObj[bKey].style.transition = 'all 0.4s ease-out';
+        });
 
         await sleep(600); // Intro pause before action
         if (seqId !== animationSequenceId) return;

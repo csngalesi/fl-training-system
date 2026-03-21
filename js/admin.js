@@ -8,7 +8,8 @@
     // ── Constants ─────────────────────────────────────────────────
     const PITCH_W = 180, PITCH_H = 360;   // builder pitch dimensions (px)
     const FRAME_COUNT = 30;
-    const ACTOR_COLORS = { p1:'#ef4444', p2:'#3b82f6', p3:'#10b981', p4:'#f59e0b' };
+    const ACTOR_COLORS = { p1:'#ef4444', p2:'#3b82f6', p3:'#10b981', p4:'#f59e0b', p5:'#ef4444', p6:'#3b82f6', p7:'#10b981', p8:'#f59e0b' };
+    const ACTOR_LABELS = { p1:'1', p2:'2', p3:'3', p4:'4', p5:'1', p6:'2', p7:'3', p8:'4' };
 
     const EXAMPLE_SETUP = {
         players: { p1:{x:5,y:15}, p2:{x:2,y:10}, p3:{x:8,y:10}, p4:{x:5,y:5} },
@@ -44,9 +45,11 @@
         return {
             p1: {x:null,y:null,rot:0,foot:null}, p2: {x:null,y:null,rot:0,foot:null},
             p3: {x:null,y:null,rot:0,foot:null}, p4: {x:null,y:null,rot:0,foot:null},
-            ball: {x:null, y:null},
-            cones: [{x:null,y:null},{x:null,y:null},{x:null,y:null},{x:null,y:null}],
-            extras: []   // extra visual instances: {id, type('p1'|'p2'|'p3'|'p4'|'ball'|'cone'), x, y}
+            p5: {x:null,y:null,rot:0,foot:null}, p6: {x:null,y:null,rot:0,foot:null},
+            p7: {x:null,y:null,rot:0,foot:null}, p8: {x:null,y:null,rot:0,foot:null},
+            ball: {x:null,y:null}, ball2: {x:null,y:null}, ball3: {x:null,y:null},
+            ball4: {x:null,y:null}, ball5: {x:null,y:null}, ball6: {x:null,y:null},
+            cones: [{x:null,y:null},{x:null,y:null},{x:null,y:null},{x:null,y:null}]
         };
     }
 
@@ -522,10 +525,10 @@
             vbPitch.appendChild(el);
         });
 
-        // Players — skip if on bench (null)
-        ['p1','p2','p3','p4'].forEach(key => {
+        // Players p1-p8 — skip if on bench (null)
+        ['p1','p2','p3','p4','p5','p6','p7','p8'].forEach(key => {
             const pos = frame[key];
-            if (pos.x === null) return;
+            if (!pos || pos.x === null) return;
             const {px, py} = fieldToPixel(pos.x, pos.y);
             const rot  = pos.rot  || 0;
             const foot = pos.foot || null;
@@ -535,7 +538,7 @@
             el.style.left = px + 'px';
             el.style.top  = py + 'px';
             el.style.transform = `translate(-50%, -50%) rotate(${rot}deg)`;
-            el.innerHTML = playerSVG(key[1], ACTOR_COLORS[key], foot);
+            el.innerHTML = playerSVG(ACTOR_LABELS[key] || key[1], ACTOR_COLORS[key], foot);
 
             // Rotate handle
             const handle = document.createElement('div');
@@ -555,40 +558,20 @@
             vbPitch.appendChild(el);
         });
 
-        // Ball — skip if on bench (null)
-        const ball = frame.ball;
-        if (ball.x !== null) {
-            const {px: bx, py: by} = fieldToPixel(ball.x, ball.y);
-            const ballEl = document.createElement('div');
-            ballEl.className = 'vb-actor ball';
-            ballEl.dataset.key = 'ball';
-            ballEl.style.left = bx + 'px';
-            ballEl.style.top  = by + 'px';
-            vbPitch.appendChild(ballEl);
-        }
-
-        // Extras (extra visual instances, no animation)
-        const frame2 = builderFrames[builderFrame];
-        (frame2.extras || []).forEach(extra => {
-            const {px, py} = fieldToPixel(extra.x, extra.y);
+        // Balls ball–ball6 — skip if on bench (null)
+        ['ball','ball2','ball3','ball4','ball5','ball6'].forEach(key => {
+            const b = frame[key];
+            if (!b || b.x === null) return;
+            const {px, py} = fieldToPixel(b.x, b.y);
             const el = document.createElement('div');
-            el.className = 'vb-actor vb-extra';
-            el.dataset.key = 'extra_' + extra.id;
+            el.className = 'vb-actor ball';
+            el.dataset.key = key;
             el.style.left = px + 'px';
             el.style.top  = py + 'px';
-            if (extra.type === 'ball') {
-                el.classList.add('ball');
-            } else if (extra.type === 'cone') {
-                el.classList.add('cone');
-            } else {
-                el.style.color = ACTOR_COLORS[extra.type] || '#fff';
-                el.style.transform = 'translate(-50%, -50%)';
-                el.innerHTML = playerSVG(extra.type[1], ACTOR_COLORS[extra.type] || '#fff', null);
-            }
             vbPitch.appendChild(el);
         });
 
-        // Bind drag — all actors including cones and extras
+        // Bind drag — all actors including cones
         vbPitch.querySelectorAll('.vb-actor').forEach(el => {
             el.addEventListener('pointerdown', onActorPointerDown);
         });
@@ -607,15 +590,6 @@
     // ── Return actor to bench (set position to null, propagate) ──
     function returnActorToBench(key) {
         const frame = builderFrames[builderFrame];
-
-        // Extras: just delete from this frame
-        if (key.startsWith('extra_')) {
-            const id = key.replace('extra_', '');
-            frame.extras = (frame.extras || []).filter(e => e.id !== id);
-            renderBuilderPitch();
-            return;
-        }
-
         let oldPos;
         if (key.startsWith('cone')) {
             const idx = parseInt(key.replace('cone', ''));
@@ -626,11 +600,8 @@
                 if (c.x === oldPos.x && c.y === oldPos.y) builderFrames[i].cones[idx] = { x: null, y: null };
                 else break;
             }
-        } else if (key === 'ball') {
-            oldPos = { ...frame.ball };
-            frame.ball = { x: null, y: null };
-            propagateForward(builderFrame, 'ball', oldPos, { x: null, y: null });
         } else {
+            // players (p1-p8) and balls (ball, ball2-ball6)
             oldPos = { x: frame[key].x, y: frame[key].y };
             frame[key].x = null;
             frame[key].y = null;
@@ -639,29 +610,40 @@
         renderBuilderPitch();
     }
 
-    // ── Bench (right panel): infinite source — always shows all types ──
+    // ── Bench (right panel): shows pieces not yet on field ────────
     function renderBench() {
         const vbBench = document.getElementById('vb-bench');
         if (!vbBench) return;
         vbBench.innerHTML = '';
+        const frame = builderFrames[builderFrame];
 
-        const playerSvg = (num, color) =>
+        const playerSvgHtml = (label, color) =>
             `<svg viewBox="0 0 42 36" width="32" height="27" style="display:block;color:${color}">
                 <ellipse cx="21" cy="13" rx="13" ry="8" fill="currentColor"/>
                 <ellipse cx="21" cy="13" rx="13" ry="8" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1"/>
-                <text x="21" y="14" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="9" font-weight="900" font-family="Outfit,sans-serif">${num}</text>
+                <text x="21" y="14" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="9" font-weight="900" font-family="Outfit,sans-serif">${label}</text>
             </svg>`;
 
-        const BENCH_TYPES = [
-            { key:'p1',   html: playerSvg(1, ACTOR_COLORS.p1),  label:'Jogador 1' },
-            { key:'p2',   html: playerSvg(2, ACTOR_COLORS.p2),  label:'Jogador 2' },
-            { key:'p3',   html: playerSvg(3, ACTOR_COLORS.p3),  label:'Jogador 3' },
-            { key:'p4',   html: playerSvg(4, ACTOR_COLORS.p4),  label:'Jogador 4' },
-            { key:'ball', html: `<div style="width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid #94a3b8;box-shadow:0 1px 3px rgba(0,0,0,.5);margin:auto"></div>`, label:'Bola' },
-            { key:'cone', html: `<div class="vb-palette-cone"></div>`, label:'Cone' },
+        const BENCH = [
+            { key:'p1',   html: playerSvgHtml('1', ACTOR_COLORS.p1), label:'Jogador 1a' },
+            { key:'p5',   html: playerSvgHtml('1', ACTOR_COLORS.p5), label:'Jogador 1b' },
+            { key:'p2',   html: playerSvgHtml('2', ACTOR_COLORS.p2), label:'Jogador 2a' },
+            { key:'p6',   html: playerSvgHtml('2', ACTOR_COLORS.p6), label:'Jogador 2b' },
+            { key:'p3',   html: playerSvgHtml('3', ACTOR_COLORS.p3), label:'Jogador 3a' },
+            { key:'p7',   html: playerSvgHtml('3', ACTOR_COLORS.p7), label:'Jogador 3b' },
+            { key:'p4',   html: playerSvgHtml('4', ACTOR_COLORS.p4), label:'Jogador 4a' },
+            { key:'p8',   html: playerSvgHtml('4', ACTOR_COLORS.p8), label:'Jogador 4b' },
+            { key:'ball',  html:`<div style="width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid #94a3b8;box-shadow:0 1px 3px rgba(0,0,0,.5);margin:auto"></div>`, label:'Bola 1' },
+            { key:'ball2', html:`<div style="width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid #94a3b8;box-shadow:0 1px 3px rgba(0,0,0,.5);margin:auto"></div>`, label:'Bola 2' },
+            { key:'ball3', html:`<div style="width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid #94a3b8;box-shadow:0 1px 3px rgba(0,0,0,.5);margin:auto"></div>`, label:'Bola 3' },
+            { key:'ball4', html:`<div style="width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid #94a3b8;box-shadow:0 1px 3px rgba(0,0,0,.5);margin:auto"></div>`, label:'Bola 4' },
+            { key:'ball5', html:`<div style="width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid #94a3b8;box-shadow:0 1px 3px rgba(0,0,0,.5);margin:auto"></div>`, label:'Bola 5' },
+            { key:'ball6', html:`<div style="width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid #94a3b8;box-shadow:0 1px 3px rgba(0,0,0,.5);margin:auto"></div>`, label:'Bola 6' },
         ];
 
-        BENCH_TYPES.forEach(({ key, html, label }) => {
+        BENCH.forEach(({ key, html, label }) => {
+            const slot = frame[key];
+            if (slot && slot.x !== null) return; // already on field
             const el = document.createElement('div');
             el.className = 'vb-bench-item';
             el.dataset.benchKey = key;
@@ -670,6 +652,20 @@
             el.addEventListener('pointerdown', onBenchPointerDown);
             vbBench.appendChild(el);
         });
+
+        // Cones (only show null ones)
+        frame.cones.forEach((c, idx) => {
+            if (c.x !== null) return;
+            const el = document.createElement('div');
+            el.className = 'vb-bench-item';
+            el.dataset.benchKey = `cone${idx}`;
+            el.title = `Cone ${idx+1} — arrastar para o campo`;
+            el.innerHTML = `<div class="vb-palette-cone"></div>`;
+            el.addEventListener('pointerdown', onBenchPointerDown);
+            vbBench.appendChild(el);
+        });
+
+        vbBench.style.display = vbBench.children.length ? 'flex' : 'none';
     }
 
     // ── Drag from bench to pitch ───────────────────────────────────
@@ -706,39 +702,19 @@
                 const frame = builderFrames[builderFrame];
                 const newPos = {x, y};
 
-                if (benchKey === 'cone') {
-                    // Find first null cone slot, or create extra cone
-                    const nullIdx = frame.cones.findIndex(c => c.x === null);
-                    if (nullIdx >= 0) {
-                        frame.cones[nullIdx] = {x, y};
-                        for (let i = builderFrame + 1; i < FRAME_COUNT; i++) {
-                            const c = builderFrames[i].cones[nullIdx];
-                            if (c.x === null) builderFrames[i].cones[nullIdx] = {x, y};
-                            else break;
-                        }
-                    } else {
-                        // All slots filled → extra cone
-                        if (!frame.extras) frame.extras = [];
-                        frame.extras.push({ id: Date.now() + Math.random(), type: 'cone', x, y });
-                    }
-                } else if (benchKey === 'ball') {
-                    if (frame.ball.x === null) {
-                        frame.ball = {x, y};
-                        propagateForward(builderFrame, 'ball', {x: null, y: null}, newPos);
-                    } else {
-                        if (!frame.extras) frame.extras = [];
-                        frame.extras.push({ id: Date.now() + Math.random(), type: 'ball', x, y });
+                if (benchKey.startsWith('cone')) {
+                    const idx = parseInt(benchKey.replace('cone', ''));
+                    frame.cones[idx] = {x, y};
+                    for (let i = builderFrame + 1; i < FRAME_COUNT; i++) {
+                        const c = builderFrames[i].cones[idx];
+                        if (c.x === null) builderFrames[i].cones[idx] = {x, y};
+                        else break;
                     }
                 } else {
-                    // Player (p1-p4)
-                    if (frame[benchKey].x === null) {
-                        frame[benchKey].x = x;
-                        frame[benchKey].y = y;
-                        propagateForward(builderFrame, benchKey, {x: null, y: null}, newPos);
-                    } else {
-                        if (!frame.extras) frame.extras = [];
-                        frame.extras.push({ id: Date.now() + Math.random(), type: benchKey, x, y });
-                    }
+                    // players (p1-p8) and balls (ball, ball2-ball6)
+                    frame[benchKey].x = x;
+                    frame[benchKey].y = y;
+                    propagateForward(builderFrame, benchKey, {x: null, y: null}, newPos);
                 }
                 renderBuilderPitch();
             }
@@ -755,13 +731,9 @@
     function propagateForward(fromFrame, key, oldPos, newPos) {
         for (let i = fromFrame + 1; i < FRAME_COUNT; i++) {
             const f = builderFrames[i];
-            const pos = key === 'ball' ? f.ball : f[key];
-            if (pos.x === oldPos.x && pos.y === oldPos.y) {
-                if (key === 'ball') f.ball = { ...f.ball, x: newPos.x, y: newPos.y };
-                else f[key] = { ...f[key], x: newPos.x, y: newPos.y };
-            } else {
-                break;
-            }
+            const pos = f[key];
+            if (!pos || pos.x !== oldPos.x || pos.y !== oldPos.y) break;
+            f[key] = { ...f[key], x: newPos.x, y: newPos.y };
         }
     }
 
@@ -770,17 +742,11 @@
         const key = e.currentTarget.dataset.key;
         const frame = builderFrames[builderFrame];
         let initPos;
-        if (key.startsWith('extra_')) {
-            const id = key.replace('extra_', '');
-            const extra = (frame.extras || []).find(ex => String(ex.id) === String(id));
-            initPos = extra ? { x: extra.x, y: extra.y } : { x: 0, y: 0 };
-        } else if (key.startsWith('cone')) {
+        if (key.startsWith('cone')) {
             const idx = parseInt(key.replace('cone', ''));
-            initPos = { ...builderFrames[builderFrame].cones[idx] };
-        } else if (key === 'ball') {
-            initPos = { ...frame.ball };
+            initPos = { ...frame.cones[idx] };
         } else {
-            initPos = { ...frame[key] };
+            initPos = { ...frame[key] }; // works for p1-p8, ball, ball2-ball6
         }
         dragging = { key, el: e.currentTarget, initPos };
         e.currentTarget.setPointerCapture(e.pointerId);
@@ -811,12 +777,7 @@
         const key = dragging.key;
         const initPos = dragging.initPos;
 
-        if (key.startsWith('extra_')) {
-            // Move extra actor within current frame only
-            const id = key.replace('extra_', '');
-            const extra = (frame.extras || []).find(e => String(e.id) === String(id));
-            if (extra) { extra.x = x; extra.y = y; }
-        } else if (key.startsWith('cone')) {
+        if (key.startsWith('cone')) {
             const idx = parseInt(key.replace('cone', ''));
             builderFrames[builderFrame].cones[idx] = {x, y};
             for (let i = builderFrame + 1; i < FRAME_COUNT; i++) {
@@ -825,10 +786,8 @@
                     builderFrames[i].cones[idx] = {x, y};
                 } else { break; }
             }
-        } else if (key === 'ball') {
-            frame.ball = { ...frame.ball, x, y };
-            propagateForward(builderFrame, 'ball', initPos, {x, y});
         } else {
+            // players (p1-p8) and balls (ball, ball2-ball6)
             frame[key] = { ...frame[key], x, y };
             propagateForward(builderFrame, key, initPos, {x, y});
         }
@@ -926,10 +885,16 @@
     // ── Generate JSON from frames ─────────────────────────────────
     function framesToJSON() {
         const f0 = builderFrames[0];
-        const pickPlayer = (p) => ({ x: p.x ?? 5, y: p.y ?? 10, rot: p.rot||0, foot: p.foot||null });
+        const pickPlayer = (p) => p ? ({ x: p.x ?? 5, y: p.y ?? 10, rot: p.rot||0, foot: p.foot||null }) : { x:5, y:10, rot:0, foot:null };
+        const pickBall   = (b) => b ? ({ x: b.x ?? 5, y: b.y ?? 10 }) : { x:5, y:10 };
         const setup = {
-            players: { p1:pickPlayer(f0.p1), p2:pickPlayer(f0.p2), p3:pickPlayer(f0.p3), p4:pickPlayer(f0.p4) },
-            ball: { x: f0.ball.x ?? 5, y: f0.ball.y ?? 10 },
+            players: {
+                p1:pickPlayer(f0.p1), p2:pickPlayer(f0.p2), p3:pickPlayer(f0.p3), p4:pickPlayer(f0.p4),
+                p5:pickPlayer(f0.p5), p6:pickPlayer(f0.p6), p7:pickPlayer(f0.p7), p8:pickPlayer(f0.p8)
+            },
+            ball:  pickBall(f0.ball),
+            ball2: pickBall(f0.ball2), ball3: pickBall(f0.ball3),
+            ball4: pickBall(f0.ball4), ball5: pickBall(f0.ball5), ball6: pickBall(f0.ball6),
             cones: f0.cones.map(c => ({ x: c.x ?? 5, y: c.y ?? 10 }))
         };
 
@@ -939,9 +904,10 @@
             const curr = builderFrames[i];
             const moves = [];
 
-            ['p1','p2','p3','p4','ball'].forEach(key => {
-                const p = key === 'ball' ? prev.ball : prev[key];
-                const c = key === 'ball' ? curr.ball : curr[key];
+            ['p1','p2','p3','p4','p5','p6','p7','p8','ball','ball2','ball3','ball4','ball5','ball6'].forEach(key => {
+                const p = prev[key];
+                const c = curr[key];
+                if (!p || !c) return;
                 // Skip bench → bench (both null)
                 if (p.x === null && c.x === null) return;
                 const posChanged  = p.x !== c.x || p.y !== c.y;
