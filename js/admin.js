@@ -42,10 +42,10 @@
 
     function defaultFrame() {
         return {
-            p1: {x:5,y:15,rot:0,foot:null}, p2: {x:2,y:10,rot:0,foot:null},
-            p3: {x:8,y:10,rot:0,foot:null}, p4: {x:5,y:5, rot:0,foot:null},
-            ball: {x:0.5,y:0},
-            cones: [{x:3,y:8},{x:7,y:8},{x:3,y:14},{x:7,y:14}]
+            p1: {x:null,y:null,rot:0,foot:null}, p2: {x:null,y:null,rot:0,foot:null},
+            p3: {x:null,y:null,rot:0,foot:null}, p4: {x:null,y:null,rot:0,foot:null},
+            ball: {x:null, y:null},
+            cones: [{x:null,y:null},{x:null,y:null},{x:null,y:null},{x:null,y:null}]
         };
     }
 
@@ -509,8 +509,9 @@
 
         const frame = builderFrames[builderFrame];
 
-        // Cones — read from current frame, draggable everywhere
+        // Cones — skip if on bench (null)
         frame.cones.forEach((c, idx) => {
+            if (c.x === null) return;
             const {px, py} = fieldToPixel(c.x, c.y);
             const el = document.createElement('div');
             el.className = 'vb-actor cone';
@@ -520,9 +521,10 @@
             vbPitch.appendChild(el);
         });
 
-        // Players
+        // Players — skip if on bench (null)
         ['p1','p2','p3','p4'].forEach(key => {
             const pos = frame[key];
+            if (pos.x === null) return;
             const {px, py} = fieldToPixel(pos.x, pos.y);
             const rot  = pos.rot  || 0;
             const foot = pos.foot || null;
@@ -542,8 +544,8 @@
             el.appendChild(handle);
 
             // Double-click → cycle foot: null → L → R → null
-            el.addEventListener('dblclick', (e) => {
-                e.stopPropagation();
+            el.addEventListener('dblclick', (ev) => {
+                ev.stopPropagation();
                 const cur = builderFrames[builderFrame][key].foot;
                 builderFrames[builderFrame][key].foot = cur === null ? 'L' : cur === 'L' ? 'R' : null;
                 renderBuilderPitch();
@@ -552,20 +554,158 @@
             vbPitch.appendChild(el);
         });
 
-        // Ball
+        // Ball — skip if on bench (null)
         const ball = frame.ball;
-        const {px: bx, py: by} = fieldToPixel(ball.x, ball.y);
-        const ballEl = document.createElement('div');
-        ballEl.className = 'vb-actor ball';
-        ballEl.dataset.key = 'ball';
-        ballEl.style.left = bx + 'px';
-        ballEl.style.top  = by + 'px';
-        vbPitch.appendChild(ballEl);
+        if (ball.x !== null) {
+            const {px: bx, py: by} = fieldToPixel(ball.x, ball.y);
+            const ballEl = document.createElement('div');
+            ballEl.className = 'vb-actor ball';
+            ballEl.dataset.key = 'ball';
+            ballEl.style.left = bx + 'px';
+            ballEl.style.top  = by + 'px';
+            vbPitch.appendChild(ballEl);
+        }
 
         // Bind drag — all actors including cones
         vbPitch.querySelectorAll('.vb-actor').forEach(el => {
             el.addEventListener('pointerdown', onActorPointerDown);
         });
+
+        // Right-click on actor → return to bench
+        vbPitch.querySelectorAll('.vb-actor').forEach(el => {
+            el.addEventListener('contextmenu', (ev) => {
+                ev.preventDefault();
+                returnActorToBench(el.dataset.key);
+            });
+        });
+
+        renderBench();
+    }
+
+    // ── Return actor to bench (set position to null, propagate) ──
+    function returnActorToBench(key) {
+        const frame = builderFrames[builderFrame];
+        let oldPos;
+        if (key.startsWith('cone')) {
+            const idx = parseInt(key.replace('cone', ''));
+            oldPos = { ...frame.cones[idx] };
+            frame.cones[idx] = { x: null, y: null };
+            for (let i = builderFrame + 1; i < FRAME_COUNT; i++) {
+                const c = builderFrames[i].cones[idx];
+                if (c.x === oldPos.x && c.y === oldPos.y) builderFrames[i].cones[idx] = { x: null, y: null };
+                else break;
+            }
+        } else if (key === 'ball') {
+            oldPos = { ...frame.ball };
+            frame.ball = { x: null, y: null };
+            propagateForward(builderFrame, 'ball', oldPos, { x: null, y: null });
+        } else {
+            oldPos = { x: frame[key].x, y: frame[key].y };
+            frame[key].x = null;
+            frame[key].y = null;
+            propagateForward(builderFrame, key, oldPos, { x: null, y: null });
+        }
+        renderBuilderPitch();
+    }
+
+    // ── Bench (right panel): show pieces not yet on field ─────────
+    function renderBench() {
+        const vbBench = document.getElementById('vb-bench');
+        if (!vbBench) return;
+        vbBench.innerHTML = '';
+        const frame = builderFrames[builderFrame];
+
+        const addBenchItem = (key, innerHtml, color = null) => {
+            const el = document.createElement('div');
+            el.className = 'vb-bench-item';
+            el.dataset.benchKey = key;
+            el.title = key + ' — arrastar para o campo';
+            if (color) el.style.color = color;
+            el.innerHTML = innerHtml;
+            el.addEventListener('pointerdown', onBenchPointerDown);
+            vbBench.appendChild(el);
+        };
+
+        ['p1','p2','p3','p4'].forEach(key => {
+            if (frame[key].x !== null) return;
+            addBenchItem(key,
+                `<svg viewBox="0 0 42 36" width="32" height="27" style="display:block">
+                    <ellipse cx="21" cy="13" rx="13" ry="8" fill="currentColor"/>
+                    <ellipse cx="21" cy="13" rx="13" ry="8" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1"/>
+                    <text x="21" y="14" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="9" font-weight="900" font-family="Outfit,sans-serif">${key[1]}</text>
+                </svg>`,
+                ACTOR_COLORS[key]);
+        });
+
+        if (frame.ball.x === null) {
+            addBenchItem('ball',
+                `<div style="width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid #94a3b8;box-shadow:0 1px 3px rgba(0,0,0,.5);margin:auto"></div>`);
+        }
+
+        frame.cones.forEach((c, idx) => {
+            if (c.x !== null) return;
+            addBenchItem(`cone${idx}`, `<div class="vb-palette-cone"></div>`);
+        });
+
+        vbBench.style.display = vbBench.children.length ? 'flex' : 'none';
+    }
+
+    // ── Drag from bench to pitch ───────────────────────────────────
+    function onBenchPointerDown(e) {
+        if (e.button !== 0) return;
+        e.preventDefault();
+        const benchKey = e.currentTarget.dataset.benchKey;
+        const el = e.currentTarget;
+
+        // Ghost follows pointer
+        const ghost = el.cloneNode(true);
+        ghost.style.cssText = `position:fixed;pointer-events:none;opacity:0.85;z-index:9999;
+            transform:translate(-50%,-50%);left:${e.clientX}px;top:${e.clientY}px;`;
+        document.body.appendChild(ghost);
+
+        el.setPointerCapture(e.pointerId);
+
+        function onMove(ev) {
+            ghost.style.left = ev.clientX + 'px';
+            ghost.style.top  = ev.clientY + 'px';
+        }
+
+        function onUp(ev) {
+            el.removeEventListener('pointermove', onMove);
+            el.removeEventListener('pointerup', onUp);
+            ghost.remove();
+
+            const pitchRect = vbPitch.getBoundingClientRect();
+            const px = ev.clientX - pitchRect.left;
+            const py = ev.clientY - pitchRect.top;
+
+            if (px >= 0 && px <= PITCH_W && py >= 0 && py <= PITCH_H) {
+                const {x, y} = pixelToField(px, py);
+                const frame = builderFrames[builderFrame];
+                const newPos = {x, y};
+
+                if (benchKey.startsWith('cone')) {
+                    const idx = parseInt(benchKey.replace('cone', ''));
+                    frame.cones[idx] = {x, y};
+                    for (let i = builderFrame + 1; i < FRAME_COUNT; i++) {
+                        const c = builderFrames[i].cones[idx];
+                        if (c.x === null && c.y === null) builderFrames[i].cones[idx] = {x, y};
+                        else break;
+                    }
+                } else if (benchKey === 'ball') {
+                    frame.ball = {x, y};
+                    propagateForward(builderFrame, 'ball', {x: null, y: null}, newPos);
+                } else {
+                    frame[benchKey].x = x;
+                    frame[benchKey].y = y;
+                    propagateForward(builderFrame, benchKey, {x: null, y: null}, newPos);
+                }
+                renderBuilderPitch();
+            }
+        }
+
+        el.addEventListener('pointermove', onMove);
+        el.addEventListener('pointerup', onUp);
     }
 
     // ── Drag logic ────────────────────────────────────────────────
@@ -739,11 +879,11 @@
     // ── Generate JSON from frames ─────────────────────────────────
     function framesToJSON() {
         const f0 = builderFrames[0];
-        const pickPlayer = (p) => ({ x:p.x, y:p.y, rot: p.rot||0, foot: p.foot||null });
+        const pickPlayer = (p) => ({ x: p.x ?? 5, y: p.y ?? 10, rot: p.rot||0, foot: p.foot||null });
         const setup = {
             players: { p1:pickPlayer(f0.p1), p2:pickPlayer(f0.p2), p3:pickPlayer(f0.p3), p4:pickPlayer(f0.p4) },
-            ball: {...f0.ball},
-            cones: f0.cones.map(c => ({...c}))
+            ball: { x: f0.ball.x ?? 5, y: f0.ball.y ?? 10 },
+            cones: f0.cones.map(c => ({ x: c.x ?? 5, y: c.y ?? 10 }))
         };
 
         const anim = [];
@@ -755,15 +895,17 @@
             ['p1','p2','p3','p4','ball'].forEach(key => {
                 const p = key === 'ball' ? prev.ball : prev[key];
                 const c = key === 'ball' ? curr.ball : curr[key];
+                // Skip bench → bench (both null)
+                if (p.x === null && c.x === null) return;
                 const posChanged  = p.x !== c.x || p.y !== c.y;
                 const rotChanged  = key !== 'ball' && (p.rot || 0) !== (c.rot || 0);
                 const footChanged = key !== 'ball' && p.foot !== c.foot;
                 if (posChanged || rotChanged || footChanged) {
                     const step = { actor: key, dur: 1000 };
-                    if (posChanged)  step.to   = {x: c.x, y: c.y};
+                    if (posChanged && c.x !== null) step.to = {x: c.x, y: c.y};
                     if (rotChanged)  step.rot  = c.rot  || 0;
                     if (footChanged) step.foot = c.foot || null;
-                    moves.push(step);
+                    if (Object.keys(step).length > 2) moves.push(step); // skip empty steps
                 }
             });
 

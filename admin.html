@@ -722,6 +722,42 @@
             opacity: .85;
         }
 
+        /* Bench: pieces waiting to be placed on field */
+        .vb-bench {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: center;
+            background: rgba(245,158,11,.06);
+            border: 1px dashed rgba(245,158,11,.35);
+            border-radius: 10px;
+            padding: 8px 6px;
+            flex-shrink: 0;
+            min-width: 44px;
+        }
+
+        .vb-bench-item {
+            width: 40px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,.12);
+            background: rgba(255,255,255,.06);
+            transition: background .12s, transform .12s;
+            touch-action: none;
+            user-select: none;
+        }
+
+        .vb-bench-item:hover {
+            background: rgba(255,255,255,.14);
+            transform: scale(1.08);
+        }
+
+        .vb-bench-item:active { cursor: grabbing; }
+
         .vb-legend {
             display: flex;
             flex-direction: column;
@@ -1501,7 +1537,10 @@
             <div class="vb-body">
                 <div id="vb-pitch" class="vb-pitch"></div>
 
-                <!-- Palette: extra items to drag onto the field -->
+                <!-- Bench: pieces not yet on field -->
+                <div id="vb-bench" class="vb-bench" title="Arraste as peças para o campo"></div>
+
+                <!-- Palette: extra cones to drag onto the field -->
                 <div class="vb-palette" id="vb-palette">
                     <div class="vb-palette-title">+</div>
                     <div class="vb-palette-item" data-palette="cone" title="Arraste para o campo"><div class="vb-palette-cone"></div></div>
