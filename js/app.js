@@ -271,7 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!el) return;
             const pos = ps[pID];
             if (pos) {
-                el.style.display = '';
+                el.style.display = 'block';
                 el.style.setProperty('--x', pos.x);
                 el.style.setProperty('--y', pos.y);
                 if (pos.rot) el.style.transform = `translate(-50%, -50%) rotate(${pos.rot}deg)`;
@@ -285,7 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!el) return;
             const bPos = bKey === 'ball' ? (drill.setup.ball || { x: 0.5, y: 0 }) : drill.setup[bKey];
             if (bPos) {
-                el.style.display = '';
+                el.style.display = 'block';
                 el.style.setProperty('--x', bPos.x);
                 el.style.setProperty('--y', bPos.y);
             }
@@ -332,7 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Identify Which Actor to Move
             const el = actorsObj[step.actor];
             if (!el) continue;
-            el.style.display = ''; // ensure extended actors are visible if animated
+            el.style.display = 'block'; // ensure extended actors are visible if animated
 
             const cssDur = (step.dur / 1000) + 's';
             // Give players ease, ball precise linear
