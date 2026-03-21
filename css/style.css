@@ -565,6 +565,8 @@ h3 {
 
 .pitch-container {
     flex: 1;
+    min-height: 0;
+    overflow-y: auto;
     position: relative;
     display: flex;
     align-items: center;
@@ -670,6 +672,12 @@ h3 {
 #actor-p2, #actor-p6 { color: #3b82f6; }
 #actor-p3, #actor-p7 { color: #10b981; }
 #actor-p4, #actor-p8 { color: #f59e0b; }
+
+/* Extended actors hidden by default; shown only when drill uses them */
+#actor-p5, #actor-p6, #actor-p7, #actor-p8,
+#actor-ball2, #actor-ball3, #actor-ball4, #actor-ball5, #actor-ball6 {
+    display: none;
+}
 
 /* Active foot highlight */
 .actor[data-foot="L"] .leg-l { fill: white; opacity: 1; }

@@ -259,6 +259,10 @@ document.addEventListener('DOMContentLoaded', () => {
             el.style.transform = 'translate(-50%, -50%)';
             el.dataset.foot = '';
         });
+        // Hide extended actors; shown only if this drill uses them
+        ['p5','p6','p7','p8','ball2','ball3','ball4','ball5','ball6'].forEach(key => {
+            if (actorsObj[key]) actorsObj[key].style.display = 'none';
+        });
 
         // Map players from data (p1-p8)
         const ps = drill.setup.players || {};
@@ -267,6 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!el) return;
             const pos = ps[pID];
             if (pos) {
+                el.style.display = '';
                 el.style.setProperty('--x', pos.x);
                 el.style.setProperty('--y', pos.y);
                 if (pos.rot) el.style.transform = `translate(-50%, -50%) rotate(${pos.rot}deg)`;
@@ -280,6 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!el) return;
             const bPos = bKey === 'ball' ? (drill.setup.ball || { x: 0.5, y: 0 }) : drill.setup[bKey];
             if (bPos) {
+                el.style.display = '';
                 el.style.setProperty('--x', bPos.x);
                 el.style.setProperty('--y', bPos.y);
             }
@@ -326,6 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Identify Which Actor to Move
             const el = actorsObj[step.actor];
             if (!el) continue;
+            el.style.display = ''; // ensure extended actors are visible if animated
 
             const cssDur = (step.dur / 1000) + 's';
             // Give players ease, ball precise linear

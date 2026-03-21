@@ -451,7 +451,19 @@
     document.addEventListener('click', () => templateMenu.classList.add('hidden'));
 
     document.getElementById('btn-builder-new').addEventListener('click', () => openBuilder('new'));
-    document.getElementById('btn-builder-edit').addEventListener('click', () => openBuilder('edit'));
+    document.getElementById('btn-builder-edit').addEventListener('click', () => {
+        let frames = null;
+        try {
+            const rawSetup = editSetup.value.trim();
+            const rawAnim  = editAnim.value.trim();
+            if (rawSetup) {
+                const setup = JSON.parse(rawSetup);
+                const anim  = rawAnim ? JSON.parse(rawAnim) : [];
+                if (setup.players || setup.ball) frames = jsonToFrames(setup, anim);
+            }
+        } catch (e) { console.warn('[Builder] Could not parse existing JSON:', e); }
+        openBuilder('edit', frames);
+    });
 
     // ── Frame tabs ────────────────────────────────────────────────
     function renderBuilderTabs() {
@@ -931,6 +943,62 @@
         }
 
         return { setup, anim };
+    }
+
+    // ── Reconstruct frames from existing drill JSON ───────────────
+    function jsonToFrames(setup, anim) {
+        const frames = Array.from({length: FRAME_COUNT}, defaultFrame);
+
+        // Frame 0 from setup — only place pieces that have real positions
+        const f0 = frames[0];
+        const players = setup.players || {};
+        ['p1','p2','p3','p4','p5','p6','p7','p8'].forEach(pID => {
+            const p = players[pID];
+            if (p && p.x != null) f0[pID] = { x: p.x, y: p.y, rot: p.rot || 0, foot: p.foot || null };
+        });
+        if (setup.ball && setup.ball.x != null) f0.ball = { x: setup.ball.x, y: setup.ball.y };
+        ['ball2','ball3','ball4','ball5','ball6'].forEach(bKey => {
+            const b = setup[bKey];
+            if (b && b.x != null) f0[bKey] = { x: b.x, y: b.y };
+        });
+        if (setup.cones) {
+            setup.cones.forEach((c, i) => {
+                if (i < 4 && c && c.x != null) f0.cones[i] = { x: c.x, y: c.y };
+            });
+        }
+
+        // Replay anim steps to rebuild subsequent frames
+        let fi = 0;
+        let batch = [];
+
+        function flushBatch() {
+            if (!batch.length || fi + 1 >= FRAME_COUNT) { batch = []; return; }
+            fi++;
+            frames[fi] = JSON.parse(JSON.stringify(frames[fi - 1]));
+            const f = frames[fi];
+            batch.forEach(({ actor, to, rot, foot }) => {
+                if (['p1','p2','p3','p4','p5','p6','p7','p8'].includes(actor)) {
+                    if (to) { f[actor].x = to.x; f[actor].y = to.y; }
+                    if (rot != null) f[actor].rot = rot;
+                    if (foot !== undefined) f[actor].foot = foot;
+                } else if (['ball','ball2','ball3','ball4','ball5','ball6'].includes(actor)) {
+                    if (to) { f[actor].x = to.x; f[actor].y = to.y; }
+                }
+            });
+            batch = [];
+        }
+
+        (anim || []).forEach(step => {
+            if ('delay' in step) { flushBatch(); }
+            else if (step.actor) { batch.push(step); }
+        });
+        flushBatch(); // trailing batch with no delay
+
+        // Fill remaining frames with the last populated frame
+        for (let i = fi + 1; i < FRAME_COUNT; i++) {
+            frames[i] = JSON.parse(JSON.stringify(frames[fi]));
+        }
+        return frames;
     }
 
     document.getElementById('btn-apply-builder').addEventListener('click', () => {
