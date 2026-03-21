@@ -897,18 +897,18 @@
     // ── Generate JSON from frames ─────────────────────────────────
     function framesToJSON() {
         const f0 = builderFrames[0];
-        const pickPlayer = (p) => p ? ({ x: p.x ?? 5, y: p.y ?? 10, rot: p.rot||0, foot: p.foot||null }) : { x:5, y:10, rot:0, foot:null };
-        const pickBall   = (b) => b ? ({ x: b.x ?? 5, y: b.y ?? 10 }) : { x:5, y:10 };
-        const setup = {
-            players: {
-                p1:pickPlayer(f0.p1), p2:pickPlayer(f0.p2), p3:pickPlayer(f0.p3), p4:pickPlayer(f0.p4),
-                p5:pickPlayer(f0.p5), p6:pickPlayer(f0.p6), p7:pickPlayer(f0.p7), p8:pickPlayer(f0.p8)
-            },
-            ball:  pickBall(f0.ball),
-            ball2: pickBall(f0.ball2), ball3: pickBall(f0.ball3),
-            ball4: pickBall(f0.ball4), ball5: pickBall(f0.ball5), ball6: pickBall(f0.ball6),
-            cones: f0.cones.map(c => ({ x: c.x ?? 5, y: c.y ?? 10 }))
-        };
+        // Only include pieces that are actually on the field (x !== null)
+        const players = {};
+        ['p1','p2','p3','p4','p5','p6','p7','p8'].forEach(k => {
+            const p = f0[k];
+            if (p && p.x !== null) players[k] = { x: p.x, y: p.y, rot: p.rot||0, foot: p.foot||null };
+        });
+        const setup = { players };
+        if (f0.ball && f0.ball.x !== null) setup.ball = { x: f0.ball.x, y: f0.ball.y };
+        ['ball2','ball3','ball4','ball5','ball6'].forEach(k => {
+            if (f0[k] && f0[k].x !== null) setup[k] = { x: f0[k].x, y: f0[k].y };
+        });
+        setup.cones = f0.cones.filter(c => c.x !== null).map(c => ({ x: c.x, y: c.y }));
 
         const anim = [];
         for (let i = 1; i < FRAME_COUNT; i++) {
