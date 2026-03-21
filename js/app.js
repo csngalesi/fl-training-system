@@ -293,10 +293,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Map Cones
+        // Map Cones (skip legacy bench sentinel position x=5, y=10)
         conesContainer.innerHTML = '';
         if (drill.setup.cones) {
             drill.setup.cones.forEach(conePos => {
+                if (conePos.x === 5 && conePos.y === 10) return;
                 const c = document.createElement('div');
                 c.className = 'cone';
                 c.style.setProperty('--x', conePos.x);
