@@ -17,16 +17,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Week plan elements
     const btnModeFund      = document.getElementById('btn-mode-fundamentals');
     const btnModeWeek      = document.getElementById('btn-mode-week');
+    const btnModePrancheta = document.getElementById('btn-mode-prancheta');
     const navFundamentals  = document.getElementById('nav-fundamentals');
     const navWeekPlans     = document.getElementById('nav-week-plans');
     const weekPlansNavList = document.getElementById('week-plans-nav-list');
     const fundamentalsPanel = document.getElementById('fundamentals-panel');
     const weekPanel        = document.getElementById('week-sessions-panel');
+    const pranchetaPanel   = document.getElementById('prancheta-panel');
     const weekPlanName     = document.getElementById('week-plan-name');
     const weekSessionCount = document.getElementById('week-session-count');
     const weekDrillsList   = document.getElementById('week-drills-list');
 
-    let appMode = 'fundamentals';   // 'fundamentals' | 'week'
+    let appMode = 'fundamentals';   // 'fundamentals' | 'week' | 'prancheta'
     let selectedPlanId = null;
 
     // Modal Elements
@@ -111,6 +113,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Mode switcher
         btnModeFund.addEventListener('click', () => switchMode('fundamentals'));
         btnModeWeek.addEventListener('click', () => switchMode('week'));
+        btnModePrancheta.addEventListener('click', () => switchMode('prancheta'));
+
+        // Prancheta
+        initPrancheta();
 
         // Event Listeners
         btnReplay.addEventListener('click', () => {
@@ -336,18 +342,37 @@ document.addEventListener('DOMContentLoaded', () => {
         appMode = mode;
         btnModeFund.classList.toggle('active', mode === 'fundamentals');
         btnModeWeek.classList.toggle('active', mode === 'week');
-        navFundamentals.classList.toggle('hidden', mode === 'week');
+        btnModePrancheta.classList.toggle('active', mode === 'prancheta');
+
+        navFundamentals.classList.toggle('hidden', mode !== 'fundamentals');
         navWeekPlans.classList.toggle('hidden', mode !== 'week');
-        fundamentalsPanel.classList.toggle('hidden', mode === 'week');
+
+        fundamentalsPanel.classList.toggle('hidden', mode !== 'fundamentals');
         weekPanel.classList.toggle('hidden', mode !== 'week');
+        pranchetaPanel.classList.toggle('hidden', mode !== 'prancheta');
+
+        const pitchEl = document.getElementById('pitch');
+
+        if (mode === 'prancheta') {
+            fundTitle.textContent = 'Prancheta';
+            fundDesc.textContent = 'Arraste peças e faça rabiscos no campo.';
+            btnTechBase.classList.add('hidden');
+            workspace.classList.remove('hidden');
+            document.getElementById('btn-replay').classList.add('hidden');
+            pitchEl.classList.add('prancheta-mode');
+            pitchHeaderCaption.innerHTML = '<p><i class="fa-solid fa-hand-pointer"></i> Clique nas peças à esquerda para adicionar ao campo. Clique com botão direito em uma peça para removê-la.</p>';
+        } else {
+            document.getElementById('btn-replay').classList.remove('hidden');
+            pitchEl.classList.remove('prancheta-mode');
+        }
 
         if (mode === 'week') {
             fundTitle.textContent = 'Treino da Semana';
             fundDesc.textContent = 'Selecione um plano no menu lateral.';
             btnTechBase.classList.add('hidden');
+            workspace.classList.remove('hidden');
             loadVisiblePlans();
-        } else {
-            navMenu.classList.remove('hidden'); // ensure nav-fundamentals stays visible
+        } else if (mode === 'fundamentals') {
             if (currentFundamental) {
                 fundTitle.textContent = currentFundamental.title;
             } else {
@@ -438,6 +463,189 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (err) {
             pitchHeaderCaption.innerHTML = `<p style="color:#ef4444">Erro: ${err.message}</p>`;
         }
+    }
+
+    // ─── PRANCHETA ───────────────────────────────────────────────────────────────
+    function initPrancheta() {
+        const canvas  = document.getElementById('prancheta-canvas');
+        const ctx     = canvas.getContext('2d');
+        const itemsEl = document.getElementById('prancheta-items');
+        const pitchEl = document.getElementById('pitch');
+
+        // Canvas buffer matches pitch CSS size (240×480)
+        canvas.width  = 240;
+        canvas.height = 480;
+
+        let pTool    = 'move';
+        let penColor = '#ffffff';
+        let penSize  = 3;
+        let isDrawing = false;
+        let lastPos   = null;
+
+        const COLORS = ['#ffffff', '#ef4444', '#3b82f6', '#22c55e', '#f59e0b', '#f97316', '#a855f7', '#000000'];
+
+        // ── Tool switching ──────────────────────────────────────────────
+        function setTool(tool) {
+            pTool = tool;
+            canvas.style.pointerEvents  = tool === 'move' ? 'none' : 'auto';
+            itemsEl.style.pointerEvents = tool === 'move' ? 'auto' : 'none';
+            canvas.style.cursor = tool === 'draw' ? 'crosshair' : tool === 'erase' ? 'cell' : 'default';
+            document.querySelectorAll('.pran-tool-btn').forEach(b =>
+                b.classList.toggle('active', b.dataset.tool === tool));
+        }
+
+        // ── Canvas coordinate helper ────────────────────────────────────
+        function getCanvasPos(e) {
+            const rect   = canvas.getBoundingClientRect();
+            const scaleX = canvas.width  / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const src    = e.touches ? e.touches[0] : e;
+            return {
+                x: (src.clientX - rect.left) * scaleX,
+                y: (src.clientY - rect.top)  * scaleY
+            };
+        }
+
+        // ── Drawing ─────────────────────────────────────────────────────
+        canvas.addEventListener('pointerdown', e => {
+            if (pTool === 'move') return;
+            isDrawing = true;
+            lastPos   = getCanvasPos(e);
+            canvas.setPointerCapture(e.pointerId);
+        });
+
+        canvas.addEventListener('pointermove', e => {
+            if (!isDrawing) return;
+            const pos = getCanvasPos(e);
+            if (pTool === 'draw') {
+                ctx.beginPath();
+                ctx.moveTo(lastPos.x, lastPos.y);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.strokeStyle = penColor;
+                ctx.lineWidth   = penSize;
+                ctx.lineCap     = 'round';
+                ctx.lineJoin    = 'round';
+                ctx.stroke();
+            } else if (pTool === 'erase') {
+                const r = penSize * 4;
+                ctx.clearRect(pos.x - r, pos.y - r, r * 2, r * 2);
+            }
+            lastPos = pos;
+        });
+
+        canvas.addEventListener('pointerup',    () => { isDrawing = false; });
+        canvas.addEventListener('pointerleave', () => { isDrawing = false; });
+
+        // ── Item dragging on pitch ──────────────────────────────────────
+        function makeItemDraggable(el) {
+            let startX, startY, startLeft, startTop;
+
+            el.addEventListener('pointerdown', e => {
+                if (pTool !== 'move') return;
+                e.stopPropagation();
+                el.setPointerCapture(e.pointerId);
+                startX    = e.clientX;
+                startY    = e.clientY;
+                startLeft = parseFloat(el.style.left);
+                startTop  = parseFloat(el.style.top);
+            });
+
+            el.addEventListener('pointermove', e => {
+                if (!e.buttons || pTool !== 'move') return;
+                const rect = pitchEl.getBoundingClientRect();
+                const dx   = (e.clientX - startX) / rect.width  * 100;
+                const dy   = (e.clientY - startY) / rect.height * 100;
+                el.style.left = Math.min(97, Math.max(3, startLeft + dx)) + '%';
+                el.style.top  = Math.min(97, Math.max(3, startTop  + dy)) + '%';
+            });
+
+            el.addEventListener('contextmenu', e => {
+                e.preventDefault();
+                el.remove();
+            });
+        }
+
+        // ── Add piece to field ──────────────────────────────────────────
+        function addPieceToField(piece, leftPct, topPct) {
+            const el = document.createElement('div');
+            el.className = 'pran-item';
+            el.style.left = leftPct + '%';
+            el.style.top  = topPct  + '%';
+            el.style.touchAction = 'none';
+
+            if (piece.type === 'player') {
+                el.style.color = piece.color;
+                el.innerHTML = `<svg viewBox="0 0 42 36" width="36" height="30" style="display:block;filter:drop-shadow(0 1px 3px rgba(0,0,0,.6))">
+                    <ellipse cx="21" cy="13" rx="13" ry="8" fill="currentColor"/>
+                    <ellipse cx="21" cy="13" rx="13" ry="8" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1"/>
+                    <text x="21" y="14" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="9" font-weight="900" font-family="Outfit,sans-serif">${piece.num}</text>
+                </svg>`;
+            } else if (piece.type === 'cone') {
+                el.innerHTML = `<svg viewBox="0 0 28 28" width="28" height="28" style="display:block;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))">
+                    <polygon points="14,3 26,25 2,25" fill="#f97316" stroke="rgba(255,255,255,.3)" stroke-width="1"/>
+                </svg>`;
+            } else if (piece.type === 'ball') {
+                el.innerHTML = `<div style="width:18px;height:18px;border-radius:50%;background:#fff;border:2px solid #94a3b8;box-shadow:0 1px 4px rgba(0,0,0,.6)"></div>`;
+            }
+
+            makeItemDraggable(el);
+            itemsEl.appendChild(el);
+        }
+
+        // ── Toolbox pieces (click to add) ───────────────────────────────
+        const COLOR_MAP = { '1': '#ef4444', '2': '#3b82f6', '3': '#22c55e', '4': '#f59e0b' };
+
+        document.querySelectorAll('.pran-piece').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const type  = btn.dataset.type;
+                const num   = btn.dataset.num ? parseInt(btn.dataset.num) : null;
+                const piece = type === 'player'
+                    ? { type: 'player', num, color: COLOR_MAP[num] }
+                    : { type };
+                const left = 35 + Math.random() * 30;
+                const top  = 30 + Math.random() * 40;
+                addPieceToField(piece, left, top);
+            });
+        });
+
+        // ── Tool buttons ────────────────────────────────────────────────
+        document.querySelectorAll('.pran-tool-btn').forEach(btn => {
+            btn.addEventListener('click', () => setTool(btn.dataset.tool));
+        });
+
+        // ── Color swatches ──────────────────────────────────────────────
+        const colorsContainer = document.getElementById('pran-colors');
+        COLORS.forEach((c, i) => {
+            const sw = document.createElement('div');
+            sw.className = 'pran-color-swatch' + (i === 0 ? ' active' : '');
+            sw.style.background = c;
+            sw.title = c;
+            if (c === '#000000') sw.style.border = '2px solid rgba(255,255,255,.3)';
+            sw.addEventListener('click', () => {
+                penColor = c;
+                if (pTool !== 'draw') setTool('draw');
+                colorsContainer.querySelectorAll('.pran-color-swatch').forEach(s => s.classList.remove('active'));
+                sw.classList.add('active');
+            });
+            colorsContainer.appendChild(sw);
+        });
+
+        // ── Pen size slider ─────────────────────────────────────────────
+        document.getElementById('pran-pen-size').addEventListener('input', e => {
+            penSize = parseInt(e.target.value);
+        });
+
+        // ── Action buttons ──────────────────────────────────────────────
+        document.getElementById('pran-clear-draw').addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
+        document.getElementById('pran-clear-all').addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            itemsEl.innerHTML = '';
+        });
+
+        // Init
+        setTool('move');
     }
 
     function escHtml(str) {

@@ -61,6 +61,9 @@
                     <button id="btn-mode-week" class="mode-btn">
                         <i class="fa-solid fa-calendar-week"></i> Treino da Semana
                     </button>
+                    <button id="btn-mode-prancheta" class="mode-btn">
+                        <i class="fa-solid fa-chalkboard"></i> Prancheta
+                    </button>
                 </div>
             </div>
 
@@ -110,6 +113,51 @@
                         <div class="drills-container" id="drills-container">
                             <!-- Drill cards injected by JS -->
                         </div>
+                    </div>
+
+                    <!-- Prancheta mode -->
+                    <div id="prancheta-panel" class="hidden">
+                        <div class="pran-section">
+                            <div class="pran-section-title">Peças — clique para adicionar ao campo</div>
+                            <div class="pran-pieces">
+                                <div class="pran-piece" data-type="player" data-num="1" title="Jogador 1" style="color:#ef4444">
+                                    <svg viewBox="0 0 42 36" width="34" height="28"><ellipse cx="21" cy="13" rx="13" ry="8" fill="currentColor"/><ellipse cx="21" cy="13" rx="13" ry="8" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1"/><text x="21" y="14" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="9" font-weight="900" font-family="Outfit,sans-serif">1</text></svg>
+                                </div>
+                                <div class="pran-piece" data-type="player" data-num="2" title="Jogador 2" style="color:#3b82f6">
+                                    <svg viewBox="0 0 42 36" width="34" height="28"><ellipse cx="21" cy="13" rx="13" ry="8" fill="currentColor"/><ellipse cx="21" cy="13" rx="13" ry="8" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1"/><text x="21" y="14" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="9" font-weight="900" font-family="Outfit,sans-serif">2</text></svg>
+                                </div>
+                                <div class="pran-piece" data-type="player" data-num="3" title="Jogador 3" style="color:#22c55e">
+                                    <svg viewBox="0 0 42 36" width="34" height="28"><ellipse cx="21" cy="13" rx="13" ry="8" fill="currentColor"/><ellipse cx="21" cy="13" rx="13" ry="8" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1"/><text x="21" y="14" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="9" font-weight="900" font-family="Outfit,sans-serif">3</text></svg>
+                                </div>
+                                <div class="pran-piece" data-type="player" data-num="4" title="Jogador 4" style="color:#f59e0b">
+                                    <svg viewBox="0 0 42 36" width="34" height="28"><ellipse cx="21" cy="13" rx="13" ry="8" fill="currentColor"/><ellipse cx="21" cy="13" rx="13" ry="8" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1"/><text x="21" y="14" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="9" font-weight="900" font-family="Outfit,sans-serif">4</text></svg>
+                                </div>
+                                <div class="pran-piece" data-type="cone" title="Cone">
+                                    <svg viewBox="0 0 28 28" width="28" height="28"><polygon points="14,3 26,25 2,25" fill="#f97316" stroke="rgba(255,255,255,.3)" stroke-width="1"/></svg>
+                                </div>
+                                <div class="pran-piece" data-type="ball" title="Bola">
+                                    <div style="width:18px;height:18px;border-radius:50%;background:#fff;border:2px solid #94a3b8;box-shadow:0 1px 4px rgba(0,0,0,.6)"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pran-section">
+                            <div class="pran-section-title">Ferramentas</div>
+                            <div class="pran-tools">
+                                <button class="pran-tool-btn active" data-tool="move"><i class="fa-solid fa-hand"></i> Mover</button>
+                                <button class="pran-tool-btn" data-tool="draw"><i class="fa-solid fa-pencil"></i> Desenhar</button>
+                                <button class="pran-tool-btn" data-tool="erase"><i class="fa-solid fa-eraser"></i> Borracha</button>
+                            </div>
+                            <div class="pran-colors" id="pran-colors"></div>
+                            <div style="margin-top:10px;display:flex;align-items:center;gap:8px;">
+                                <label style="font-size:.8rem;color:var(--text-muted);">Espessura</label>
+                                <input type="range" id="pran-pen-size" min="1" max="12" value="3" style="flex:1;accent-color:var(--acc-primary)">
+                            </div>
+                        </div>
+                        <div class="pran-actions">
+                            <button id="pran-clear-draw" class="btn btn-secondary btn-sm"><i class="fa-solid fa-trash"></i> Limpar rabiscos</button>
+                            <button id="pran-clear-all" class="btn btn-secondary btn-sm"><i class="fa-solid fa-rotate-left"></i> Reiniciar campo</button>
+                        </div>
+                        <p class="pran-hint">Clique com botão direito em uma peça no campo para removê-la.</p>
                     </div>
 
                     <!-- Week plan mode -->
@@ -166,6 +214,10 @@
 
                             <!-- Dynamic Cones/Targets injected by Drill logic -->
                             <div id="dynamic-elements"></div>
+
+                            <!-- Prancheta overlay -->
+                            <div id="prancheta-items" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:5;pointer-events:none;"></div>
+                            <canvas id="prancheta-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:6;pointer-events:none;border-radius:2px;"></canvas>
                         </div>
                     </div>
                     <div class="visual-footer" id="visual-caption">

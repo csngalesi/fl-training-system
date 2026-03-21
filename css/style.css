@@ -843,3 +843,147 @@ h3 {
         height: 360px;
     }
 }
+
+/* ═══════════════════════════════════════════════
+   PRANCHETA
+═══════════════════════════════════════════════ */
+#prancheta-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: 0;
+}
+
+.pran-section {
+    margin-bottom: 20px;
+}
+
+.pran-section-title {
+    font-size: .72rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-bottom: 10px;
+}
+
+.pran-pieces {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.pran-piece {
+    cursor: pointer;
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    border: 2px solid rgba(255,255,255,.15);
+    background: rgba(255,255,255,.07);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: .18s;
+    user-select: none;
+}
+
+.pran-piece:hover {
+    background: rgba(255,255,255,.16);
+    border-color: rgba(255,255,255,.4);
+    transform: scale(1.07);
+}
+
+.pran-tools {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.pran-tool-btn {
+    flex: 1;
+    min-width: 76px;
+    padding: 8px 10px;
+    border: 1px solid rgba(255,255,255,.15);
+    background: rgba(255,255,255,.05);
+    border-radius: 8px;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: .82rem;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    transition: .15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.pran-tool-btn:hover {
+    color: var(--text-main);
+    border-color: rgba(255,255,255,.3);
+}
+
+.pran-tool-btn.active {
+    background: rgba(16,185,129,.15);
+    border-color: var(--acc-primary);
+    color: var(--acc-primary);
+}
+
+.pran-colors {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.pran-color-swatch {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: .15s;
+    flex-shrink: 0;
+}
+
+.pran-color-swatch:hover { transform: scale(1.12); }
+.pran-color-swatch.active { border-color: white; transform: scale(1.18); }
+
+.pran-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: auto;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255,255,255,.08);
+}
+
+.pran-hint {
+    font-size: .75rem;
+    color: var(--text-muted);
+    margin-top: 10px;
+    line-height: 1.4;
+    opacity: .7;
+}
+
+/* Item arrastável no campo */
+.pran-item {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    cursor: grab;
+    z-index: 5;
+    user-select: none;
+    touch-action: none;
+}
+
+.pran-item:active { cursor: grabbing; }
+
+/* Esconder actores animados quando prancheta está ativa */
+.pitch.prancheta-mode #actor-p1,
+.pitch.prancheta-mode #actor-p2,
+.pitch.prancheta-mode #actor-p3,
+.pitch.prancheta-mode #actor-p4,
+.pitch.prancheta-mode #actor-ball,
+.pitch.prancheta-mode #dynamic-elements {
+    display: none;
+}
