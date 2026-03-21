@@ -225,12 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
             drillsContainer.appendChild(card);
         });
 
-        // Stop any running animation and clear the pitch
-        animationSequenceId++;
-        Object.values(actorsObj).forEach(el => { el.style.display = 'none'; });
-        conesContainer.innerHTML = '';
-        pitchHeaderCaption.innerHTML = '<p>Selecione um exercício para ver a simulação.</p>';
-        currentDrill = null;
+        stopSimulation();
     }
 
     function selectDrill(drill, cardEl) {
@@ -369,8 +364,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // WEEK PLAN MODE
     // ==========================================================
 
+    function stopSimulation() {
+        animationSequenceId++;
+        Object.values(actorsObj).forEach(el => { el.style.display = 'none'; });
+        conesContainer.innerHTML = '';
+        pitchHeaderCaption.innerHTML = '<p>Aguardando seleção do exercício...</p>';
+        currentDrill = null;
+    }
+
     function switchMode(mode) {
         appMode = mode;
+        stopSimulation();
         btnModeFund.classList.toggle('active', mode === 'fundamentals');
         btnModeWeek.classList.toggle('active', mode === 'week');
         btnModePrancheta.classList.toggle('active', mode === 'prancheta');
