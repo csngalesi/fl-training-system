@@ -225,10 +225,12 @@ document.addEventListener('DOMContentLoaded', () => {
             drillsContainer.appendChild(card);
         });
 
-        // Automatically select the first drill
-        if (currentFundamental.drills.length > 0) {
-            selectDrill(currentFundamental.drills[0], drillsContainer.firstChild);
-        }
+        // Stop any running animation and clear the pitch
+        animationSequenceId++;
+        Object.values(actorsObj).forEach(el => { el.style.display = 'none'; });
+        conesContainer.innerHTML = '';
+        pitchHeaderCaption.innerHTML = '<p>Selecione um exercício para ver a simulação.</p>';
+        currentDrill = null;
     }
 
     function selectDrill(drill, cardEl) {
