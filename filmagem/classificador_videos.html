@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Lab - Classificador de Vídeos</title>
+    <style>
+        :root {
+            --bg: #121212; --panel: #1e1e1e;
+            --accent: #ff6b35; --accent-hover: #fa5216;
+            --text: #ffffff; --text-muted: #aaaaaa;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body { background-color: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        
+        h1 { color: var(--accent); margin-bottom: 5px; text-transform: uppercase; font-size: 1.5rem; text-align: center; }
+        .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 25px; text-align: center; }
+
+        .container {
+            display: flex; gap: 20px; width: 100%; max-width: 1000px;
+            flex-direction: row; flex-wrap: wrap; justify-content: center;
+        }
+
+        /* Área do Vídeo */
+        .player-section {
+            background: var(--panel); border-radius: 12px; padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            flex: 2; min-width: 320px; display: flex; flex-direction: column; align-items: center;
+        }
+        
+        .video-wrapper {
+            width: 100%; height: 500px; background: #000; border-radius: 8px;
+            display: flex; justify-content: center; align-items: center; margin-bottom: 20px;
+        }
+        
+        video { width: 100%; height: 100%; object-fit: contain; }
+
+        /* Controles Next/Prev */
+        .controls { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+        .btn-nav {
+            background: #333; color: white; border: none; padding: 12px 24px;
+            border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s;
+        }
+        .btn-nav:hover { background: #555; }
+        .counter { font-size: 1.2rem; font-weight: bold; color: var(--text-muted); }
+
+        /* Painel de Classificação (Tags) */
+        .form-section {
+            background: var(--panel); border-radius: 12px; padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 20px;
+        }
+        
+        .form-group { display: flex; flex-direction: column; gap: 8px; }
+        label { font-weight: bold; color: #ddd; font-size: 1.1rem; }
+        
+        select {
+            padding: 12px; border-radius: 6px; border: 1px solid #444;
+            background: #222; color: #fff; font-size: 1rem; cursor: pointer;
+        }
+        
+        .checkbox-group { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .checkbox-group input { width: 22px; height: 22px; cursor: pointer; accent-color: var(--accent); }
+        .checkbox-group span { font-weight: bold; font-size: 1.1rem; color: #ffeb3b; }
+
+        /* Status de salvamento automático */
+        .save-status { font-size: 0.85rem; color: #4CAF50; text-align: center; height: 20px; }
+
+        /* Exportação */
+        .export-section { margin-top: auto; padding-top: 20px; border-top: 1px solid #444; display: flex; flex-direction: column; gap: 10px;}
+        .export-btn {
+            background: var(--accent); color: white; border: none; padding: 15px; width: 100%;
+            border-radius: 8px; font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: 0.3s;
+        }
+        .export-btn:hover { background: var(--accent-hover); transform: translateY(-2px); }
+
+    </style>
+</head>
+<body>
+
+    <h1>📊 Classificador de Referências</h1>
+    <p class="subtitle">Selecione o fundamento e marque os favoritos. O progresso é salvo sozinho!</p>
+
+    <div class="container">
+        
+        <!-- PLAYER -->
+        <div class="player-section">
+            <div class="video-wrapper">
+                <video id="video-player" controls autoplay loop playsinline>
+                    <source id="video-source" src="" type="video/mp4">
+                    Seu navegador não suporta vídeos.
+                </video>
+            </div>
+            
+            <div class="controls">
+                <button class="btn-nav" onclick="changeVid(-1)">⬅ Anterior</button>
+                <div class="counter" id="counter">1 / 77</div>
+                <button class="btn-nav" onclick="changeVid(1)">Próximo ➡</button>
+            </div>
+        </div>
+
+        <!-- FORMULÁRIO -->
+        <div class="form-section">
+            <div class="form-group">
+                <label for="fundamento">Fundamento Técnico:</label>
+                <select id="fundamento" onchange="autoSave()">
+                    <option value="">-- Não classificado --</option>
+                    <option value="domínio">Domínio de Bola</option>
+                    <option value="passe">Passe</option>
+                    <option value="chute">Chute / Finalização</option>
+                    <option value="drible">Drible / Finta</option>
+                    <option value="condução">Condução de Bola</option>
+                    <option value="cabeceio">Cabeceio</option>
+                    <option value="marcação">Marcação / Defensivo</option>
+                    <option value="técnica atlética">Técnica Atlética / Atletismo</option>
+                    <option value="outro">Outros (Goleiro, Tático, etc)</option>
+                </select>
+            </div>
+
+            <label class="checkbox-group">
+                <input type="checkbox" id="favorito" onchange="autoSave()">
+                <span>⭐ Marcar como FAVORITO</span>
+            </label>
+
+            <div class="save-status" id="save-status"></div>
+
+            <div class="export-section">
+                <p style="font-size:0.85rem; color:#bbb; text-align:center;">
+                    Quando terminar de ver e classificar todos os vídeos, clique abaixo para baixar os dados. 
+                    Me envie esse arquivo e eu gerarei o formato final pro Vercel!
+                </p>
+                <button class="export-btn" onclick="exportData()">⬇ Exportar Dados (JSON)</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Array com todos os 77 vídeos que foram baixados na pasta 'videos_baixados'
+        const videoFiles = [
+            "001_Video by chowkit.football.mp4", "002_Video by dhiraj_juventus.mp4", "003_Video by mechanicaltennis.mp4",
+            "004_Video by the.football_analyst.mp4", "005_Video by matheusspferreira.mp4", "006_Video by sergiuskills.mp4",
+            "007_Video by thespeedmechanic_.mp4", "008_Video by brandonhima.mp4", "009_Video by alexramostraining.mp4",
+            "010_Video by zth.training.mp4", "011_Video by zth.training.mp4", "012_Video by nic.fut.mp4",
+            "013_Video by corneteiroonline.mp4", "014_Video by mercedes_roa.mp4", "015_Video by alexramostraining.mp4",
+            "016_Video by football_school_iq.mp4", "017_Video by shoheiabe6.mp4", "018_Video by prolific.soccer.mp4",
+            "019_Video by bigjohngk.mp4", "020_Video by marquinhopromessa.mp4", "021_Video by leofootz.mp4",
+            "022_Video by alexramostraining.mp4", "023_Video by hu.barry.mp4", "024_Video by dnafutevolei_.mp4",
+            "025_Video by the_jwl.mp4", "026_Video by futevoleidoquebra.mp4", "027_Video by rugbybricks.mp4",
+            "028_Video by the_jwl.mp4", "029_Video by alexramostraining.mp4", "030_Video by ricardoprofut.mp4",
+            "031_Video by edu.shoow.mp4", "032_Video by alexramostraining.mp4", "033_Video by jamiebreeno.mp4",
+            "034_Video by brentgtraining.mp4", "035_Video by ricardoprofut.mp4", "036_Video by regate_takuya.mp4",
+            "037_Video by kano_aus.mp4", "038_Video by futblack_.mp4", "039_Video by zth.training.mp4",
+            "040_Video by marcelinhocariocaoficial.mp4", "041_Video by rios.futebol.mp4", "042_Video by projectzeronow.mp4",
+            "043_Video by skillafootball.mp4", "044_Video by gavindefootball.mp4", "045_Video by nspsoccer.mp4",
+            "046_Video by nspsoccer.mp4", "047_Video by increasefootball.mp4", "048_Video by brentgtraining.mp4",
+            "049_Video by roycesports.mp4", "050_Video by goalman_.mp4", "051_Video by optimalsoccertraining.mp4",
+            "052_Video by hamadaadam10.mp4", "053_Video by futblack_.mp4", "054_Video by 777_livl.mp4",
+            "055_Video by alexramostraining.mp4", "056_Video by senne_gk.mp4", "057_Video by alexramostraining.mp4",
+            "058_Video by dicadogordinhoo.mp4", "059_Video by jawadzakari.mp4", "060_Video by nivassfut.mp4",
+            "061_Video by nspsoccer.mp4", "062_Video by brentgtraining.mp4", "063_Video by chowkit.football.mp4",
+            "064_Video by the_jwl.mp4", "065_Video by nahueloyola.mp4", "066_Video by nxtphasesoccer.mp4",
+            "067_Video by nxtphasesoccer.mp4", "068_Video by jawadzakari.mp4", "069_Video by pierrecastempresas.mp4",
+            "070_Video by soccercoachtrav.mp4", "071_Video by nspsoccer.mp4", "072_16M views · 1.1M reactions ｜ Classic Cri.mp4",
+            "073_1M views · 10K reactions ｜ Quem se lembr.mp4", "074_5 Body Feints Every Player MUST Know (Wi.mp4",
+            "075_Esse drible do Denilson é um absurdo! @d.mp4", "076_A DIFERENÇA ENTRE O 4231 E O 433 #shorts.mp4",
+            "077_O Espetáculo De Romário 😱🥵🤌🍷⚽️.mp4"
+        ];
+
+        let db = JSON.parse(localStorage.getItem('football_lab_db')) || {};
+        let currentIndex = 0;
+
+        const player = document.getElementById('video-player');
+        const source = document.getElementById('video-source');
+        const counter = document.getElementById('counter');
+        const selectFundamento = document.getElementById('fundamento');
+        const checkFavorito = document.getElementById('favorito');
+        const statusMsg = document.getElementById('save-status');
+
+        function loadVideo(index) {
+            if (index < 0 || index >= videoFiles.length) return;
+            currentIndex = index;
+            const currentFile = videoFiles[currentIndex];
+
+            // Set Video Source (Acessa a subpasta videos_baixados)
+            source.src = `videos_baixados/${currentFile}`;
+            player.load();
+            player.play().catch(e => console.log("Auto-play prevented by browser"));
+
+            counter.innerText = `${currentIndex + 1} / ${videoFiles.length}`;
+
+            // Load saved data for this video
+            const data = db[currentFile] || { fundamento: "", favorito: false };
+            selectFundamento.value = data.fundamento;
+            checkFavorito.checked = data.favorito;
+        }
+
+        function changeVid(step) {
+            let nextIndex = currentIndex + step;
+            if (nextIndex >= 0 && nextIndex < videoFiles.length) {
+                loadVideo(nextIndex);
+            }
+        }
+
+        // Navegação por teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === "ArrowRight") changeVid(1);
+            if (e.key === "ArrowLeft") changeVid(-1);
+        });
+
+        // Salvar dinamicamente no navegador
+        function autoSave() {
+            const currentFile = videoFiles[currentIndex];
+            db[currentFile] = {
+                fundamento: selectFundamento.value,
+                favorito: checkFavorito.checked
+            };
+            localStorage.setItem('football_lab_db', JSON.stringify(db));
+            
+            statusMsg.innerText = "✔ Salvo automaticamente!";
+            setTimeout(() => { statusMsg.innerText = ""; }, 1500);
+        }
+
+        // Exportar JSON para gerar o Vercel depois
+        function exportData() {
+            const dataStr = JSON.stringify(db, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "classificacao_football_lab.json";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Init
+        loadVideo(0);
+
+    </script>
+</body>
+</html>

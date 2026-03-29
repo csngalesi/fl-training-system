@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Lab - Modo Cinema</title>
+    <style>
+        :root {
+            --bg: #0a0a0a; --panel: #1e1e1e;
+            --accent: #ff6b35; --accent-hover: #fa5216;
+            --text: #ffffff; --text-muted: #aaaaaa;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body { background-color: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; padding: 15px; overflow-x: hidden; justify-content: center; min-height: 100vh;}
+        
+        .back-btn { color: var(--text-muted); font-size: 1rem; text-decoration: none; border-bottom: 1px dotted var(--text-muted); transition: 0.3s;}
+        .back-btn:hover { color: #fff; }
+
+        .container {
+            display: flex; gap: 15px; width: 100%; max-width: 1600px;
+            flex-direction: column; align-items: center;
+        }
+
+        .player-section {
+            background: var(--panel); border-radius: 12px; padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+            width: 100%; display: flex; flex-direction: column; align-items: center;
+        }
+        
+        /* Cabeçalho do Player interno */
+        .player-header {
+            display: flex; justify-content: space-between; align-items: center; 
+            width: 100%; margin-bottom: 15px;
+        }
+        .header-spacer { width: 150px; } /* Spacer para manter o título perfeitamente centrado */
+        
+        #video-fundamento { color: var(--accent); font-size: 1.5rem; letter-spacing: 1px; text-align: center; text-transform: uppercase;}
+
+        /* Layout em Linha (Botões LATERAIS) */
+        .video-layout {
+            display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 15px;
+        }
+
+        .video-wrapper {
+            flex: 1; height: 80vh; min-height: 400px; background: #000; border-radius: 8px;
+            display: flex; justify-content: center; align-items: center; position:relative; overflow: hidden;
+        }
+        
+        video { width: 100%; height: 100%; object-fit: contain; }
+
+        .side-btn {
+            background: #2a2a2a; color: white; border: none; padding: 0 25px;
+            border-radius: 8px; font-weight: bold; font-size: 2.5rem; cursor: pointer; transition: 0.3s;
+            height: 40vh; min-height: 150px; display: flex; align-items: center; justify-content: center; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6); user-select: none;
+        }
+        .side-btn:hover { background: var(--accent); color: #000; transform: scale(1.05); }
+        .side-btn:active { transform: scale(0.95); }
+
+        .counter { font-size: 1.5rem; font-weight: bold; color: var(--text-muted); text-align: center; margin-top: 15px; background: #111; padding: 5px 20px; border-radius: 20px;}
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <div class="player-section">
+            
+            <div class="player-header">
+                <a href="todos_videos.html" id="back-link" class="back-btn">⬅ Voltar para Galeria</a>
+                <h2 id="video-fundamento">🎬 MODO CINEMA - CARREGANDO...</h2>
+                <div class="header-spacer"></div>
+            </div>
+
+            <div class="video-layout">
+                <button class="side-btn" onclick="changeVid(-1)" title="Anterior (Seta Esquerda)">&#10094;</button>
+                
+                <div class="video-wrapper">
+                    <video id="video-player" controls autoplay loop playsinline>
+                        <source id="video-source" src="" type="video/mp4">
+                        Seu navegador não suporta vídeos.
+                    </video>
+                </div>
+                
+                <button class="side-btn" onclick="changeVid(1)" title="Próximo (Seta Direita)">&#10095;</button>
+            </div>
+            
+            <div class="counter" id="counter">1 / X</div>
+        </div>
+
+    </div>
+
+    <script>
+        const videoData = {
+  "001_Video by chowkit.football.mp4": { "fundamento": "drible", "favorito": true },
+  "002_Video by dhiraj_juventus.mp4": { "fundamento": "drible", "favorito": true },
+  "003_Video by mechanicaltennis.mp4": { "fundamento": "chute", "favorito": true },
+  "004_Video by the.football_analyst.mp4": { "fundamento": "condução", "favorito": true },
+  "005_Video by matheusspferreira.mp4": { "fundamento": "drible", "favorito": true },
+  "006_Video by sergiuskills.mp4": { "fundamento": "passe", "favorito": true },
+  "007_Video by thespeedmechanic_.mp4": { "fundamento": "técnica atlética", "favorito": true },
+  "008_Video by brandonhima.mp4": { "fundamento": "drible", "favorito": true },
+  "009_Video by alexramostraining.mp4": { "fundamento": "drible", "favorito": true },
+  "010_Video by zth.training.mp4": { "fundamento": "domínio", "favorito": true },
+  "011_Video by zth.training.mp4": { "fundamento": "chute", "favorito": true },
+  "012_Video by nic.fut.mp4": { "fundamento": "drible", "favorito": true },
+  "013_Video by corneteiroonline.mp4": { "fundamento": "chute", "favorito": true },
+  "014_Video by mercedes_roa.mp4": { "fundamento": "condução", "favorito": false },
+  "015_Video by alexramostraining.mp4": { "fundamento": "domínio", "favorito": true },
+  "016_Video by football_school_iq.mp4": { "fundamento": "drible", "favorito": true },
+  "017_Video by shoheiabe6.mp4": { "fundamento": "passe", "favorito": true },
+  "018_Video by prolific.soccer.mp4": { "fundamento": "passe", "favorito": true },
+  "019_Video by bigjohngk.mp4": { "fundamento": "chute", "favorito": true },
+  "020_Video by marquinhopromessa.mp4": { "fundamento": "marcação", "favorito": true },
+  "021_Video by leofootz.mp4": { "fundamento": "drible", "favorito": true },
+  "022_Video by alexramostraining.mp4": { "fundamento": "passe", "favorito": true },
+  "023_Video by hu.barry.mp4": { "fundamento": "drible", "favorito": true },
+  "024_Video by dnafutevolei_.mp4": { "fundamento": "outro", "favorito": false },
+  "025_Video by the_jwl.mp4": { "fundamento": "chute", "favorito": true },
+  "026_Video by futevoleidoquebra.mp4": { "fundamento": "outro", "favorito": false },
+  "027_Video by rugbybricks.mp4": { "fundamento": "chute", "favorito": true },
+  "028_Video by the_jwl.mp4": { "fundamento": "condução", "favorito": true },
+  "029_Video by alexramostraining.mp4": { "fundamento": "drible", "favorito": true },
+  "030_Video by ricardoprofut.mp4": { "fundamento": "domínio", "favorito": true },
+  "031_Video by edu.shoow.mp4": { "fundamento": "outro", "favorito": true },
+  "032_Video by alexramostraining.mp4": { "fundamento": "chute", "favorito": true },
+  "033_Video by jamiebreeno.mp4": { "fundamento": "condução", "favorito": true },
+  "034_Video by brentgtraining.mp4": { "fundamento": "passe", "favorito": true },
+  "035_Video by ricardoprofut.mp4": { "fundamento": "marcação", "favorito": true },
+  "036_Video by regate_takuya.mp4": { "fundamento": "condução", "favorito": true },
+  "037_Video by kano_aus.mp4": { "fundamento": "domínio", "favorito": true },
+  "038_Video by futblack_.mp4": { "fundamento": "chute", "favorito": true },
+  "039_Video by zth.training.mp4": { "fundamento": "chute", "favorito": true },
+  "040_Video by marcelinhocariocaoficial.mp4": { "fundamento": "chute", "favorito": false },
+  "041_Video by rios.futebol.mp4": { "fundamento": "drible", "favorito": true },
+  "042_Video by projectzeronow.mp4": { "fundamento": "chute", "favorito": true },
+  "043_Video by skillafootball.mp4": { "fundamento": "chute", "favorito": true },
+  "044_Video by gavindefootball.mp4": { "fundamento": "chute", "favorito": true },
+  "045_Video by nspsoccer.mp4": { "fundamento": "domínio", "favorito": true },
+  "046_Video by nspsoccer.mp4": { "fundamento": "chute", "favorito": true },
+  "047_Video by increasefootball.mp4": { "fundamento": "domínio", "favorito": true },
+  "048_Video by brentgtraining.mp4": { "fundamento": "domínio", "favorito": true },
+  "049_Video by roycesports.mp4": { "fundamento": "condução", "favorito": true },
+  "050_Video by goalman_.mp4": { "fundamento": "domínio", "favorito": true },
+  "051_Video by optimalsoccertraining.mp4": { "fundamento": "passe", "favorito": true },
+  "052_Video by hamadaadam10.mp4": { "fundamento": "chute", "favorito": true },
+  "053_Video by futblack_.mp4": { "fundamento": "chute", "favorito": false },
+  "054_Video by 777_livl.mp4": { "fundamento": "chute", "favorito": true },
+  "055_Video by alexramostraining.mp4": { "fundamento": "chute", "favorito": true },
+  "056_Video by senne_gk.mp4": { "fundamento": "chute", "favorito": true },
+  "057_Video by alexramostraining.mp4": { "fundamento": "drible", "favorito": true },
+  "058_Video by dicadogordinhoo.mp4": { "fundamento": "domínio", "favorito": true },
+  "059_Video by jawadzakari.mp4": { "fundamento": "condução", "favorito": false },
+  "060_Video by nivassfut.mp4": { "fundamento": "condução", "favorito": true },
+  "061_Video by nspsoccer.mp4": { "fundamento": "passe", "favorito": true },
+  "062_Video by brentgtraining.mp4": { "fundamento": "drible", "favorito": true },
+  "063_Video by chowkit.football.mp4": { "fundamento": "drible", "favorito": true },
+  "064_Video by the_jwl.mp4": { "fundamento": "passe", "favorito": true },
+  "065_Video by nahueloyola.mp4": { "fundamento": "chute", "favorito": true },
+  "066_Video by nxtphasesoccer.mp4": { "fundamento": "condução", "favorito": true },
+  "067_Video by nxtphasesoccer.mp4": { "fundamento": "condução", "favorito": true },
+  "068_Video by jawadzakari.mp4": { "fundamento": "drible", "favorito": true },
+  "069_Video by pierrecastempresas.mp4": { "fundamento": "chute", "favorito": false },
+  "070_Video by soccercoachtrav.mp4": { "fundamento": "chute", "favorito": true },
+  "071_Video by nspsoccer.mp4": { "fundamento": "passe", "favorito": true },
+  "072_16M views · 1.1M reactions ｜ Classic Cri.mp4": { "fundamento": "drible", "favorito": true },
+  "073_1M views · 10K reactions ｜ Quem se lembr.mp4": { "fundamento": "condução", "favorito": true },
+  "074_5 Body Feints Every Player MUST Know (Wi.mp4": { "fundamento": "drible", "favorito": true },
+  "075_Esse drible do Denilson é um absurdo! @d.mp4": { "fundamento": "drible", "favorito": true },
+  "077_O Espetáculo De Romário 😱🥵🤌🍷⚽️.mp4": { "fundamento": "drible", "favorito": true }
+        };
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const mode = urlParams.get('mode') || 'todos';
+
+        // Configuração baseada no modo
+        if (mode === 'favoritos') {
+            document.getElementById('back-link').href = "favoritos.html";
+            document.documentElement.style.setProperty('--accent', '#ffeb3b');
+        }
+
+        const categories = ["domínio", "passe", "chute", "drible", "condução", "cabeceio", "marcação", "técnica atlética", "outro", ""];
+        let playlist = [];
+
+        // Preenche a playlist na exata ordem dos fundamentos
+        categories.forEach(cat => {
+            const vids = Object.keys(videoData).filter(file => (videoData[file].fundamento || "") === cat);
+            vids.forEach(file => {
+                if (mode === 'favoritos' && !videoData[file].favorito) return; 
+                playlist.push(file);
+            });
+        });
+
+        let currentIndex = 0;
+        const player = document.getElementById('video-player');
+        const source = document.getElementById('video-source');
+        const counter = document.getElementById('counter');
+        const fundLabel = document.getElementById('video-fundamento');
+
+        function loadVideo(index) {
+            if (index < 0 || index >= playlist.length) return;
+            currentIndex = index;
+            const currentFile = playlist[currentIndex];
+
+            source.src = `videos_baixados/${currentFile}`;
+            player.load();
+            player.play().catch(e => console.log("Auto-play prevented by browser"));
+
+            counter.innerText = `${currentIndex + 1} / ${playlist.length}`;
+
+            let fund = videoData[currentFile].fundamento || "Sem Categoria";
+            fundLabel.innerText = "🎬 MODO CINEMA - " + fund.toUpperCase() + (videoData[currentFile].favorito ? " ⭐" : "");
+        }
+
+        function changeVid(step) {
+            let nextIndex = currentIndex + step;
+            if (nextIndex >= 0 && nextIndex < playlist.length) {
+                loadVideo(nextIndex);
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === "ArrowRight") changeVid(1);
+            if (e.key === "ArrowLeft") changeVid(-1);
+        });
+
+        loadVideo(0);
+    </script>
+</body>
+</html>

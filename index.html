@@ -54,16 +54,19 @@
                     <h2 style="font-size: 1.4rem;">FL Training System</h2>
                 </div>
                 <!-- Mode switcher -->
-                <div class="mode-switcher">
-                    <button id="btn-mode-fundamentals" class="mode-btn active">
-                        <i class="fa-solid fa-futbol"></i> Fundamentos
+                <div class="mode-switcher" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <button id="btn-mode-fundamentals" class="mode-btn active" style="margin: 0; padding: 10px 4px; font-size: 0.8rem; height: 100%;">
+                        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;"><i class="fa-solid fa-futbol" style="font-size:1.1rem; margin:0;"></i> <span>Fundamentos</span></div>
                     </button>
-                    <button id="btn-mode-week" class="mode-btn">
-                        <i class="fa-solid fa-calendar-week"></i> Treino da Semana
+                    <button id="btn-mode-week" class="mode-btn" style="margin: 0; padding: 10px 4px; font-size: 0.8rem; height: 100%;">
+                        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;"><i class="fa-solid fa-calendar-week" style="font-size:1.1rem; margin:0;"></i> <span>Treinos</span></div>
                     </button>
-                    <button id="btn-mode-prancheta" class="mode-btn">
-                        <i class="fa-solid fa-chalkboard"></i> Prancheta
+                    <button id="btn-mode-prancheta" class="mode-btn" style="margin: 0; padding: 10px 4px; font-size: 0.8rem; height: 100%;">
+                        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;"><i class="fa-solid fa-chalkboard" style="font-size:1.1rem; margin:0;"></i> <span>Prancheta</span></div>
                     </button>
+                    <a href="filmagem/todos_videos.html" target="_blank" class="mode-btn" style="margin: 0; padding: 10px 4px; font-size: 0.8rem; height: 100%; text-decoration: none; display: flex; align-items: center; justify-content: center; color: inherit; background: rgba(255,107,53,0.1); border: 1px solid rgba(255,107,53,0.3);">
+                        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;"><i class="fa-solid fa-video" style="font-size:1.1rem; margin:0; color: #ff6b35;"></i> <span style="font-weight:bold; color:#ff6b35;">RepVid</span></div>
+                    </a>
                 </div>
             </div>
 
