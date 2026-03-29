@@ -31,8 +31,15 @@
 <body>
 
     <div class="header">
-        <h1>Football Lab</h1>
-        <div class="nav-links">
+        <div style="display: flex; align-items: center; gap: 15px; flex-wrap:wrap;">
+            <img src="https://footballlab.com.br/favicon.svg" alt="FL" style="width: 48px; height: 48px;">
+            <div style="display:flex; flex-direction:column;">
+                <h2 style="font-size: 1.4rem; margin:0; font-family: 'Outfit', sans-serif; color:white;">FL Training System</h2>
+                <span style="color:var(--accent); font-weight:bold; font-size: 0.9rem;">Galeria de Fundamentos</span>
+            </div>
+            <a href="../" style="margin-left:15px; color:#aaa; text-decoration:none; padding:8px 15px; border:1px solid #444; border-radius:6px; font-size:0.9rem; transition:0.3s;" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#aaa';">⬅ Voltar para o App</a>
+        </div>
+        <div class="nav-links" style="margin-top:10px;">
             <a href="todos_videos.html" class="active" id="nav-todos">Todos (0)</a>
             <a href="favoritos.html" id="nav-fav">⭐ Favoritos (0)</a>
         </div>
