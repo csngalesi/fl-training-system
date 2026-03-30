@@ -25,7 +25,7 @@
         }
         h1 { color: #3b82f6; margin: 0; font-size: 2rem; text-transform: uppercase; font-weight: 900;}
         .time-badge {
-            background: #ef4444; /* Vermelho Rec */
+            background: #ef4444; 
             padding: 10px 20px;
             border-radius: 8px;
             font-size: 1.5rem;
@@ -44,8 +44,8 @@
         .video-container {
             display: flex;
             justify-content: center;
-            margin-bottom: 20px;
-            height: 55vh;
+            margin-bottom: 10px;
+            height: 48vh;
         }
         .video-box {
             width: 80%;
@@ -59,43 +59,57 @@
             position: relative;
         }
         
-        /* OVERLAY DO INSTAGRAM REELS (9:16) */
         .ig-overlay {
             position: absolute;
             top: 0; bottom: 0; left: 50%;
             transform: translateX(-50%);
             height: 100%;
             aspect-ratio: 9/16;
-            box-shadow: 0 0 0 9999px rgba(0,0,0,0.85); /* Máscara escurecedora gigantesta ao redor do centro */
-            pointer-events: none; /* Deixa os cliques passarem pro vídeo */
+            box-shadow: 0 0 0 9999px rgba(0,0,0,0.85); 
+            pointer-events: none; 
             border: 2px dashed rgba(255,255,255,0.6);
             border-radius: 10px;
-            display: none; /* Escondido por padrão */
+            display: none; 
             z-index: 5;
         }
         .ig-overlay::after {
             content: '📱 Framing IG Reels';
             position: absolute;
-            top: 15px;
-            left: 15px;
-            color: white;
-            font-size: 1rem;
-            font-weight: bold;
-            font-family: inherit;
-            background: #e1306c;
-            padding: 5px 10px;
-            border-radius: 20px;
-            text-shadow: none;
+            top: 15px; left: 15px;
+            color: white; font-size: 1rem; font-weight: bold;
+            font-family: inherit; background: #e1306c;
+            padding: 5px 10px; border-radius: 20px;
         }
 
-        video {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            background: #000;
+        video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+        
+        /* RELACIONADOS GALLERY */
+        .related-tray {
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            padding: 10px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 10px;
+            margin-bottom: 15px;
+            min-height: 120px;
+            justify-content: center;
         }
+        .rel-item {
+            flex: 0 0 160px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #1e293b;
+            position: relative;
+        }
+        .rel-item video {
+            width: 100%; height: 100px; object-fit: cover;
+        }
+        .rel-label {
+            font-size: 0.8rem; font-weight: bold; padding: 3px;
+        }
+
         .controls {
-            margin-top: 15px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -109,54 +123,19 @@
             max-width: 800px;
         }
         input[type="text"] {
-            flex: 1;
-            font-size: 2rem;
-            padding: 15px;
-            border-radius: 10px;
-            border: none;
-            text-align: center;
-            font-family: inherit;
-            font-weight: 700;
+            flex: 1; font-size: 2rem; padding: 15px; border-radius: 10px; border: none; text-align: center; font-family: inherit; font-weight: 700;
         }
         
-        /* BOTÃO ESTRELA (FAVORITO) */
         .estrela-btn {
-            background: transparent;
-            color: #64748b;
-            border: 3px solid #64748b;
-            font-size: 1.8rem;
-            padding: 10px 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 900;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            background: transparent; color: #64748b; border: 3px solid #64748b; font-size: 1.8rem; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 900; transition: all 0.3s;
         }
         .estrela-btn.active {
-            color: #facc15;
-            background: rgba(250, 204, 21, 0.15);
-            border-color: #facc15;
-            box-shadow: 0 0 15px rgba(250, 204, 21, 0.3);
+            color: #facc15; background: rgba(250, 204, 21, 0.15); border-color: #facc15; box-shadow: 0 0 15px rgba(250, 204, 21, 0.3);
         }
 
-        .btn-group {
-            display: flex;
-            gap: 15px;
-        }
-        button {
-            padding: 15px 30px;
-            font-size: 1.5rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 700;
-            transition: 0.2s;
-            color: #fff;
-        }
-        .btn-primary { background: #3b82f6; }
-        .btn-primary:active { background: #2563eb; }
+        .btn-group { display: flex; gap: 15px; }
+        button { padding: 15px 30px; font-size: 1.5rem; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; color: #fff; }
+        .btn-primary { background: #3b82f6; } .btn-primary:active { background: #2563eb; }
         .btn-secondary { background: #475569; }
         .btn-ig { background: #e1306c; border: 2px solid #ca265d; }
         .btn-export { background: #559c31; margin-top: 5px; box-shadow: 0 4px 15px rgba(85, 156, 49, 0.4); }
@@ -173,13 +152,17 @@
         <div style="font-size: 1.5rem; font-weight: 700;">Tomada: <span id="counterDisplay">1/259</span></div>
     </div>
 
+    <!-- MAIN PLAYER -->
     <div class="video-container" id="videoContainer">
         <div class="video-box" id="vpbox">
             <video id="mainVid" src="" loop controls autoplay></video>
-            <!-- Moldura Instagram -->
             <div class="ig-overlay" id="igOverlay"></div>
         </div>
     </div>
+
+    <!-- PISTA DE VÍDEOS DO MESMO TEMA (RELACIONADOS) -->
+    <div id="relatedTitle" style="text-align: left; margin-left: 10%; font-weight: bold; color: #94a3b8; display: none;">🎞️ Outros ângulos/takes deste mesmo fundamento:</div>
+    <div class="related-tray" id="relatedVideos"></div>
 
     <div class="controls">
         <div class="inputs-row">
@@ -189,14 +172,13 @@
         
         <div class="btn-group">
             <button class="btn-secondary" onclick="prevVideo()">⏮️ Anterior</button>
-            <button class="btn-ig" onclick="toggleIGMask()">📱 Ligar / Desligar Lente IG</button>
+            <button class="btn-ig" onclick="toggleIGMask()">📱 Ligar Lente IG</button>
             <button class="btn-primary" onclick="salvarEAvancar()">Salvar e Avançar ⏭️</button>
             <button class="btn-secondary" onclick="pular()">Pular ⏭️</button>
         </div>
-        <button class="btn-export" onclick="exportarScript()">💾 Baixar Script de Renomeio Definitivo (.ps1)</button>
+        <button class="btn-export" onclick="exportarScript()">💾 Baixar Script Definitivo (.ps1)</button>
     </div>
 
-    <!-- Carrega o catálogo gerado pelo PowerShell -->
     <script src="catalogo_simples.js"></script>
 
     <script>
@@ -211,6 +193,8 @@
         const vpBox = document.getElementById('vpbox');
         const igOverlay = document.getElementById('igOverlay');
         const estrelaBtn = document.getElementById('estrelaBtn');
+        const relatedVideos = document.getElementById('relatedVideos');
+        const relatedTitle = document.getElementById('relatedTitle');
         
         let isEstrela = false;
         let isIGMaskOn = false;
@@ -226,6 +210,55 @@
             estrelaBtn.innerText = isEstrela ? "⭐ Estrela" : "☆ Estrela";
         }
 
+        // Função mágica para extrair o assunto limpo do nome do arquivo real físico (que já foi renomeado uma vez)
+        function extractTopicFromFilename(pathUri) {
+            if (!pathUri) return "";
+            const filename = pathUri.split('/').pop().split('.')[0];
+            
+            // Remove sufixo de cartão (_cartao1)
+            let clean = filename.replace(/_cartao[12]$/i, '');
+            // Remove sufixo de ESTRELA se tiver (_ESTRELA)
+            clean = clean.replace(/_ESTRELA$/i, '');
+            // Remove prefixo numeral secuencial se houver (ex: 041_)
+            clean = clean.replace(/^\\d{3}_/, '');
+            
+            if (clean.match(/^C\\d{4}$/) || clean.match(/^GUI\\d{4}$/)) return ""; // O arquivo nunca foi classificado (nome original Sony)
+            
+            // Troca underlines por espaços pra ficar lindão no Input
+            return clean.replace(/_/g, ' ');
+        }
+
+        function renderRelated(topic) {
+            relatedVideos.innerHTML = '';
+            if (!topic) {
+                relatedTitle.style.display = 'none';
+                return;
+            }
+            relatedTitle.style.display = 'block';
+
+            // Find all videos that contain this topic (slugified) in their filename
+            const searchSlug = topic.replace(/ /g, '_').toLowerCase();
+            
+            const related = videosData.filter(v => {
+                const fname = v.Path.substring(v.Path.lastIndexOf('/')+1).toLowerCase();
+                return fname.includes(searchSlug) || extractTopicFromFilename(v.Path).toLowerCase() === topic.toLowerCase();
+            });
+
+            related.forEach((r, idx) => {
+                const color = r.Card === 1 ? '#559c31' : '#3b82f6';
+                const isCurrentUrl = r.Path === videosData[currentIndex].Path;
+                const borderSz = isCurrentUrl ? '4px solid #facc15' : \`2px solid \${color}\`;
+                
+                relatedVideos.innerHTML += \`
+                    <div class="rel-item" style="border: \${borderSz};">
+                        <div class="rel-label" style="background:\${color};">CARTÃO \${r.Card}</div>
+                        <!-- We don't autoplay these so it doesn't crash the browser, just visual thumbs! -->
+                        <video src="\${r.Path}#t=2.0" style="pointer-events:none;"></video>
+                    </div>
+                \`;
+            });
+        }
+
         function renderCurrent() {
             if (currentIndex >= videosData.length) {
                 alert("Todas as tomadas foram revisadas! Você já pode exportar o script.");
@@ -233,38 +266,47 @@
             }
 
             const item = videosData[currentIndex];
-            timeText.innerText = `🕒 ${item.Time}`;
-            cardBadge.innerText = `CÂMERA / CARTÃO ${item.Card}`;
+            timeText.innerText = \`🕒 \${item.Time}\`;
+            cardBadge.innerText = \`CÂMERA / CARTÃO \${item.Card}\`;
             
-            // Mudar cor da borda de acordo com o cartão para facilitação visual
             if (item.Card === 1) {
-                vpBox.style.borderColor = '#559c31'; // Verde Cartão 1
-                cardBadge.style.color = '#559c31';
+                vpBox.style.borderColor = '#559c31'; cardBadge.style.color = '#559c31';
             } else {
-                vpBox.style.borderColor = '#3b82f6'; // Azul Cartão 2
-                cardBadge.style.color = '#3b82f6';
+                vpBox.style.borderColor = '#3b82f6'; cardBadge.style.color = '#3b82f6';
             }
 
             counterDisplay.innerText = (currentIndex + 1) + ' / ' + videosData.length;
             
-            // Check if already classified
+            // Check if already classified in localStorage
             const existing = classifications.find(c => c.index === currentIndex);
+            
+            // Recupera a inteligência do nome físico existente pra não ter que digitar do zero!
+            const inheritedTopic = extractTopicFromFilename(item.Path);
+
             if (existing) {
                 assuntoInput.value = existing.assunto;
                 isEstrela = existing.estrela || false;
             } else {
-                assuntoInput.value = '';
-                isEstrela = false;
+                // Herda o assunto da "Criação original" do arquivo físico!
+                assuntoInput.value = inheritedTopic;
+                isEstrela = item.Path.includes("_ESTRELA."); // Lê fisicamente se já for estrela!
             }
-            // Sync UI toggle for Star
+            
             estrelaBtn.classList.toggle('active', isEstrela);
             estrelaBtn.innerText = isEstrela ? "⭐ Estrela" : "☆ Estrela";
 
-            // Render video
+            // Renderiza o cinto de relacionados 
+            renderRelated(assuntoInput.value);
+
             videoPlayer.src = item.Path;
             videoPlayer.play().catch(e => console.log("Autoplay prevent: ", e));
             assuntoInput.focus();
         }
+
+        // Listener pra atualizar os relacionados se ele digitar algo diferente!
+        assuntoInput.addEventListener('keyup', () => {
+            renderRelated(assuntoInput.value.trim());
+        });
 
         function salvarEAvancar() {
             const assunto = assuntoInput.value.trim().replace(/[^a-zA-Z0-9 -]/g, "");
@@ -274,7 +316,6 @@
             }
 
             const item = videosData[currentIndex];
-            
             classifications = classifications.filter(c => c.index !== currentIndex);
             
             classifications.push({
@@ -312,8 +353,8 @@
                 return;
             }
 
-            let script = "# Script Gerado pelo FL Classificador Sequencial\r\n";
-            script += "# Execute este script no PowerShell para aplicar os nomes definitivamente.\r\n\r\n";
+            let script = "# Script Gerado pelo FL Classificador Sequencial\\r\\n";
+            script += "# Execute este script no PowerShell para aplicar as NOVAS super tags (Estrela).\\r\\n\\r\\n";
 
             try {
                 classifications.forEach((c, idx) => {
@@ -322,7 +363,7 @@
                     const toWinPath = (uri) => {
                         if (!uri) return null;
                         let p = decodeURI(uri).replace('file:///', '');
-                        return p.split('/').join('\\');
+                        return p.split('/').join('\\\\');
                     };
 
                     const makeSafeName = (name) => name.trim().replace(/ /g, '_');
@@ -331,24 +372,30 @@
                     const ext1 = p1.substring(p1.lastIndexOf('.'));
                     const cam = c.card;
                     const safeAssunto = makeSafeName(c.assunto);
-                    const estrelaTag = c.estrela ? "ESTRELA_" : "";
+                    const estrelaSufixo = c.estrela ? "_ESTRELA" : "";
                     
-                    const newName1 = `${timePrefix}_${estrelaTag}${safeAssunto}_cartao${cam}${ext1}`;
-                    script += `Rename-Item -Path "${p1}" -NewName "${newName1}" -ErrorAction SilentlyContinue\r\n`;
+                    // Exemplo Novo: 041_dominio_parado_cartao1_ESTRELA.mp4
+                    const newName1 = \`\${timePrefix}_\${safeAssunto}_cartao\${cam}\${estrelaSufixo}\${ext1}\`;
+                    
+                    /* Previne que ele tente renomear se o nome já for exatamente o mesmo, evitando erro vermelho no PowerShell */
+                    const isAlreadyNamed = p1.endsWith("\\\\" + newName1);
+                    if (!isAlreadyNamed) {
+                        script += \`Rename-Item -Path "\${p1}" -NewName "\${newName1}" -ErrorAction SilentlyContinue\\r\\n\`;
+                    }
                 });
 
                 const blob = new Blob([script], { type: "text/plain;charset=utf-8" });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement("a");
                 a.href = url;
-                a.download = "FL_Renomear_Sequencial.ps1";
+                a.download = "FL_Renomear_SuperTags.ps1";
                 document.body.appendChild(a);
                 a.click();
                 setTimeout(() => {
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
                 }, 100);
-                alert("Script exportado! As modificações com Estrela estarão nos nomes dos arquivos.");
+                alert("Script exportado com sucesso! A tag será colocada DENTRO e NO FINAL do nome do arquivo pra ficar perfeito pra você.");
             } catch (err) {
                 alert("Houve um erro convertendo suas classificações: " + err.message);
             }
@@ -361,16 +408,10 @@
             }
         });
 
-        // Toggles by Spacebar only if video or document has focus without breaking typing
         document.addEventListener('keydown', (e) => {
             if (document.activeElement === assuntoInput) return;
-            // Hotkey for Star could be 'S' optionally!
-            if (e.key.toLowerCase() === 's') {
-                toggleEstrela();
-            }
-            if (e.key.toLowerCase() === 'i') {
-                toggleIGMask();
-            }
+            if (e.key.toLowerCase() === 's') { toggleEstrela(); }
+            if (e.key.toLowerCase() === 'i') { toggleIGMask(); }
         });
 
         renderCurrent();
