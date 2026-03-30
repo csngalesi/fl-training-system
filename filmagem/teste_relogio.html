@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validador de Relógio das Câmeras - Football Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;600&family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #0f172a;
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 40px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        h1 { color: #facc15; margin: 0; font-size: 2rem; text-transform: uppercase; font-weight: 900;}
+        .time-badge {
+            background: #ef4444;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .video-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            height: 60vh;
+        }
+        .video-box {
+            flex: 1;
+            background: #000;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 2px solid #334155;
+            position: relative;
+        }
+        .video-label {
+            text-transform: uppercase;
+            font-weight: 900;
+            padding: 10px;
+            font-size: 1.2rem;
+            z-index: 10;
+        }
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #000;
+        }
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+        button {
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: 0.2s;
+            color: #fff;
+            background: #3b82f6;
+        }
+        button:active { background: #2563eb; }
+        
+        .master-play {
+            background: #ef4444;
+            font-size: 1.5rem;
+            padding: 10px 40px;
+            border-radius: 50px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Teste de Relógio (4 Amostras de Overlap)</h1>
+        <div class="time-badge" id="timeDisplay">10:35:28</div>
+        <div style="font-size: 1.5rem; font-weight: 700;">Amostra: <span id="counterDisplay">1/4</span></div>
+    </div>
+
+    <!-- Master Play/Pause -->
+    <button class="master-play" onclick="togglePlayAll()">⏯️ Tocar / Pausar Sincronizado</button>
+
+    <div class="video-container" id="videoContainer">
+        <!-- Renderizado dinamicamente pelo JS -->
+    </div>
+
+    <div class="controls">
+        <button onclick="pular()">Próxima Amostra ⏭️</button>
+    </div>
+
+    <!-- Carrega o catálogo de teste gerado pelo PowerShell -->
+    <script src="catalogo_teste_relogio.js"></script>
+
+    <script>
+        let currentIndex = 0;
+        
+        const videoContainer = document.getElementById('videoContainer');
+        const timeDisplay = document.getElementById('timeDisplay');
+        const counterDisplay = document.getElementById('counterDisplay');
+        let playing = false;
+
+        function renderCurrent() {
+            if (currentIndex >= videosData.length) {
+                videoContainer.innerHTML = '<h2>Todas as 4 amostras validadas! O relógio bate?</h2>';
+                return;
+            }
+
+            const item = videosData[currentIndex];
+            timeDisplay.innerHTML = `🕒 Fechou o arquivo em: <b>${item.Time}</b>`;
+            counterDisplay.innerText = (currentIndex + 1) + ' / ' + videosData.length;
+            
+            // Render videos
+            videoContainer.innerHTML = '';
+            playing = false;
+
+            videoContainer.innerHTML = `
+                <div class="video-box">
+                    <div class="video-label" style="background:#559c31;">🎥 Câmera 1</div>
+                    <video id="vid1" src="${item.V1}" loop muted></video>
+                </div>
+                <div class="video-box">
+                    <div class="video-label" style="background:#3b82f6;">🎥 Câmera 2</div>
+                    <video id="vid2" src="${item.V2}" loop muted></video>
+                </div>
+            `;
+        }
+
+        function togglePlayAll() {
+            const v1 = document.getElementById('vid1');
+            const v2 = document.getElementById('vid2');
+            
+            playing = !playing;
+            
+            if (v1) { playing ? v1.play() : v1.pause(); }
+            if (v2) { playing ? v2.play() : v2.pause(); }
+        }
+
+        function pular() {
+            currentIndex++;
+            renderCurrent();
+        }
+
+        // Initialize
+        renderCurrent();
+
+    </script>
+</body>
+</html>

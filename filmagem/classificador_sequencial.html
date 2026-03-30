@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classificador Sequencial - Football Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;600&family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #0f172a;
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 40px; // Aumentar margens se a tela for mto larga
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            margin-bottom: 5px;
+        }
+        h1 { color: #3b82f6; margin: 0; font-size: 2rem; text-transform: uppercase; font-weight: 900;}
+        .time-badge {
+            background: #ef4444; /* Vermelho Rec */
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .card-badge {
+            background: #fff;
+            color: #000;
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-weight: 900;
+        }
+        .video-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            height: 60vh;
+        }
+        .video-box {
+            width: 80%;
+            max-width: 1200px;
+            background: #000;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 3px solid #334155;
+            position: relative;
+        }
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #000;
+        }
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        input[type="text"] {
+            font-size: 2rem;
+            padding: 15px;
+            border-radius: 10px;
+            border: none;
+            width: 70%;
+            max-width: 800px;
+            text-align: center;
+            font-family: inherit;
+            font-weight: 700;
+        }
+        .btn-group {
+            display: flex;
+            gap: 15px;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: 0.2s;
+            color: #fff;
+        }
+        .btn-primary { background: #3b82f6; }
+        .btn-primary:active { background: #2563eb; }
+        .btn-secondary { background: #475569; }
+        .btn-export { background: #559c31; margin-top: 5px; box-shadow: 0 4px 15px rgba(85, 156, 49, 0.4); }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Classificador Sequencial Absoluto</h1>
+        <div class="time-badge" id="timeDisplay">
+            <span id="timeText">🕒 10:35:28</span>
+            <span class="card-badge" id="cardBadge">CARTÃO 1</span>
+        </div>
+        <div style="font-size: 1.5rem; font-weight: 700;">Tomada: <span id="counterDisplay">1/259</span></div>
+    </div>
+
+    <div class="video-container" id="videoContainer">
+        <div class="video-box" id="vpbox">
+            <video id="mainVid" src="" loop controls autoplay></video>
+        </div>
+    </div>
+
+    <div class="controls">
+        <input type="text" id="assunto" placeholder="Digite o Assunto (Ex: Drible Curto)">
+        <div class="btn-group">
+            <button class="btn-secondary" onclick="prevVideo()">⏮️ Anterior</button>
+            <button class="btn-primary" onclick="salvarEAvancar()">Salvar e Avançar ⏭️</button>
+            <button class="btn-secondary" onclick="pular()">Pular ⏭️</button>
+        </div>
+        <button class="btn-export" onclick="exportarScript()">💾 Baixar Script de Renomeio (.ps1)</button>
+    </div>
+
+    <!-- Carrega o catálogo gerado pelo PowerShell -->
+    <script src="catalogo_simples.js"></script>
+
+    <script>
+        let currentIndex = parseInt(localStorage.getItem('fl_seq_index')) || 0;
+        let classifications = JSON.parse(localStorage.getItem('fl_seq_classifications')) || [];
+        
+        const videoPlayer = document.getElementById('mainVid');
+        const timeText = document.getElementById('timeText');
+        const cardBadge = document.getElementById('cardBadge');
+        const counterDisplay = document.getElementById('counterDisplay');
+        const assuntoInput = document.getElementById('assunto');
+        const vpBox = document.getElementById('vpbox');
+
+        function renderCurrent() {
+            if (currentIndex >= videosData.length) {
+                alert("Todas as tomadas foram revisadas! Você já pode exportar o script.");
+                return;
+            }
+
+            const item = videosData[currentIndex];
+            timeText.innerText = `🕒 ${item.Time}`;
+            cardBadge.innerText = `CÂMERA / CARTÃO ${item.Card}`;
+            
+            // Mudar cor da borda de acordo com o cartão para facilitação visual
+            if (item.Card === 1) {
+                vpBox.style.borderColor = '#559c31'; // Verde Cartão 1
+                cardBadge.style.color = '#559c31';
+            } else {
+                vpBox.style.borderColor = '#3b82f6'; // Azul Cartão 2
+                cardBadge.style.color = '#3b82f6';
+            }
+
+            counterDisplay.innerText = (currentIndex + 1) + ' / ' + videosData.length;
+            
+            // Check if already classified
+            const existing = classifications.find(c => c.index === currentIndex);
+            if (existing) {
+                assuntoInput.value = existing.assunto;
+            } else {
+                assuntoInput.value = '';
+            }
+
+            // Render video
+            videoPlayer.src = item.Path;
+            videoPlayer.play().catch(e => console.log("Autoplay prevent: ", e));
+            assuntoInput.focus();
+        }
+
+        function salvarEAvancar() {
+            const assunto = assuntoInput.value.trim().replace(/[^a-zA-Z0-9 -]/g, "");
+            if (!assunto) {
+                alert('Digite um assunto para classificar (sem caracteres especiais)!');
+                return;
+            }
+
+            const item = videosData[currentIndex];
+            
+            classifications = classifications.filter(c => c.index !== currentIndex);
+            
+            classifications.push({
+                index: currentIndex,
+                assunto: assunto,
+                path: item.Path,
+                card: item.Card
+            });
+
+            localStorage.setItem('fl_seq_classifications', JSON.stringify(classifications));
+            localStorage.setItem('fl_seq_index', currentIndex + 1);
+            
+            currentIndex++;
+            renderCurrent();
+        }
+
+        function pular() {
+            currentIndex++;
+            localStorage.setItem('fl_seq_index', currentIndex);
+            renderCurrent();
+        }
+
+        function prevVideo() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                localStorage.setItem('fl_seq_index', currentIndex);
+                renderCurrent();
+            }
+        }
+
+        function exportarScript() {
+            if (classifications.length === 0) {
+                alert("Nenhum vídeo classificado ainda!");
+                return;
+            }
+
+            let script = "# Script Gerado pelo FL Classificador Sequencial\\n";
+            script += "# Execute este script no PowerShell para aplicar os nomes definitivamente.\\n\\n";
+
+            classifications.forEach((c, idx) => {
+                const timePrefix = String(idx+1).padStart(3, '0');
+
+                // Decode URI to Windows Local Path
+                const toWinPath = (uri) => {
+                    if (!uri) return null;
+                    let p = decodeURI(uri).replace('file:///', '');
+                    return p.replace(/\\//g, '\\\\');
+                };
+
+                const makeSafeName = (name) => name.trim().replace(/ /g, '_');
+
+                const p1 = toWinPath(c.path);
+                const ext1 = p1.substring(p1.lastIndexOf('.'));
+                const cam = c.card;
+                const safeAssunto = makeSafeName(c.assunto);
+                
+                // Formato Exemplo: "001_Drible_Curto_cartao1.mp4"
+                const newName1 = `${timePrefix}_${safeAssunto}_cartao${cam}${ext1}`;
+                
+                script += `Rename-Item -Path "${p1}" -NewName "${newName1}" -ErrorAction SilentlyContinue\\n`;
+            });
+
+            const blob = new Blob([script], { type: "text/plain;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "FL_Renomear_Sequencial.ps1";
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        assuntoInput.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                salvarEAvancar();
+            }
+        });
+
+        renderCurrent();
+
+    </script>
+</body>
+</html>
