@@ -18,7 +18,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 40px; // Aumentar margens se a tela for mto larga
+            padding: 10px 40px;
             background: rgba(255,255,255,0.05);
             border-radius: 10px;
             margin-bottom: 5px;
@@ -45,7 +45,7 @@
             display: flex;
             justify-content: center;
             margin-bottom: 20px;
-            height: 60vh;
+            height: 55vh;
         }
         .video-box {
             width: 80%;
@@ -58,6 +58,36 @@
             border: 3px solid #334155;
             position: relative;
         }
+        
+        /* OVERLAY DO INSTAGRAM REELS (9:16) */
+        .ig-overlay {
+            position: absolute;
+            top: 0; bottom: 0; left: 50%;
+            transform: translateX(-50%);
+            height: 100%;
+            aspect-ratio: 9/16;
+            box-shadow: 0 0 0 9999px rgba(0,0,0,0.85); /* Máscara escurecedora gigantesta ao redor do centro */
+            pointer-events: none; /* Deixa os cliques passarem pro vídeo */
+            border: 2px dashed rgba(255,255,255,0.6);
+            border-radius: 10px;
+            display: none; /* Escondido por padrão */
+            z-index: 5;
+        }
+        .ig-overlay::after {
+            content: '📱 Framing IG Reels';
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            font-family: inherit;
+            background: #e1306c;
+            padding: 5px 10px;
+            border-radius: 20px;
+            text-shadow: none;
+        }
+
         video {
             width: 100%;
             height: 100%;
@@ -71,17 +101,46 @@
             align-items: center;
             gap: 15px;
         }
+        .inputs-row {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            width: 70%;
+            max-width: 800px;
+        }
         input[type="text"] {
+            flex: 1;
             font-size: 2rem;
             padding: 15px;
             border-radius: 10px;
             border: none;
-            width: 70%;
-            max-width: 800px;
             text-align: center;
             font-family: inherit;
             font-weight: 700;
         }
+        
+        /* BOTÃO ESTRELA (FAVORITO) */
+        .estrela-btn {
+            background: transparent;
+            color: #64748b;
+            border: 3px solid #64748b;
+            font-size: 1.8rem;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 900;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .estrela-btn.active {
+            color: #facc15;
+            background: rgba(250, 204, 21, 0.15);
+            border-color: #facc15;
+            box-shadow: 0 0 15px rgba(250, 204, 21, 0.3);
+        }
+
         .btn-group {
             display: flex;
             gap: 15px;
@@ -99,6 +158,7 @@
         .btn-primary { background: #3b82f6; }
         .btn-primary:active { background: #2563eb; }
         .btn-secondary { background: #475569; }
+        .btn-ig { background: #e1306c; border: 2px solid #ca265d; }
         .btn-export { background: #559c31; margin-top: 5px; box-shadow: 0 4px 15px rgba(85, 156, 49, 0.4); }
     </style>
 </head>
@@ -116,17 +176,24 @@
     <div class="video-container" id="videoContainer">
         <div class="video-box" id="vpbox">
             <video id="mainVid" src="" loop controls autoplay></video>
+            <!-- Moldura Instagram -->
+            <div class="ig-overlay" id="igOverlay"></div>
         </div>
     </div>
 
     <div class="controls">
-        <input type="text" id="assunto" placeholder="Digite o Assunto (Ex: Drible Curto)">
+        <div class="inputs-row">
+            <button class="estrela-btn" id="estrelaBtn" onclick="toggleEstrela()" title="Marque essa estrela se o lance for um espetáculo para vídeos curtos!">☆ Estrela</button>
+            <input type="text" id="assunto" placeholder="Digite o Assunto (Ex: Drible Curto)">
+        </div>
+        
         <div class="btn-group">
             <button class="btn-secondary" onclick="prevVideo()">⏮️ Anterior</button>
+            <button class="btn-ig" onclick="toggleIGMask()">📱 Ligar / Desligar Lente IG</button>
             <button class="btn-primary" onclick="salvarEAvancar()">Salvar e Avançar ⏭️</button>
             <button class="btn-secondary" onclick="pular()">Pular ⏭️</button>
         </div>
-        <button class="btn-export" onclick="exportarScript()">💾 Baixar Script de Renomeio (.ps1)</button>
+        <button class="btn-export" onclick="exportarScript()">💾 Baixar Script de Renomeio Definitivo (.ps1)</button>
     </div>
 
     <!-- Carrega o catálogo gerado pelo PowerShell -->
@@ -142,6 +209,22 @@
         const counterDisplay = document.getElementById('counterDisplay');
         const assuntoInput = document.getElementById('assunto');
         const vpBox = document.getElementById('vpbox');
+        const igOverlay = document.getElementById('igOverlay');
+        const estrelaBtn = document.getElementById('estrelaBtn');
+        
+        let isEstrela = false;
+        let isIGMaskOn = false;
+
+        function toggleIGMask() {
+            isIGMaskOn = !isIGMaskOn;
+            igOverlay.style.display = isIGMaskOn ? 'block' : 'none';
+        }
+
+        function toggleEstrela() {
+            isEstrela = !isEstrela;
+            estrelaBtn.classList.toggle('active', isEstrela);
+            estrelaBtn.innerText = isEstrela ? "⭐ Estrela" : "☆ Estrela";
+        }
 
         function renderCurrent() {
             if (currentIndex >= videosData.length) {
@@ -168,9 +251,14 @@
             const existing = classifications.find(c => c.index === currentIndex);
             if (existing) {
                 assuntoInput.value = existing.assunto;
+                isEstrela = existing.estrela || false;
             } else {
                 assuntoInput.value = '';
+                isEstrela = false;
             }
+            // Sync UI toggle for Star
+            estrelaBtn.classList.toggle('active', isEstrela);
+            estrelaBtn.innerText = isEstrela ? "⭐ Estrela" : "☆ Estrela";
 
             // Render video
             videoPlayer.src = item.Path;
@@ -193,7 +281,8 @@
                 index: currentIndex,
                 assunto: assunto,
                 path: item.Path,
-                card: item.Card
+                card: item.Card,
+                estrela: isEstrela
             });
 
             localStorage.setItem('fl_seq_classifications', JSON.stringify(classifications));
@@ -242,8 +331,9 @@
                     const ext1 = p1.substring(p1.lastIndexOf('.'));
                     const cam = c.card;
                     const safeAssunto = makeSafeName(c.assunto);
+                    const estrelaTag = c.estrela ? "ESTRELA_" : "";
                     
-                    const newName1 = `${timePrefix}_${safeAssunto}_cartao${cam}${ext1}`;
+                    const newName1 = `${timePrefix}_${estrelaTag}${safeAssunto}_cartao${cam}${ext1}`;
                     script += `Rename-Item -Path "${p1}" -NewName "${newName1}" -ErrorAction SilentlyContinue\r\n`;
                 });
 
@@ -258,8 +348,9 @@
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
                 }, 100);
+                alert("Script exportado! As modificações com Estrela estarão nos nomes dos arquivos.");
             } catch (err) {
-                alert("Houve um erro convertendo suas classificações. Pressione F12 para ver o erro e me avise! " + err.message);
+                alert("Houve um erro convertendo suas classificações: " + err.message);
             }
         }
 
@@ -267,6 +358,18 @@
             if (event.key === "Enter") {
                 event.preventDefault();
                 salvarEAvancar();
+            }
+        });
+
+        // Toggles by Spacebar only if video or document has focus without breaking typing
+        document.addEventListener('keydown', (e) => {
+            if (document.activeElement === assuntoInput) return;
+            // Hotkey for Star could be 'S' optionally!
+            if (e.key.toLowerCase() === 's') {
+                toggleEstrela();
+            }
+            if (e.key.toLowerCase() === 'i') {
+                toggleIGMask();
             }
         });
 
