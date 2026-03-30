@@ -223,39 +223,44 @@
                 return;
             }
 
-            let script = "# Script Gerado pelo FL Classificador Sequencial\\n";
-            script += "# Execute este script no PowerShell para aplicar os nomes definitivamente.\\n\\n";
+            let script = "# Script Gerado pelo FL Classificador Sequencial\r\n";
+            script += "# Execute este script no PowerShell para aplicar os nomes definitivamente.\r\n\r\n";
 
-            classifications.forEach((c, idx) => {
-                const timePrefix = String(idx+1).padStart(3, '0');
+            try {
+                classifications.forEach((c, idx) => {
+                    const timePrefix = String(idx+1).padStart(3, '0');
 
-                // Decode URI to Windows Local Path
-                const toWinPath = (uri) => {
-                    if (!uri) return null;
-                    let p = decodeURI(uri).replace('file:///', '');
-                    return p.replace(/\\//g, '\\\\');
-                };
+                    const toWinPath = (uri) => {
+                        if (!uri) return null;
+                        let p = decodeURI(uri).replace('file:///', '');
+                        return p.split('/').join('\\');
+                    };
 
-                const makeSafeName = (name) => name.trim().replace(/ /g, '_');
+                    const makeSafeName = (name) => name.trim().replace(/ /g, '_');
 
-                const p1 = toWinPath(c.path);
-                const ext1 = p1.substring(p1.lastIndexOf('.'));
-                const cam = c.card;
-                const safeAssunto = makeSafeName(c.assunto);
-                
-                // Formato Exemplo: "001_Drible_Curto_cartao1.mp4"
-                const newName1 = `${timePrefix}_${safeAssunto}_cartao${cam}${ext1}`;
-                
-                script += `Rename-Item -Path "${p1}" -NewName "${newName1}" -ErrorAction SilentlyContinue\\n`;
-            });
+                    const p1 = toWinPath(c.path);
+                    const ext1 = p1.substring(p1.lastIndexOf('.'));
+                    const cam = c.card;
+                    const safeAssunto = makeSafeName(c.assunto);
+                    
+                    const newName1 = `${timePrefix}_${safeAssunto}_cartao${cam}${ext1}`;
+                    script += `Rename-Item -Path "${p1}" -NewName "${newName1}" -ErrorAction SilentlyContinue\r\n`;
+                });
 
-            const blob = new Blob([script], { type: "text/plain;charset=utf-8" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "FL_Renomear_Sequencial.ps1";
-            a.click();
-            URL.revokeObjectURL(url);
+                const blob = new Blob([script], { type: "text/plain;charset=utf-8" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "FL_Renomear_Sequencial.ps1";
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+            } catch (err) {
+                alert("Houve um erro convertendo suas classificações. Pressione F12 para ver o erro e me avise! " + err.message);
+            }
         }
 
         assuntoInput.addEventListener("keypress", function(event) {
