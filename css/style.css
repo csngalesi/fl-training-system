@@ -511,7 +511,7 @@ h3 {
 
 /* VISUAL PITCH */
 .visual-panel {
-    width: 450px;
+    width: 600px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
