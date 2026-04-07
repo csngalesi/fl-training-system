@@ -575,8 +575,8 @@ h3 {
 
 /* Beautiful Grass Pitch */
 .pitch {
-    width: 240px;
-    height: 480px;
+    width: 320px;
+    height: 640px;
     /* Rich grassy gradient stripes */
     background: repeating-linear-gradient(0deg,
             #1b5e20,
