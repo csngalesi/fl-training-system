@@ -1,6 +1,13 @@
 -- FL Training System — Migration v7
--- Adds visible_in_week flag to fl_week_plans
--- Run this in Supabase SQL Editor
+-- Corrige RLS de fl_drills: permite update/delete para qualquer usuário autenticado
+-- (drills importados via SQL ficam com user_id NULL e eram bloqueados pelas policies antigas)
+-- Execute no SQL Editor do Supabase
 
-ALTER TABLE fl_week_plans
-    ADD COLUMN IF NOT EXISTS visible_in_week BOOLEAN NOT NULL DEFAULT false;
+DROP POLICY IF EXISTS "fl_drill_update" ON public.fl_drills;
+DROP POLICY IF EXISTS "fl_drill_delete" ON public.fl_drills;
+
+CREATE POLICY "fl_drill_update" ON public.fl_drills
+    FOR UPDATE USING (auth.uid() IS NOT NULL);
+
+CREATE POLICY "fl_drill_delete" ON public.fl_drills
+    FOR DELETE USING (auth.uid() IS NOT NULL);

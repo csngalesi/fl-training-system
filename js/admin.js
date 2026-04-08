@@ -6,7 +6,7 @@
     'use strict';
 
     // ── Constants ─────────────────────────────────────────────────
-    const PITCH_W = 180, PITCH_H = 360;   // builder pitch dimensions (px)
+    const PITCH_W = 460, PITCH_H = 580;   // builder pitch dimensions (px)
     const FRAME_COUNT = 30;
     const ACTOR_COLORS = { p1:'#ef4444', p2:'#3b82f6', p3:'#10b981', p4:'#f59e0b', p5:'#ef4444', p6:'#3b82f6', p7:'#10b981', p8:'#f59e0b' };
     const ACTOR_LABELS = { p1:'1', p2:'2', p3:'3', p4:'4', p5:'1', p6:'2', p7:'3', p8:'4' };
