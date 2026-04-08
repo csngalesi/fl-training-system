@@ -127,6 +127,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Prancheta
         initPrancheta();
 
+        // Controle de Carga
+        initCarga();
+
         // Event Listeners
         btnReplay.addEventListener('click', () => {
             if (currentDrill) playDrillAnimation(currentDrill);
@@ -400,6 +403,9 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('btn-replay').classList.remove('hidden');
             pitchEl.classList.remove('prancheta-mode');
         }
+
+        // Show Controle de Carga button only in week mode
+        document.getElementById('btn-carga').classList.toggle('hidden', mode !== 'week');
 
         if (mode === 'week') {
             fundTitle.textContent = 'Treino da Semana';
@@ -681,6 +687,154 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Init
         setTool('move');
+    }
+
+    // ==========================================================
+    // CONTROLE DE CARGA / PSE (Percepção Subjetiva de Esforço)
+    // ==========================================================
+
+    const PSE_ZONES = [
+        { min: 0,  max: 0,  label: 'Repouso',       color: '#94a3b8' },
+        { min: 1,  max: 2,  label: 'Muito Leve',     color: '#22c55e' },
+        { min: 3,  max: 4,  label: 'Leve',           color: '#84cc16' },
+        { min: 5,  max: 6,  label: 'Moderado',       color: '#eab308' },
+        { min: 7,  max: 8,  label: 'Intenso',        color: '#f97316' },
+        { min: 9,  max: 9,  label: 'Muito Intenso',  color: '#ef4444' },
+        { min: 10, max: 10, label: 'Máximo',         color: '#7c3aed' },
+    ];
+
+    let pseStudents   = [];
+    let pseIdCounter  = 0;
+
+    function getPseZone(pse) {
+        return PSE_ZONES.find(z => pse >= z.min && pse <= z.max) || PSE_ZONES[0];
+    }
+
+    function addPseStudent(name) {
+        pseIdCounter++;
+        pseStudents.push({ id: pseIdCounter, name: name || `Aluno ${pseIdCounter}`, pse: null });
+        renderPseStudents();
+    }
+
+    function removePseStudent(id) {
+        pseStudents = pseStudents.filter(s => s.id !== id);
+        renderPseStudents();
+    }
+
+    function setPseValue(id, val) {
+        const s = pseStudents.find(s => s.id === id);
+        if (s) s.pse = val;
+        renderPseStudents();
+    }
+
+    function renderPseStudents() {
+        const list = document.getElementById('carga-students-list');
+        if (!list) return;
+
+        if (!pseStudents.length) {
+            list.innerHTML = '<p style="color:var(--text-muted);font-size:.88rem;padding:8px 0">Nenhum aluno. Clique em + Aluno.</p>';
+            return;
+        }
+
+        list.innerHTML = pseStudents.map(s => `
+            <div class="pse-student-row" data-id="${s.id}">
+                <div class="pse-student-name">
+                    <input type="text" value="${escHtml(s.name)}" placeholder="Nome do aluno"
+                        class="pse-name-input" data-id="${s.id}"
+                        style="background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.2);
+                               color:var(--text-primary);font-size:.9rem;width:100%;outline:none;padding:2px 0">
+                    <button class="pse-remove-btn" data-id="${s.id}" title="Remover aluno">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="pse-scale">
+                    ${[0,1,2,3,4,5,6,7,8,9,10].map(v => `
+                        <button class="pse-btn pse-val-${v} ${s.pse === v ? 'selected' : ''}"
+                            data-id="${s.id}" data-val="${v}">${v}</button>
+                    `).join('')}
+                </div>
+            </div>
+        `).join('');
+
+        list.querySelectorAll('.pse-btn').forEach(btn => {
+            btn.addEventListener('click', () => setPseValue(parseInt(btn.dataset.id), parseInt(btn.dataset.val)));
+        });
+        list.querySelectorAll('.pse-remove-btn').forEach(btn => {
+            btn.addEventListener('click', () => removePseStudent(parseInt(btn.dataset.id)));
+        });
+        list.querySelectorAll('.pse-name-input').forEach(inp => {
+            inp.addEventListener('change', e => {
+                const s = pseStudents.find(s => s.id === parseInt(inp.dataset.id));
+                if (s) s.name = e.target.value;
+            });
+        });
+    }
+
+    function calcCarga() {
+        const filled = pseStudents.filter(s => s.pse !== null);
+        if (!filled.length) {
+            alert('Defina a PSE de pelo menos um aluno antes de calcular.');
+            return;
+        }
+        const DURATION = 60;
+        const results = filled.map(s => ({ ...s, load: s.pse * DURATION, zone: getPseZone(s.pse) }));
+        const avgPse  = results.reduce((sum, r) => sum + r.pse, 0) / results.length;
+        const avgLoad = Math.round(avgPse * DURATION);
+        const teamZone = getPseZone(Math.round(avgPse));
+
+        const table = document.getElementById('carga-results-table');
+        table.innerHTML = results.map(r => `
+            <div style="border-left:4px solid ${r.zone.color};background:rgba(255,255,255,.04);
+                        border-radius:8px;padding:10px 14px;display:flex;align-items:center;
+                        justify-content:space-between;gap:12px;flex-wrap:wrap">
+                <div style="font-weight:600;color:var(--text-primary);min-width:100px">${escHtml(r.name)}</div>
+                <div style="display:flex;align-items:center;gap:8px">
+                    <span style="background:${r.zone.color}33;color:${r.zone.color};border-radius:20px;
+                                 padding:2px 10px;font-size:.8rem;font-weight:700">PSE ${r.pse}</span>
+                    <span style="color:${r.zone.color};font-weight:600;font-size:.88rem">${r.zone.label}</span>
+                </div>
+                <div style="font-size:1.1rem;font-weight:800;color:${r.zone.color}">${r.load} UA</div>
+            </div>
+        `).join('');
+
+        document.getElementById('carga-team-summary').innerHTML = `
+            <div class="carga-result-card" style="border-color:${teamZone.color};text-align:center">
+                <div style="font-size:.75rem;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Média da Equipe</div>
+                <div style="font-size:2.2rem;font-weight:900;color:${teamZone.color};line-height:1">${avgLoad} <span style="font-size:1rem;font-weight:500">UA</span></div>
+                <div style="font-size:.85rem;color:${teamZone.color};margin-top:6px">PSE ${avgPse.toFixed(1)} · ${teamZone.label}</div>
+                <div style="font-size:.75rem;color:var(--text-muted);margin-top:4px">${filled.length} aluno${filled.length !== 1 ? 's' : ''} · sessão de ${DURATION} min</div>
+            </div>
+        `;
+
+        document.getElementById('carga-form-view').classList.add('hidden');
+        document.getElementById('carga-result-view').classList.remove('hidden');
+    }
+
+    function initCarga() {
+        const btnCargaOpen = document.getElementById('btn-carga');
+        const cargaModal   = document.getElementById('carga-modal');
+        if (!btnCargaOpen || !cargaModal) return;
+
+        btnCargaOpen.addEventListener('click', () => {
+            pseStudents  = [];
+            pseIdCounter = 0;
+            ['Aluno 1', 'Aluno 2', 'Aluno 3', 'Aluno 4'].forEach(n => addPseStudent(n));
+            document.getElementById('carga-form-view').classList.remove('hidden');
+            document.getElementById('carga-result-view').classList.add('hidden');
+            cargaModal.classList.remove('hidden');
+        });
+
+        document.getElementById('btn-add-aluno').addEventListener('click', () => addPseStudent());
+        document.getElementById('btn-calc-carga').addEventListener('click', calcCarga);
+
+        document.getElementById('btn-carga-back').addEventListener('click', () => {
+            document.getElementById('carga-form-view').classList.remove('hidden');
+            document.getElementById('carga-result-view').classList.add('hidden');
+        });
+
+        const btnClose = document.getElementById('btn-close-carga');
+        if (btnClose) btnClose.addEventListener('click', () => cargaModal.classList.add('hidden'));
+        cargaModal.addEventListener('click', e => { if (e.target === cargaModal) cargaModal.classList.add('hidden'); });
     }
 
     function escHtml(str) {
