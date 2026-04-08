@@ -22,6 +22,37 @@
 
 <body>
 
+    <!-- Modal Controle de Carga PSE -->
+    <div id="carga-modal" class="modal-overlay hidden">
+        <div class="modal-content glass-panel" style="max-width:680px;width:95%;">
+            <div class="modal-header">
+                <div>
+                    <h2><i class="fa-solid fa-gauge-high" style="color:#a78bfa;"></i> Controle de Carga</h2>
+                    <p style="font-size:.82rem;color:var(--text-muted);margin-top:3px;">PSE da Sessão · Escala CR10 de Borg · 60 min</p>
+                </div>
+                <button id="btn-close-carga" class="btn-icon"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div id="carga-form-view">
+                    <div id="carga-students-list" style="display:flex;flex-direction:column;gap:14px;margin-bottom:16px;"></div>
+                    <button id="btn-add-aluno" class="btn-secondary" style="width:100%;margin-bottom:16px;">
+                        <i class="fa-solid fa-user-plus"></i> Adicionar Aluno
+                    </button>
+                    <button id="btn-calc-carga" class="btn-primary" style="width:100%;background:linear-gradient(135deg,#7c3aed,#4f46e5);">
+                        <i class="fa-solid fa-calculator"></i> Calcular Carga
+                    </button>
+                </div>
+                <div id="carga-result-view" class="hidden">
+                    <div id="carga-results-table" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;"></div>
+                    <div id="carga-team-summary" style="background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.3);border-radius:10px;padding:14px;text-align:center;"></div>
+                    <button id="btn-carga-back" class="btn-secondary" style="width:100%;margin-top:14px;">
+                        <i class="fa-solid fa-arrow-left"></i> Voltar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Base Técnica -->
     <div id="tech-modal" class="modal-overlay hidden">
         <div class="modal-content glass-panel">
@@ -99,6 +130,9 @@
                 </div>
                 <button id="btn-tech-base" class="btn-primary hidden">
                     <i class="fa-solid fa-microscope"></i> Ver Base Técnica
+                </button>
+                <button id="btn-carga" class="btn-primary hidden" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);">
+                    <i class="fa-solid fa-gauge-high"></i> Controle de Carga
                 </button>
             </header>
 
