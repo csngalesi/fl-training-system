@@ -130,6 +130,52 @@ document.addEventListener('DOMContentLoaded', () => {
         // Controle de Carga
         initCarga();
 
+        // Mensagem modal
+        document.getElementById('btn-mensagem').addEventListener('click', async () => {
+            const modal   = document.getElementById('mensagem-modal');
+            const loading = document.getElementById('mensagem-loading');
+            const content = document.getElementById('mensagem-content');
+            const empty   = document.getElementById('mensagem-empty');
+            loading.classList.remove('hidden');
+            content.classList.add('hidden');
+            empty.classList.add('hidden');
+            modal.classList.remove('hidden');
+            try {
+                const data = await window.FLApi.Mensagem.get();
+                loading.classList.add('hidden');
+                if (data && (data.mensagem || data.destaque_tecnico)) {
+                    document.getElementById('mensagem-texto').textContent    = data.mensagem || '';
+                    document.getElementById('mensagem-destaque').textContent = data.destaque_tecnico || '';
+                    content.classList.remove('hidden');
+                } else {
+                    empty.classList.remove('hidden');
+                }
+            } catch (e) {
+                loading.classList.add('hidden');
+                empty.classList.remove('hidden');
+                console.error('[FL] Mensagem.get() error:', e);
+            }
+        });
+        document.getElementById('btn-close-mensagem').addEventListener('click', () => {
+            document.getElementById('mensagem-modal').classList.add('hidden');
+        });
+        document.getElementById('mensagem-modal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('mensagem-modal'))
+                document.getElementById('mensagem-modal').classList.add('hidden');
+        });
+
+        // Metodologia modal
+        document.getElementById('btn-metodologia').addEventListener('click', () => {
+            document.getElementById('metodologia-modal').classList.remove('hidden');
+        });
+        document.getElementById('btn-close-metodologia').addEventListener('click', () => {
+            document.getElementById('metodologia-modal').classList.add('hidden');
+        });
+        document.getElementById('metodologia-modal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('metodologia-modal'))
+                document.getElementById('metodologia-modal').classList.add('hidden');
+        });
+
         // Event Listeners
         btnReplay.addEventListener('click', () => {
             if (currentDrill) playDrillAnimation(currentDrill);
@@ -404,8 +450,10 @@ document.addEventListener('DOMContentLoaded', () => {
             pitchEl.classList.remove('prancheta-mode');
         }
 
-        // Show Controle de Carga button only in week mode
+        // Show Controle de Carga / Mensagem / Metodologia buttons only in week mode
         document.getElementById('btn-carga').classList.toggle('hidden', mode !== 'week');
+        document.getElementById('btn-mensagem').classList.toggle('hidden', mode !== 'week');
+        document.getElementById('btn-metodologia').classList.toggle('hidden', mode !== 'week');
 
         if (mode === 'week') {
             fundTitle.textContent = 'Treino da Semana';

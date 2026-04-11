@@ -53,6 +53,47 @@
         </div>
     </div>
 
+    <!-- Modal Mensagem -->
+    <div id="mensagem-modal" class="modal-overlay hidden">
+        <div class="modal-content glass-panel" style="max-width:580px;width:95%;">
+            <div class="modal-header">
+                <div>
+                    <h2><i class="fa-solid fa-message" style="color:#0ea5e9;"></i> Mensagem da Semana</h2>
+                </div>
+                <button id="btn-close-mensagem" class="btn-icon"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div id="mensagem-loading" style="text-align:center;padding:20px;color:var(--text-muted);">
+                    <i class="fa-solid fa-spinner fa-spin"></i> Carregando...
+                </div>
+                <div id="mensagem-content" class="hidden">
+                    <div style="margin-bottom:20px;">
+                        <div style="font-size:.75rem;font-weight:600;letter-spacing:.08em;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">Mensagem</div>
+                        <p id="mensagem-texto" style="font-size:1rem;line-height:1.65;color:var(--text-primary);white-space:pre-wrap;"></p>
+                    </div>
+                    <div style="border-top:1px solid rgba(255,255,255,.08);padding-top:16px;">
+                        <div style="font-size:.75rem;font-weight:600;letter-spacing:.08em;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">Destaque Técnico</div>
+                        <p id="mensagem-destaque" style="font-size:1rem;line-height:1.65;color:var(--text-primary);white-space:pre-wrap;"></p>
+                    </div>
+                </div>
+                <div id="mensagem-empty" class="hidden" style="text-align:center;padding:20px;color:var(--text-muted);">
+                    Nenhuma mensagem cadastrada ainda.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Metodologia -->
+    <div id="metodologia-modal" class="modal-overlay hidden">
+        <div class="modal-content glass-panel" style="max-width:1100px;width:97%;padding:0;overflow:hidden;">
+            <div class="modal-header" style="padding:14px 18px;">
+                <h2><i class="fa-solid fa-book-open" style="color:#16a34a;"></i> Metodologia</h2>
+                <button id="btn-close-metodologia" class="btn-icon"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <iframe src="blueprint.html" style="width:100%;height:75vh;border:none;display:block;" title="Blueprint de 60 Minutos"></iframe>
+        </div>
+    </div>
+
     <!-- Modal Base Técnica -->
     <div id="tech-modal" class="modal-overlay hidden">
         <div class="modal-content glass-panel">
@@ -130,6 +171,12 @@
                 </div>
                 <button id="btn-tech-base" class="btn-primary hidden">
                     <i class="fa-solid fa-microscope"></i> Ver Base Técnica
+                </button>
+                <button id="btn-mensagem" class="btn-primary hidden" style="background:linear-gradient(135deg,#0ea5e9,#6366f1);">
+                    <i class="fa-solid fa-message"></i> Mensagem
+                </button>
+                <button id="btn-metodologia" class="btn-primary hidden" style="background:linear-gradient(135deg,#16a34a,#15803d);">
+                    <i class="fa-solid fa-book-open"></i> Metodologia
                 </button>
                 <button id="btn-carga" class="btn-primary hidden" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);">
                     <i class="fa-solid fa-gauge-high"></i> Controle de Carga
