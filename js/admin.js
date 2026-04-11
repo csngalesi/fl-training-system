@@ -1742,7 +1742,54 @@
             document.querySelectorAll('.admin-module').forEach(m => m.classList.add('hidden'));
             document.getElementById(`module-${mod}`).classList.remove('hidden');
             if (mod === 'fundamentals') loadFundModuleList();
+            if (mod === 'mensagem') initMensagemModule();
         });
+    });
+
+    // ── Módulo Mensagem ───────────────────────────────────────────
+    let _mensagemId = null;
+
+    async function initMensagemModule() {
+        const statusEl = document.getElementById('msg-save-status');
+        statusEl.textContent = 'Carregando...';
+        try {
+            const data = await window.FLApi.Mensagem.get();
+            if (data) {
+                _mensagemId = data.id;
+                document.getElementById('msg-mensagem').value = data.mensagem || '';
+                document.getElementById('msg-destaque').value = data.destaque_tecnico || '';
+                statusEl.textContent = `Última atualização: ${new Date(data.updated_at).toLocaleString('pt-BR')}`;
+            } else {
+                _mensagemId = null;
+                document.getElementById('msg-mensagem').value = '';
+                document.getElementById('msg-destaque').value = '';
+                statusEl.textContent = 'Nenhuma mensagem cadastrada ainda.';
+            }
+        } catch (err) {
+            statusEl.textContent = 'Erro ao carregar: ' + err.message;
+        }
+    }
+
+    document.getElementById('btn-save-mensagem').addEventListener('click', async () => {
+        const btn = document.getElementById('btn-save-mensagem');
+        const statusEl = document.getElementById('msg-save-status');
+        const payload = {
+            mensagem:         document.getElementById('msg-mensagem').value.trim(),
+            destaque_tecnico: document.getElementById('msg-destaque').value.trim(),
+        };
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
+        try {
+            const saved = await window.FLApi.Mensagem.save(_mensagemId, payload);
+            _mensagemId = saved.id;
+            statusEl.textContent = `Salvo em ${new Date(saved.updated_at).toLocaleString('pt-BR')}`;
+            toast('Mensagem salva!');
+        } catch (err) {
+            toast('Erro ao salvar: ' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar';
+        }
     });
 
     // ── Boot ──────────────────────────────────────────────────────

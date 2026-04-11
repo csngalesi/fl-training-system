@@ -207,7 +207,38 @@
         },
     };
 
-    window.FLApi = { Fundamentals, Drills, Templates, WeekPlans };
+    // ── Mensagem ──────────────────────────────────────────────────
+    const Mensagem = {
+        async get() {
+            const { data, error } = await db()
+                .from('fl_mensagem')
+                .select('*')
+                .order('updated_at', { ascending: false })
+                .limit(1)
+                .maybeSingle();
+            if (error) throw error;
+            return data;
+        },
+        async save(id, payload) {
+            if (id) {
+                const { data, error } = await db()
+                    .from('fl_mensagem')
+                    .update({ ...payload, updated_at: new Date().toISOString() })
+                    .eq('id', id)
+                    .select().single();
+                if (error) throw error;
+                return data;
+            }
+            const { data, error } = await db()
+                .from('fl_mensagem')
+                .insert(payload)
+                .select().single();
+            if (error) throw error;
+            return data;
+        },
+    };
+
+    window.FLApi = { Fundamentals, Drills, Templates, WeekPlans, Mensagem };
 
     console.info('[FL] API module loaded.');
 })();

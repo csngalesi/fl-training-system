@@ -1357,6 +1357,9 @@
             <button class="sidebar-item" data-module="week">
                 <i class="fa-solid fa-calendar-week"></i> Semana
             </button>
+            <button class="sidebar-item" data-module="mensagem">
+                <i class="fa-solid fa-message"></i> Mensagem
+            </button>
         </nav>
 
         <!-- ── Main Content ── -->
@@ -1738,6 +1741,29 @@
             </div>
 
         </div><!-- /#module-fundamentals -->
+
+        <!-- ══ Module: Mensagem ══ -->
+        <div id="module-mensagem" class="admin-module hidden">
+            <h2 style="margin-bottom:24px"><i class="fa-solid fa-message" style="color:#a78bfa"></i> Mensagem da Semana</h2>
+            <div class="glass-card" style="max-width:700px;padding:28px;display:flex;flex-direction:column;gap:20px;">
+                <div>
+                    <label class="form-label" style="display:block;margin-bottom:8px;font-weight:600">Mensagem</label>
+                    <textarea id="msg-mensagem" rows="6" placeholder="Digite a mensagem da semana..."
+                        style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:var(--text-main);padding:12px;font-size:.92rem;resize:vertical;font-family:inherit;box-sizing:border-box;"></textarea>
+                </div>
+                <div>
+                    <label class="form-label" style="display:block;margin-bottom:8px;font-weight:600">Destaque Técnico</label>
+                    <textarea id="msg-destaque" rows="4" placeholder="Digite o destaque técnico..."
+                        style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:var(--text-main);padding:12px;font-size:.92rem;resize:vertical;font-family:inherit;box-sizing:border-box;"></textarea>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px">
+                    <button id="btn-save-mensagem" class="btn-primary" style="background:linear-gradient(135deg,#7c3aed,#4f46e5)">
+                        <i class="fa-solid fa-floppy-disk"></i> Salvar
+                    </button>
+                    <span id="msg-save-status" style="font-size:.85rem;color:var(--text-muted)"></span>
+                </div>
+            </div>
+        </div><!-- /#module-mensagem -->
 
         </div><!-- /.admin-main -->
     </div><!-- /.admin-layout -->
