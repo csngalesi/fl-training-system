@@ -57,9 +57,7 @@
     <div id="mensagem-modal" class="modal-overlay hidden">
         <div class="modal-content glass-panel" style="max-width:580px;width:95%;">
             <div class="modal-header">
-                <div>
-                    <h2><i class="fa-solid fa-message" style="color:#0ea5e9;"></i> Mensagem da Semana</h2>
-                </div>
+                <h2><i class="fa-solid fa-message" style="color:#0ea5e9;"></i> Mensagem da Semana</h2>
                 <button id="btn-close-mensagem" class="btn-icon"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="modal-body">
@@ -67,17 +65,31 @@
                     <i class="fa-solid fa-spinner fa-spin"></i> Carregando...
                 </div>
                 <div id="mensagem-content" class="hidden">
-                    <div style="margin-bottom:20px;">
-                        <div style="font-size:.75rem;font-weight:600;letter-spacing:.08em;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">Mensagem</div>
-                        <p id="mensagem-texto" style="font-size:1rem;line-height:1.65;color:var(--text-primary);white-space:pre-wrap;"></p>
-                    </div>
-                    <div style="border-top:1px solid rgba(255,255,255,.08);padding-top:16px;">
-                        <div style="font-size:.75rem;font-weight:600;letter-spacing:.08em;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">Destaque Técnico</div>
-                        <p id="mensagem-destaque" style="font-size:1rem;line-height:1.65;color:var(--text-primary);white-space:pre-wrap;"></p>
-                    </div>
+                    <p id="mensagem-texto" style="font-size:1rem;line-height:1.65;color:var(--text-primary);white-space:pre-wrap;"></p>
                 </div>
                 <div id="mensagem-empty" class="hidden" style="text-align:center;padding:20px;color:var(--text-muted);">
                     Nenhuma mensagem cadastrada ainda.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Técnica -->
+    <div id="tecnica-modal" class="modal-overlay hidden">
+        <div class="modal-content glass-panel" style="max-width:580px;width:95%;">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-star" style="color:#f59e0b;"></i> Destaque Técnico</h2>
+                <button id="btn-close-tecnica" class="btn-icon"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div id="tecnica-loading" style="text-align:center;padding:20px;color:var(--text-muted);">
+                    <i class="fa-solid fa-spinner fa-spin"></i> Carregando...
+                </div>
+                <div id="tecnica-content" class="hidden">
+                    <p id="tecnica-texto" style="font-size:1rem;line-height:1.65;color:var(--text-primary);white-space:pre-wrap;"></p>
+                </div>
+                <div id="tecnica-empty" class="hidden" style="text-align:center;padding:20px;color:var(--text-muted);">
+                    Nenhum destaque técnico cadastrado ainda.
                 </div>
             </div>
         </div>
@@ -174,6 +186,9 @@
                 </button>
                 <button id="btn-mensagem" class="btn-primary hidden" style="background:linear-gradient(135deg,#0ea5e9,#6366f1);">
                     <i class="fa-solid fa-message"></i> Mensagem
+                </button>
+                <button id="btn-tecnica" class="btn-primary hidden" style="background:linear-gradient(135deg,#d97706,#f59e0b);">
+                    <i class="fa-solid fa-star"></i> Técnica
                 </button>
                 <button id="btn-metodologia" class="btn-primary hidden" style="background:linear-gradient(135deg,#16a34a,#15803d);">
                     <i class="fa-solid fa-book-open"></i> Metodologia

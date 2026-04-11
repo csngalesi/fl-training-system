@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Controle de Carga
         initCarga();
 
-        // Mensagem modal
+        // Mensagem modal (só campo mensagem)
         document.getElementById('btn-mensagem').addEventListener('click', async () => {
             const modal   = document.getElementById('mensagem-modal');
             const loading = document.getElementById('mensagem-loading');
@@ -143,9 +143,8 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const data = await window.FLApi.Mensagem.get();
                 loading.classList.add('hidden');
-                if (data && (data.mensagem || data.destaque_tecnico)) {
-                    document.getElementById('mensagem-texto').textContent    = data.mensagem || '';
-                    document.getElementById('mensagem-destaque').textContent = data.destaque_tecnico || '';
+                if (data && data.mensagem) {
+                    document.getElementById('mensagem-texto').textContent = data.mensagem;
                     content.classList.remove('hidden');
                 } else {
                     empty.classList.remove('hidden');
@@ -162,6 +161,39 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('mensagem-modal').addEventListener('click', (e) => {
             if (e.target === document.getElementById('mensagem-modal'))
                 document.getElementById('mensagem-modal').classList.add('hidden');
+        });
+
+        // Técnica modal (só campo destaque_tecnico)
+        document.getElementById('btn-tecnica').addEventListener('click', async () => {
+            const modal   = document.getElementById('tecnica-modal');
+            const loading = document.getElementById('tecnica-loading');
+            const content = document.getElementById('tecnica-content');
+            const empty   = document.getElementById('tecnica-empty');
+            loading.classList.remove('hidden');
+            content.classList.add('hidden');
+            empty.classList.add('hidden');
+            modal.classList.remove('hidden');
+            try {
+                const data = await window.FLApi.Mensagem.get();
+                loading.classList.add('hidden');
+                if (data && data.destaque_tecnico) {
+                    document.getElementById('tecnica-texto').textContent = data.destaque_tecnico;
+                    content.classList.remove('hidden');
+                } else {
+                    empty.classList.remove('hidden');
+                }
+            } catch (e) {
+                loading.classList.add('hidden');
+                empty.classList.remove('hidden');
+                console.error('[FL] Mensagem.get() error:', e);
+            }
+        });
+        document.getElementById('btn-close-tecnica').addEventListener('click', () => {
+            document.getElementById('tecnica-modal').classList.add('hidden');
+        });
+        document.getElementById('tecnica-modal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('tecnica-modal'))
+                document.getElementById('tecnica-modal').classList.add('hidden');
         });
 
         // Metodologia modal
@@ -450,9 +482,10 @@ document.addEventListener('DOMContentLoaded', () => {
             pitchEl.classList.remove('prancheta-mode');
         }
 
-        // Show Controle de Carga / Mensagem / Metodologia buttons only in week mode
+        // Show Controle de Carga / Mensagem / Técnica / Metodologia buttons only in week mode
         document.getElementById('btn-carga').classList.toggle('hidden', mode !== 'week');
         document.getElementById('btn-mensagem').classList.toggle('hidden', mode !== 'week');
+        document.getElementById('btn-tecnica').classList.toggle('hidden', mode !== 'week');
         document.getElementById('btn-metodologia').classList.toggle('hidden', mode !== 'week');
 
         if (mode === 'week') {
