@@ -130,6 +130,28 @@ document.addEventListener('DOMContentLoaded', () => {
         // Controle de Carga
         initCarga();
 
+        // helper: render media files into a container
+        function renderMedia(container, fileNames, folder) {
+            container.innerHTML = '';
+            (fileNames || []).forEach(name => {
+                const ext = name.split('.').pop().toLowerCase();
+                if (['jpg','jpeg','png','gif','webp'].includes(ext)) {
+                    const img = document.createElement('img');
+                    img.src = `mensagem/${folder}/${name}`;
+                    img.style.cssText = 'width:100%;border-radius:10px;object-fit:cover;';
+                    img.loading = 'lazy';
+                    container.appendChild(img);
+                } else if (['mp4','mov','webm'].includes(ext)) {
+                    const vid = document.createElement('video');
+                    vid.src = `mensagem/${folder}/${name}`;
+                    vid.controls = true;
+                    vid.preload = 'none';
+                    vid.style.cssText = 'width:100%;border-radius:10px;';
+                    container.appendChild(vid);
+                }
+            });
+        }
+
         // Mensagem modal (só campo mensagem)
         document.getElementById('btn-mensagem').addEventListener('click', async () => {
             const modal   = document.getElementById('mensagem-modal');
@@ -143,8 +165,9 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const data = await window.FLApi.Mensagem.get();
                 loading.classList.add('hidden');
-                if (data && data.mensagem) {
-                    document.getElementById('mensagem-texto').textContent = data.mensagem;
+                if (data && (data.mensagem || (data.media_geral && data.media_geral.length))) {
+                    document.getElementById('mensagem-texto').textContent = data.mensagem || '';
+                    renderMedia(document.getElementById('mensagem-media'), data.media_geral, 'geral');
                     content.classList.remove('hidden');
                 } else {
                     empty.classList.remove('hidden');
@@ -176,8 +199,9 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const data = await window.FLApi.Mensagem.get();
                 loading.classList.add('hidden');
-                if (data && data.destaque_tecnico) {
-                    document.getElementById('tecnica-texto').textContent = data.destaque_tecnico;
+                if (data && (data.destaque_tecnico || (data.media_tecnico && data.media_tecnico.length))) {
+                    document.getElementById('tecnica-texto').textContent = data.destaque_tecnico || '';
+                    renderMedia(document.getElementById('tecnica-media'), data.media_tecnico, 'tecnico');
                     content.classList.remove('hidden');
                 } else {
                     empty.classList.remove('hidden');
