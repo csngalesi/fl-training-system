@@ -862,6 +862,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Open modal
         document.getElementById('btn-carga').addEventListener('click', () => {
+            if (!selectedPlanId) {
+                alert('Selecione um plano da semana antes de registrar a carga.');
+                return;
+            }
             _cargaStudent = null; _cargaPse = null; _cargaSource = null;
             // Set session label
             const sess = cargaCurrentSessionLabel();
