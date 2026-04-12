@@ -799,9 +799,20 @@ document.addEventListener('DOMContentLoaded', () => {
         return { day: flDay, time: hour, label: `${DAYS_MAP[flDay]} ${hour.substring(0,5)}` };
     }
 
+    let _cargaAllStudents = [];
+
     function renderCargaStudentList(students) {
-        const list = document.getElementById('carga-students-list');
+        _cargaAllStudents = students;
         document.getElementById('carga-students-loading').classList.add('hidden');
+        const searchWrap = document.getElementById('carga-search-wrap');
+        const searchEl   = document.getElementById('carga-search');
+        searchEl.value   = '';
+        searchWrap.classList.toggle('hidden', students.length === 0);
+        _renderCargaStudentRows(students);
+    }
+
+    function _renderCargaStudentRows(students) {
+        const list = document.getElementById('carga-students-list');
         if (!students.length) {
             list.innerHTML = '<p style="color:var(--text-muted);font-size:.88rem;padding:12px 0;">Nenhum aluno encontrado.</p>';
             return;
@@ -895,6 +906,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('carga-students-list').innerHTML =
                     `<p style="color:#ef4444;font-size:.88rem;">Erro ao carregar: ${escHtml(e.message)}</p>`;
             }
+        });
+
+        // Search
+        document.getElementById('carga-search').addEventListener('input', e => {
+            const term = e.target.value.toLowerCase().trim();
+            const filtered = term
+                ? _cargaAllStudents.filter(s => s.full_name.toLowerCase().includes(term))
+                : _cargaAllStudents;
+            _renderCargaStudentRows(filtered);
         });
 
         // Back buttons

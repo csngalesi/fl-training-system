@@ -60,7 +60,12 @@
                     <div id="carga-students-loading" style="text-align:center;padding:20px;color:var(--text-muted);">
                         <i class="fa-solid fa-spinner fa-spin"></i> Carregando...
                     </div>
-                    <div id="carga-students-list" style="display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto;"></div>
+                    <div id="carga-search-wrap" class="hidden" style="margin-bottom:10px;position:relative;">
+                        <i class="fa-solid fa-magnifying-glass" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:.85rem;pointer-events:none;"></i>
+                        <input id="carga-search" type="text" placeholder="Buscar aluno..."
+                            style="width:100%;box-sizing:border-box;padding:9px 12px 9px 34px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:var(--text-primary);font-size:.9rem;outline:none;">
+                    </div>
+                    <div id="carga-students-list" style="display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto;"></div>
                 </div>
 
                 <!-- Passo 3: PSE -->
