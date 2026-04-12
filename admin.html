@@ -1763,46 +1763,6 @@
                     <span id="msg-save-status" style="font-size:.85rem;color:var(--text-muted)"></span>
                 </div>
             </div>
-            <!-- Mídia -->
-            <div class="glass-card" style="max-width:700px;padding:28px;display:flex;flex-direction:column;gap:20px;">
-                <h3 style="margin:0;font-size:1rem;"><i class="fa-solid fa-photo-film" style="color:#a78bfa"></i> Arquivos de Mídia</h3>
-
-                <!-- GitHub Token -->
-                <div style="display:flex;flex-direction:column;gap:6px;">
-                    <label class="form-label" style="font-weight:600;">GitHub Token <span style="font-weight:400;font-size:.8rem;color:var(--text-muted)">(PAT com <code>contents:write</code>)</span></label>
-                    <div style="display:flex;gap:8px;">
-                        <input type="password" id="gh-token" placeholder="ghp_..." autocomplete="off"
-                            style="flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:var(--text-main);padding:10px 12px;font-size:.9rem;">
-                        <button id="btn-save-gh-token" class="btn-secondary" style="white-space:nowrap;">
-                            <i class="fa-solid fa-key"></i> Salvar
-                        </button>
-                    </div>
-                    <span id="gh-token-status" style="font-size:.8rem;color:var(--text-muted);"></span>
-                </div>
-
-                <!-- Arquivos Geral -->
-                <div style="display:flex;flex-direction:column;gap:6px;">
-                    <label class="form-label" style="font-weight:600;">Arquivos — Geral <span style="font-weight:400;font-size:.8rem;color:var(--text-muted)">(fotos e vídeos, na ordem desejada)</span></label>
-                    <input type="file" id="files-geral" multiple accept="image/*,video/*"
-                        style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:var(--text-main);padding:10px 12px;font-size:.88rem;width:100%;box-sizing:border-box;">
-                    <span id="files-geral-current" style="font-size:.8rem;color:var(--text-muted);"></span>
-                </div>
-
-                <!-- Arquivos Técnico -->
-                <div style="display:flex;flex-direction:column;gap:6px;">
-                    <label class="form-label" style="font-weight:600;">Arquivos — Técnico <span style="font-weight:400;font-size:.8rem;color:var(--text-muted)">(fotos e vídeos, na ordem desejada)</span></label>
-                    <input type="file" id="files-tecnico" multiple accept="image/*,video/*"
-                        style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:var(--text-main);padding:10px 12px;font-size:.88rem;width:100%;box-sizing:border-box;">
-                    <span id="files-tecnico-current" style="font-size:.8rem;color:var(--text-muted);"></span>
-                </div>
-
-                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-                    <button id="btn-commit-files" class="btn-primary" style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border:1px solid rgba(255,255,255,.2);">
-                        <i class="fa-brands fa-github"></i> Commit de arquivos
-                    </button>
-                    <span id="commit-status" style="font-size:.85rem;color:var(--text-muted);"></span>
-                </div>
-            </div>
         </div><!-- /#module-mensagem -->
 
         </div><!-- /.admin-main -->
