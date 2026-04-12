@@ -1743,6 +1743,7 @@
             document.getElementById(`module-${mod}`).classList.remove('hidden');
             if (mod === 'fundamentals') loadFundModuleList();
             if (mod === 'mensagem') initMensagemModule();
+            if (mod === 'carga') initCargaModule();
         });
     });
 
@@ -1791,6 +1792,100 @@
             btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar';
         }
     });
+
+    // ── Módulo Carga ──────────────────────────────────────────────
+    const PSE_COLORS_ADMIN = ['#94a3b8','#22c55e','#22c55e','#84cc16','#84cc16','#eab308','#eab308','#f97316','#f97316','#ef4444','#7c3aed'];
+    const PSE_LABELS_ADMIN = ['Repouso','Muito Leve','Muito Leve','Leve','Leve','Moderado','Moderado','Intenso','Intenso','Muito Intenso','Máximo'];
+    let _cargaSelectedPlanId = null;
+
+    async function initCargaModule() {
+        // Load plans
+        const plansList = document.getElementById('carga-plans-list');
+        plansList.innerHTML = '<span style="color:var(--text-muted);font-size:.88rem;">Carregando...</span>';
+        try {
+            const plans = await window.FLApi.WeekPlans.getAll();
+            if (!plans.length) {
+                plansList.innerHTML = '<span style="color:var(--text-muted);font-size:.88rem;">Nenhum plano cadastrado.</span>';
+                return;
+            }
+            plansList.innerHTML = plans.map(p => `
+                <button class="btn btn-secondary carga-plan-btn" data-id="${p.id}"
+                    style="padding:10px 18px;border-radius:10px;font-weight:600;font-size:.88rem;">
+                    ${p.title}
+                </button>`).join('');
+            plansList.querySelectorAll('.carga-plan-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    plansList.querySelectorAll('.carga-plan-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    _cargaSelectedPlanId = btn.dataset.id;
+                    loadCargaRecords(_cargaSelectedPlanId, btn.textContent.trim());
+                });
+            });
+        } catch(e) {
+            plansList.innerHTML = `<span style="color:#ef4444;">Erro: ${e.message}</span>`;
+        }
+
+        document.getElementById('btn-carga-refresh').addEventListener('click', () => {
+            if (_cargaSelectedPlanId) loadCargaRecords(_cargaSelectedPlanId);
+        });
+    }
+
+    async function loadCargaRecords(planId, planName) {
+        const title   = document.getElementById('carga-records-title');
+        const loading = document.getElementById('carga-records-loading');
+        const table   = document.getElementById('carga-records-table');
+        const btnRef  = document.getElementById('btn-carga-refresh');
+
+        if (planName) title.textContent = `Registros — ${planName}`;
+        title.style.color = 'var(--text-main)';
+        btnRef.style.display = '';
+        loading.classList.remove('hidden');
+        table.innerHTML = '';
+
+        try {
+            const records = await window.FLApi.CargaRegistros.getByPlan(planId);
+            loading.classList.add('hidden');
+            if (!records.length) {
+                table.innerHTML = '<p style="color:var(--text-muted);font-size:.88rem;">Nenhum registro para este plano.</p>';
+                return;
+            }
+            table.innerHTML = records.map(r => {
+                const pse   = r.pse_value;
+                const color = PSE_COLORS_ADMIN[pse] || '#94a3b8';
+                const label = PSE_LABELS_ADMIN[pse] || '';
+                const dt    = new Date(r.recorded_at).toLocaleString('pt-BR');
+                return `
+                <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+                            background:rgba(255,255,255,.04);border-radius:10px;padding:12px 16px;
+                            border-left:4px solid ${color};">
+                    <div style="flex:1;min-width:120px;font-weight:600;">${r.student_name}</div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <span style="background:${color}22;color:${color};border-radius:20px;
+                                     padding:3px 12px;font-size:.82rem;font-weight:700;">PSE ${pse}</span>
+                        <span style="color:${color};font-size:.82rem;">${label}</span>
+                    </div>
+                    ${r.session_label ? `<span style="font-size:.78rem;color:var(--text-muted);"><i class="fa-solid fa-clock"></i> ${r.session_label}</span>` : ''}
+                    <span style="font-size:.78rem;color:var(--text-muted);margin-left:auto;">${dt}</span>
+                    <button class="btn-icon carga-del-btn" data-id="${r.id}" title="Excluir" style="color:#ef4444;opacity:.6;">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>`;
+            }).join('');
+
+            table.querySelectorAll('.carga-del-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    if (!confirm('Excluir este registro?')) return;
+                    try {
+                        await window.FLApi.CargaRegistros.delete(btn.dataset.id);
+                        loadCargaRecords(_cargaSelectedPlanId);
+                    } catch(e) { toast('Erro ao excluir: ' + e.message, 'error'); }
+                });
+            });
+        } catch(e) {
+            loading.classList.add('hidden');
+            table.innerHTML = `<p style="color:#ef4444;">Erro: ${e.message}</p>`;
+        }
+    }
 
     // ── Boot ──────────────────────────────────────────────────────
     init();

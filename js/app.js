@@ -771,150 +771,170 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================================
-    // CONTROLE DE CARGA / PSE (Percepção Subjetiva de Esforço)
+    // CARGA PSE — multi-step modal
     // ==========================================================
 
-    const PSE_ZONES = [
-        { min: 0,  max: 0,  label: 'Repouso',       color: '#94a3b8' },
-        { min: 1,  max: 2,  label: 'Muito Leve',     color: '#22c55e' },
-        { min: 3,  max: 4,  label: 'Leve',           color: '#84cc16' },
-        { min: 5,  max: 6,  label: 'Moderado',       color: '#eab308' },
-        { min: 7,  max: 8,  label: 'Intenso',        color: '#f97316' },
-        { min: 9,  max: 9,  label: 'Muito Intenso',  color: '#ef4444' },
-        { min: 10, max: 10, label: 'Máximo',         color: '#7c3aed' },
-    ];
+    const PSE_COLORS = ['#94a3b8','#22c55e','#22c55e','#84cc16','#84cc16','#eab308','#eab308','#f97316','#f97316','#ef4444','#7c3aed'];
+    const PSE_LABELS = ['Repouso','Muito Leve','Muito Leve','Leve','Leve','Moderado','Moderado','Intenso','Intenso','Muito Intenso','Máximo'];
 
-    let pseStudents   = [];
-    let pseIdCounter  = 0;
+    // current state
+    let _cargaStudent    = null; // { id, name }
+    let _cargaSessionLbl = '';
+    let _cargaPse        = null;
+    let _cargaSource     = null; // 'sessao' | 'cadastro'
 
-    function getPseZone(pse) {
-        return PSE_ZONES.find(z => pse >= z.min && pse <= z.max) || PSE_ZONES[0];
+    function cargaShowStep(step) {
+        ['carga-step-source','carga-step-students','carga-step-pse','carga-step-ok']
+            .forEach(id => document.getElementById(id).classList.add('hidden'));
+        document.getElementById(step).classList.remove('hidden');
     }
 
-    function addPseStudent(name) {
-        pseIdCounter++;
-        pseStudents.push({ id: pseIdCounter, name: name || `Aluno ${pseIdCounter}`, pse: null });
-        renderPseStudents();
+    function cargaCurrentSessionLabel() {
+        const DAYS_MAP = { 1:'Segunda', 2:'Terça', 3:'Quarta', 4:'Quinta', 5:'Sexta', 6:'Sábado' };
+        const now = new Date();
+        const jsDay = now.getDay(); // 0=Sun
+        const flDay = jsDay === 0 ? null : jsDay; // 0=Dom → sem aula
+        if (!flDay) return null;
+        const hour = `${String(now.getHours()).padStart(2,'0')}:00:00`;
+        return { day: flDay, time: hour, label: `${DAYS_MAP[flDay]} ${hour.substring(0,5)}` };
     }
 
-    function removePseStudent(id) {
-        pseStudents = pseStudents.filter(s => s.id !== id);
-        renderPseStudents();
-    }
-
-    function setPseValue(id, val) {
-        const s = pseStudents.find(s => s.id === id);
-        if (s) s.pse = val;
-        renderPseStudents();
-    }
-
-    function renderPseStudents() {
+    function renderCargaStudentList(students) {
         const list = document.getElementById('carga-students-list');
-        if (!list) return;
-
-        if (!pseStudents.length) {
-            list.innerHTML = '<p style="color:var(--text-muted);font-size:.88rem;padding:8px 0">Nenhum aluno. Clique em + Aluno.</p>';
+        document.getElementById('carga-students-loading').classList.add('hidden');
+        if (!students.length) {
+            list.innerHTML = '<p style="color:var(--text-muted);font-size:.88rem;padding:12px 0;">Nenhum aluno encontrado.</p>';
             return;
         }
-
-        list.innerHTML = pseStudents.map(s => `
-            <div class="pse-student-row" data-id="${s.id}">
-                <div class="pse-student-name">
-                    <input type="text" value="${escHtml(s.name)}" placeholder="Nome do aluno"
-                        class="pse-name-input" data-id="${s.id}"
-                        style="background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.2);
-                               color:var(--text-primary);font-size:.9rem;width:100%;outline:none;padding:2px 0">
-                    <button class="pse-remove-btn" data-id="${s.id}" title="Remover aluno">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </div>
-                <div class="pse-scale">
-                    ${[0,1,2,3,4,5,6,7,8,9,10].map(v => `
-                        <button class="pse-btn pse-val-${v} ${s.pse === v ? 'selected' : ''}"
-                            data-id="${s.id}" data-val="${v}">${v}</button>
-                    `).join('')}
-                </div>
-            </div>
-        `).join('');
-
-        list.querySelectorAll('.pse-btn').forEach(btn => {
-            btn.addEventListener('click', () => setPseValue(parseInt(btn.dataset.id), parseInt(btn.dataset.val)));
-        });
-        list.querySelectorAll('.pse-remove-btn').forEach(btn => {
-            btn.addEventListener('click', () => removePseStudent(parseInt(btn.dataset.id)));
-        });
-        list.querySelectorAll('.pse-name-input').forEach(inp => {
-            inp.addEventListener('change', e => {
-                const s = pseStudents.find(s => s.id === parseInt(inp.dataset.id));
-                if (s) s.name = e.target.value;
+        list.innerHTML = students.map(s => `
+            <button class="btn-secondary carga-student-btn"
+                data-id="${escHtml(s.id || '')}" data-name="${escHtml(s.full_name)}"
+                style="text-align:left;padding:12px 14px;border-radius:10px;font-size:.92rem;">
+                <i class="fa-solid fa-user" style="color:#a78bfa;margin-right:8px;"></i>
+                ${escHtml(s.full_name)}
+            </button>`).join('');
+        list.querySelectorAll('.carga-student-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                _cargaStudent = { id: btn.dataset.id, name: btn.dataset.name };
+                _cargaPse = null;
+                document.getElementById('carga-pse-student-name').textContent = _cargaStudent.name;
+                document.getElementById('carga-pse-selected').textContent = '';
+                document.getElementById('btn-carga-save').disabled = true;
+                cargaShowStep('carga-step-pse');
             });
         });
     }
 
-    function calcCarga() {
-        const filled = pseStudents.filter(s => s.pse !== null);
-        if (!filled.length) {
-            alert('Defina a PSE de pelo menos um aluno antes de calcular.');
-            return;
-        }
-        const DURATION = 60;
-        const results = filled.map(s => ({ ...s, load: s.pse * DURATION, zone: getPseZone(s.pse) }));
-        const avgPse  = results.reduce((sum, r) => sum + r.pse, 0) / results.length;
-        const avgLoad = Math.round(avgPse * DURATION);
-        const teamZone = getPseZone(Math.round(avgPse));
-
-        const table = document.getElementById('carga-results-table');
-        table.innerHTML = results.map(r => `
-            <div style="border-left:4px solid ${r.zone.color};background:rgba(255,255,255,.04);
-                        border-radius:8px;padding:10px 14px;display:flex;align-items:center;
-                        justify-content:space-between;gap:12px;flex-wrap:wrap">
-                <div style="font-weight:600;color:var(--text-primary);min-width:100px">${escHtml(r.name)}</div>
-                <div style="display:flex;align-items:center;gap:8px">
-                    <span style="background:${r.zone.color}33;color:${r.zone.color};border-radius:20px;
-                                 padding:2px 10px;font-size:.8rem;font-weight:700">PSE ${r.pse}</span>
-                    <span style="color:${r.zone.color};font-weight:600;font-size:.88rem">${r.zone.label}</span>
-                </div>
-                <div style="font-size:1.1rem;font-weight:800;color:${r.zone.color}">${r.load} UA</div>
-            </div>
-        `).join('');
-
-        document.getElementById('carga-team-summary').innerHTML = `
-            <div class="carga-result-card" style="border-color:${teamZone.color};text-align:center">
-                <div style="font-size:.75rem;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Média da Equipe</div>
-                <div style="font-size:2.2rem;font-weight:900;color:${teamZone.color};line-height:1">${avgLoad} <span style="font-size:1rem;font-weight:500">UA</span></div>
-                <div style="font-size:.85rem;color:${teamZone.color};margin-top:6px">PSE ${avgPse.toFixed(1)} · ${teamZone.label}</div>
-                <div style="font-size:.75rem;color:var(--text-muted);margin-top:4px">${filled.length} aluno${filled.length !== 1 ? 's' : ''} · sessão de ${DURATION} min</div>
-            </div>
-        `;
-
-        document.getElementById('carga-form-view').classList.add('hidden');
-        document.getElementById('carga-result-view').classList.remove('hidden');
-    }
-
     function initCarga() {
-        const btnCargaOpen = document.getElementById('btn-carga');
-        const cargaModal   = document.getElementById('carga-modal');
-        if (!btnCargaOpen || !cargaModal) return;
+        const cargaModal = document.getElementById('carga-modal');
+        if (!cargaModal) return;
 
-        btnCargaOpen.addEventListener('click', () => {
-            pseStudents  = [];
-            pseIdCounter = 0;
-            ['Aluno 1', 'Aluno 2', 'Aluno 3', 'Aluno 4'].forEach(n => addPseStudent(n));
-            document.getElementById('carga-form-view').classList.remove('hidden');
-            document.getElementById('carga-result-view').classList.add('hidden');
+        // Build PSE grid (0–10)
+        const grid = document.getElementById('carga-pse-grid');
+        grid.innerHTML = Array.from({length:11},(_,v) => `
+            <button class="pse-btn" data-val="${v}"
+                style="padding:10px 0;border-radius:8px;font-weight:800;font-size:1rem;
+                       background:rgba(255,255,255,.06);border:2px solid transparent;
+                       color:${PSE_COLORS[v]};cursor:pointer;transition:.15s;">
+                ${v}
+            </button>`).join('');
+        grid.querySelectorAll('.pse-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                _cargaPse = parseInt(btn.dataset.val);
+                grid.querySelectorAll('.pse-btn').forEach(b => b.style.borderColor = 'transparent');
+                btn.style.borderColor = PSE_COLORS[_cargaPse];
+                document.getElementById('carga-pse-selected').innerHTML =
+                    `<span style="color:${PSE_COLORS[_cargaPse]}">PSE ${_cargaPse} · ${PSE_LABELS[_cargaPse]}</span>`;
+                document.getElementById('btn-carga-save').disabled = false;
+            });
+        });
+
+        // Open modal
+        document.getElementById('btn-carga').addEventListener('click', () => {
+            _cargaStudent = null; _cargaPse = null; _cargaSource = null;
+            // Set session label
+            const sess = cargaCurrentSessionLabel();
+            document.getElementById('carga-sessao-label').textContent = sess ? sess.label : 'Sem aula agora';
+            cargaShowStep('carga-step-source');
             cargaModal.classList.remove('hidden');
         });
 
-        document.getElementById('btn-add-aluno').addEventListener('click', () => addPseStudent());
-        document.getElementById('btn-calc-carga').addEventListener('click', calcCarga);
-
-        document.getElementById('btn-carga-back').addEventListener('click', () => {
-            document.getElementById('carga-form-view').classList.remove('hidden');
-            document.getElementById('carga-result-view').classList.add('hidden');
+        // Source: Sessão Atual
+        document.getElementById('btn-carga-sessao').addEventListener('click', async () => {
+            _cargaSource = 'sessao';
+            const sess = cargaCurrentSessionLabel();
+            document.getElementById('carga-students-title').textContent = sess ? `Sessão: ${sess.label}` : 'Sessão Atual';
+            _cargaSessionLbl = sess ? sess.label : '';
+            document.getElementById('carga-students-list').innerHTML = '';
+            document.getElementById('carga-students-loading').classList.remove('hidden');
+            cargaShowStep('carga-step-students');
+            try {
+                let students = [];
+                if (sess) students = await window.FLApi.FLGestao.getSessionStudents(sess.day, sess.time);
+                renderCargaStudentList(students);
+            } catch(e) {
+                document.getElementById('carga-students-loading').classList.add('hidden');
+                document.getElementById('carga-students-list').innerHTML =
+                    `<p style="color:#ef4444;font-size:.88rem;">Erro ao carregar: ${escHtml(e.message)}</p>`;
+            }
         });
 
-        const btnClose = document.getElementById('btn-close-carga');
-        if (btnClose) btnClose.addEventListener('click', () => cargaModal.classList.add('hidden'));
+        // Source: Cadastro
+        document.getElementById('btn-carga-cadastro').addEventListener('click', async () => {
+            _cargaSource = 'cadastro';
+            _cargaSessionLbl = '';
+            document.getElementById('carga-students-title').textContent = 'Todos os Alunos';
+            document.getElementById('carga-students-list').innerHTML = '';
+            document.getElementById('carga-students-loading').classList.remove('hidden');
+            cargaShowStep('carga-step-students');
+            try {
+                const students = await window.FLApi.FLGestao.getAllStudents();
+                renderCargaStudentList(students);
+            } catch(e) {
+                document.getElementById('carga-students-loading').classList.add('hidden');
+                document.getElementById('carga-students-list').innerHTML =
+                    `<p style="color:#ef4444;font-size:.88rem;">Erro ao carregar: ${escHtml(e.message)}</p>`;
+            }
+        });
+
+        // Back buttons
+        document.getElementById('btn-carga-back-source').addEventListener('click', () => cargaShowStep('carga-step-source'));
+        document.getElementById('btn-carga-back-students').addEventListener('click', () => cargaShowStep('carga-step-students'));
+
+        // Save
+        document.getElementById('btn-carga-save').addEventListener('click', async () => {
+            if (!_cargaStudent || _cargaPse === null || !selectedPlanId) return;
+            const btn = document.getElementById('btn-carga-save');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
+            try {
+                await window.FLApi.CargaRegistros.create({
+                    week_plan_id:  selectedPlanId,
+                    student_id:    _cargaStudent.id || null,
+                    student_name:  _cargaStudent.name,
+                    pse_value:     _cargaPse,
+                    session_label: _cargaSessionLbl || null,
+                });
+                document.getElementById('carga-ok-text').textContent =
+                    `${_cargaStudent.name} · PSE ${_cargaPse} · ${PSE_LABELS[_cargaPse]}`;
+                cargaShowStep('carga-step-ok');
+            } catch(e) {
+                alert('Erro ao salvar: ' + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar';
+            }
+        });
+
+        // OK step
+        document.getElementById('btn-carga-outro').addEventListener('click', () => {
+            _cargaStudent = null; _cargaPse = null;
+            cargaShowStep('carga-step-source');
+        });
+        document.getElementById('btn-carga-fechar').addEventListener('click', () => cargaModal.classList.add('hidden'));
+
+        // Close
+        document.getElementById('btn-close-carga').addEventListener('click', () => cargaModal.classList.add('hidden'));
         cargaModal.addEventListener('click', e => { if (e.target === cargaModal) cargaModal.classList.add('hidden'); });
     }
 

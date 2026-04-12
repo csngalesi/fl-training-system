@@ -1360,6 +1360,9 @@
             <button class="sidebar-item" data-module="mensagem">
                 <i class="fa-solid fa-message"></i> Mensagem
             </button>
+            <button class="sidebar-item" data-module="carga">
+                <i class="fa-solid fa-gauge-high"></i> Carga
+            </button>
         </nav>
 
         <!-- ── Main Content ── -->
@@ -1764,6 +1767,29 @@
                 </div>
             </div>
         </div><!-- /#module-mensagem -->
+
+        <!-- ══ Module: Carga ══ -->
+        <div id="module-carga" class="admin-module hidden">
+            <h2 style="margin-bottom:24px"><i class="fa-solid fa-gauge-high" style="color:#a78bfa"></i> Carga (PSE)</h2>
+
+            <!-- Planos -->
+            <div class="section-header" style="margin-bottom:16px;">
+                <h3 style="margin:0;font-size:1rem;">Plano da Semana</h3>
+            </div>
+            <div id="carga-plans-list" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:28px;"></div>
+
+            <!-- Registros -->
+            <div class="section-header" style="margin-bottom:14px;">
+                <h3 id="carga-records-title" style="margin:0;font-size:1rem;color:var(--text-muted);">Selecione um plano acima</h3>
+                <button id="btn-carga-refresh" class="btn btn-secondary btn-sm" style="display:none;">
+                    <i class="fa-solid fa-rotate"></i> Atualizar
+                </button>
+            </div>
+            <div id="carga-records-loading" class="hidden" style="color:var(--text-muted);padding:12px 0;">
+                <i class="fa-solid fa-spinner fa-spin"></i> Carregando...
+            </div>
+            <div id="carga-records-table" style="display:flex;flex-direction:column;gap:8px;"></div>
+        </div><!-- /#module-carga -->
 
         </div><!-- /.admin-main -->
     </div><!-- /.admin-layout -->
