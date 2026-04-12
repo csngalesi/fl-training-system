@@ -5,25 +5,26 @@
 <title>Blueprint 60 Minutos - Football Lab</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
+  @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
   
   body { 
-    font-family: 'Inter', sans-serif; background: #e2e8f0; 
+    font-family: 'Inter', sans-serif; background: #020617; 
     display: flex; justify-content: center; align-items: center; 
     min-height: 100vh; margin: 0; 
   }
   
   .infographic { 
-    width: 1040px; height: 720px; background: white; position: relative; 
-    box-shadow: 0 20px 50px rgba(0,0,0,0.15); border-radius: 16px; overflow: hidden; 
-    /* Grade de Fundo Suave */
-    background-image: linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px), 
-                      linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px); 
+    width: 1040px; height: 720px; background: #0f172a; position: relative; 
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5); border-radius: 16px; overflow: hidden; 
+    /* Grade de Fundo Dark */
+    background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), 
+                      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); 
     background-size: 20px 20px; 
   }
   
   .title { 
     text-align: center; font-size: 34px; font-weight: 800; 
-    margin-top: 40px; color: #0f172a; letter-spacing: -0.5px;
+    margin-top: 40px; color: #f8fafc; letter-spacing: -0.5px;
   }
   
   /* --- GRÁFICO DONUT PRINCIPAL --- */
@@ -38,11 +39,11 @@
       #0284c7 75% 91.66%,    /* Bloco D: 10min (Left) */
       #475569 91.66% 100%    /* Bloco E: 5min (Top Left) */
     ); 
-    box-shadow: 0 0 0 6px white inset, 0 10px 25px rgba(0,0,0,0.1); 
+    box-shadow: 0 0 0 6px #0f172a inset, 0 10px 25px rgba(0,0,0,0.4); 
   }
 
   /* Linhas separadoras brancas do gráfico */
-  .separator { position: absolute; left: 50%; bottom: 50%; width: 6px; height: 50%; background: white; transform-origin: bottom center; z-index: 2; pointer-events: none; margin-left: -3px; }
+  .separator { position: absolute; left: 50%; bottom: 50%; width: 6px; height: 50%; background: #0f172a; transform-origin: bottom center; z-index: 2; pointer-events: none; margin-left: -3px; }
   .sep-1 { transform: rotate(30deg); }     /* 8.33% = 30 deg */
   .sep-2 { transform: rotate(90deg); }     /* 25% = 90 deg */
   .sep-3 { transform: rotate(270deg); }    /* 75% = 270 deg */
@@ -52,39 +53,51 @@
   /* O "Buraco" central e Textos */
   .hole { 
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-    width: 220px; height: 220px; background: white; border-radius: 50%; 
+    width: 220px; height: 220px; background: #0f172a; border-radius: 50%; 
     display: flex; flex-direction: column; justify-content: center; align-items: center; 
-    box-shadow: inset 0 5px 15px rgba(0,0,0,0.06); z-index: 3;
+    box-shadow: inset 0 5px 15px rgba(0,0,0,0.3); z-index: 3;
   }
-  .hole-number { font-size: 60px; font-weight: 900; color: #020617; line-height: 1; margin-top: 15px; }
-  .hole-text { font-size: 16px; font-weight: 800; color: #020617; letter-spacing: 2px; }
+  .hole-number { font-size: 60px; font-weight: 900; color: #f8fafc; line-height: 1; margin-top: 15px; }
+  .hole-text { font-size: 16px; font-weight: 800; color: #f8fafc; letter-spacing: 2px; }
 
   /* Logo FL Replicada em Vetor CSS */
   .fl-logo { display: flex; flex-direction: column; align-items: center; margin-top: 12px; }
   .fl-letters { display: flex; font-weight: 900; font-size: 32px; line-height: 0.8; letter-spacing: -1px; }
   .fl-f { color: #4d7c0f; border-bottom: 4px solid #4d7c0f; padding-bottom: 2px; }
   .fl-l { color: #eab308; border-bottom: 4px solid #eab308; padding-bottom: 2px; }
-  .fl-text { font-size: 12px; color: #020617; font-weight: 900; letter-spacing: -0.5px; margin-top: 4px; font-family: 'Arial Black', Impact, sans-serif; }
+  .fl-text { font-size: 12px; color: #f8fafc; font-weight: 900; letter-spacing: -0.5px; margin-top: 4px; font-family: 'Arial Black', Impact, sans-serif; }
+
+  /* Ícones de Fundo Fatias */
+  .slice-icon { 
+    position: absolute; left: 50%; top: 50%; color: white; 
+    font-size: 32px; z-index: 5; opacity: 1; text-shadow: 0 4px 10px rgba(0,0,0,0.5); 
+    pointer-events: none;
+  }
 
   /* --- BLOCOS DE TEXTO (LEGENDAS) --- */
-  .label { position: absolute; width: 280px; background: white; padding: 12px; z-index: 10; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-  .label-title { font-weight: 800; font-size: 18px; color: #0f172a; margin-bottom: 5px; }
-  .label-title span { font-weight: 600; color: #64748b;}
-  .label-desc { font-size: 14px; color: #475569; line-height: 1.4; }
+  .label { position: absolute; width: 280px; background: #1e293b; padding: 12px; z-index: 10; border-radius: 8px; box-shadow: 0 5px 25px rgba(0,0,0,0.4); }
+  .label-title { font-weight: 800; font-size: 18px; color: #f8fafc; margin-bottom: 5px; }
+  .label-title span { font-weight: 600; color: #94a3b8;}
+  .label-desc { font-size: 14px; color: #cbd5e1; line-height: 1.4; }
   
   /* Posicionamento Específico e Linhas Pontilhadas (Ponteiros) */
-  .label-A { top: 120px; left: 740px; border-top: 4px solid #e2e8f0; } /* 5min Inicial */
-  .label-B { top: 290px; left: 740px; border-top: 4px solid #eab308; } /* 10min Ativação */
+  .label-A { top: 120px; left: 716px; border-top: 4px solid #e2e8f0; } /* 5min Inicial */
+  .label-B { top: 290px; left: 716px; border-top: 4px solid #eab308; } /* 10min Ativação */
   .label-C { top: 580px; left: 380px; width: 280px; text-align: center; border-bottom: 4px solid #4d7c0f; } /* 30min Núcleo */
   .label-D { top: 290px; left: 20px; text-align: right; border-top: 4px solid #0284c7; } /* 10min Jogos */
   .label-E { top: 120px; left: 20px; text-align: right; border-top: 4px solid #475569; } /* 5min Volta calma */
 
-  /* Linhas Conectoras */
-  .label-A::before { content: ''; position: absolute; left: -30px; top: 20px; width: 20px; border-bottom: 2px dashed #94a3b8; }
-  .label-B::before { content: ''; position: absolute; left: -30px; top: 20px; width: 20px; border-bottom: 2px dashed #94a3b8; }
-  .label-D::before { content: ''; position: absolute; right: -30px; top: 20px; width: 20px; border-bottom: 2px dashed #94a3b8; }
-  .label-E::before { content: ''; position: absolute; right: -30px; top: 20px; width: 20px; border-bottom: 2px dashed #94a3b8; }
-  .label-C::before { content: ''; position: absolute; top: -20px; left: 50%; height: 10px; border-left: 2px dashed #94a3b8; }
+  /* Linhas Conectoras (Cotovelo Tridimensional) */
+  .label-A::before { content: ''; position: absolute; left: -30px; top: 20px; width: 20px; border-top: 2px dashed #64748b; }
+  .label-A::after { content: ''; position: absolute; left: -145px; top: 20px; width: 115px; border-top: 2px dashed #64748b; transform-origin: right top; transform: rotate(-13deg); }
+
+  .label-B::before { content: ''; position: absolute; left: -30px; top: 20px; width: 20px; border-bottom: 2px dashed #64748b; }
+  .label-D::before { content: ''; position: absolute; right: -30px; top: 20px; width: 20px; border-bottom: 2px dashed #64748b; }
+  
+  .label-E::before { content: ''; position: absolute; right: -30px; top: 20px; width: 20px; border-top: 2px dashed #64748b; }
+  .label-E::after { content: ''; position: absolute; right: -145px; top: 20px; width: 115px; border-top: 2px dashed #64748b; transform-origin: left top; transform: rotate(13deg); }
+  
+  .label-C::before { content: ''; position: absolute; top: -20px; left: 50%; height: 10px; border-left: 2px dashed #64748b; }
 </style>
 </head>
 <body>
@@ -98,6 +111,13 @@
     <div class="separator sep-4"></div>
     <div class="separator sep-5"></div>
     
+    <!-- Ícones Centros Geométricos nas Fatias -->
+    <i class="fa-solid fa-list-check slice-icon" style="transform: translate(calc(-50% + 40px), calc(-50% - 149px));"></i>
+    <i class="fa-solid fa-bone slice-icon" style="transform: translate(calc(-50% + 134px), calc(-50% - 77px));"></i>
+    <i class="fa-regular fa-futbol slice-icon" style="transform: translate(-50%, calc(-50% + 155px)); font-size: 40px;"></i>
+    <i class="fa-solid fa-people-group slice-icon" style="transform: translate(calc(-50% - 134px), calc(-50% - 77px));"></i>
+    <i class="fa-solid fa-temperature-arrow-down slice-icon" style="transform: translate(calc(-50% - 40px), calc(-50% - 149px)); font-size: 26px;"></i>
+
     <div class="hole">
       <div class="hole-number">60</div>
       <div class="hole-text">MINUTOS</div>
