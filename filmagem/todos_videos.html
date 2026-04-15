@@ -16,12 +16,13 @@
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
         .card { background: var(--card-bg); border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.5); display: flex; flex-direction: column; }
         video { width: 100%; height: 400px; object-fit: contain; background: #000; }
-        .card-info { padding: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .vid-title { font-size: 0.85rem; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 85%; }
+        .card-info { padding: 12px 15px; display: flex; flex-direction: column; gap: 6px; }
+        .vid-filename { font-size: 0.82rem; color: #bbb; word-break: break-all; line-height: 1.3; }
+        .card-meta { display: flex; justify-content: space-between; align-items: center; }
         .star { color: #ffeb3b; font-size: 1.2rem; }
-        
-        .play-all-btn { 
-            background: #ff6b35; color: white; padding: 15px 30px; border-radius: 8px; text-decoration: none; 
+
+        .play-all-btn {
+            background: #ff6b35; color: white; padding: 15px 30px; border-radius: 8px; text-decoration: none;
             font-weight: bold; font-size: 1.2rem; display: inline-block; transition: 0.3s; box-shadow: 0 4px 10px rgba(255,107,53,0.4);
         }
         .play-all-btn:hover { background: #fa5216; transform: translateY(-2px); }
@@ -55,123 +56,165 @@
     <div id="content"></div>
 
     <script>
-        const videoData = {
-  "001_Video by chowkit.football.mp4": { "fundamento": "drible", "favorito": true },
-  "002_Video by dhiraj_juventus.mp4": { "fundamento": "drible", "favorito": true },
-  "003_Video by mechanicaltennis.mp4": { "fundamento": "chute", "favorito": true },
-  "004_Video by the.football_analyst.mp4": { "fundamento": "condução", "favorito": true },
-  "005_Video by matheusspferreira.mp4": { "fundamento": "drible", "favorito": true },
-  "006_Video by sergiuskills.mp4": { "fundamento": "passe", "favorito": true },
-  "007_Video by thespeedmechanic_.mp4": { "fundamento": "técnica atlética", "favorito": true },
-  "008_Video by brandonhima.mp4": { "fundamento": "drible", "favorito": true },
-  "009_Video by alexramostraining.mp4": { "fundamento": "drible", "favorito": true },
-  "010_Video by zth.training.mp4": { "fundamento": "domínio", "favorito": true },
-  "011_Video by zth.training.mp4": { "fundamento": "chute", "favorito": true },
-  "012_Video by nic.fut.mp4": { "fundamento": "drible", "favorito": true },
-  "013_Video by corneteiroonline.mp4": { "fundamento": "chute", "favorito": true },
-  "014_Video by mercedes_roa.mp4": { "fundamento": "condução", "favorito": false },
-  "015_Video by alexramostraining.mp4": { "fundamento": "domínio", "favorito": true },
-  "016_Video by football_school_iq.mp4": { "fundamento": "drible", "favorito": true },
-  "017_Video by shoheiabe6.mp4": { "fundamento": "passe", "favorito": true },
-  "018_Video by prolific.soccer.mp4": { "fundamento": "passe", "favorito": true },
-  "019_Video by bigjohngk.mp4": { "fundamento": "chute", "favorito": true },
-  "020_Video by marquinhopromessa.mp4": { "fundamento": "marcação", "favorito": true },
-  "021_Video by leofootz.mp4": { "fundamento": "drible", "favorito": true },
-  "022_Video by alexramostraining.mp4": { "fundamento": "passe", "favorito": true },
-  "023_Video by hu.barry.mp4": { "fundamento": "drible", "favorito": true },
-  "024_Video by dnafutevolei_.mp4": { "fundamento": "outro", "favorito": false },
-  "025_Video by the_jwl.mp4": { "fundamento": "chute", "favorito": true },
-  "026_Video by futevoleidoquebra.mp4": { "fundamento": "outro", "favorito": false },
-  "027_Video by rugbybricks.mp4": { "fundamento": "chute", "favorito": true },
-  "028_Video by the_jwl.mp4": { "fundamento": "condução", "favorito": true },
-  "029_Video by alexramostraining.mp4": { "fundamento": "drible", "favorito": true },
-  "030_Video by ricardoprofut.mp4": { "fundamento": "domínio", "favorito": true },
-  "031_Video by edu.shoow.mp4": { "fundamento": "outro", "favorito": true },
-  "032_Video by alexramostraining.mp4": { "fundamento": "chute", "favorito": true },
-  "033_Video by jamiebreeno.mp4": { "fundamento": "condução", "favorito": true },
-  "034_Video by brentgtraining.mp4": { "fundamento": "passe", "favorito": true },
-  "035_Video by ricardoprofut.mp4": { "fundamento": "marcação", "favorito": true },
-  "036_Video by regate_takuya.mp4": { "fundamento": "condução", "favorito": true },
-  "037_Video by kano_aus.mp4": { "fundamento": "domínio", "favorito": true },
-  "038_Video by futblack_.mp4": { "fundamento": "chute", "favorito": true },
-  "039_Video by zth.training.mp4": { "fundamento": "chute", "favorito": true },
-  "040_Video by marcelinhocariocaoficial.mp4": { "fundamento": "chute", "favorito": false },
-  "041_Video by rios.futebol.mp4": { "fundamento": "drible", "favorito": true },
-  "042_Video by projectzeronow.mp4": { "fundamento": "chute", "favorito": true },
-  "043_Video by skillafootball.mp4": { "fundamento": "chute", "favorito": true },
-  "044_Video by gavindefootball.mp4": { "fundamento": "chute", "favorito": true },
-  "045_Video by nspsoccer.mp4": { "fundamento": "domínio", "favorito": true },
-  "046_Video by nspsoccer.mp4": { "fundamento": "chute", "favorito": true },
-  "047_Video by increasefootball.mp4": { "fundamento": "domínio", "favorito": true },
-  "048_Video by brentgtraining.mp4": { "fundamento": "domínio", "favorito": true },
-  "049_Video by roycesports.mp4": { "fundamento": "condução", "favorito": true },
-  "050_Video by goalman_.mp4": { "fundamento": "domínio", "favorito": true },
-  "051_Video by optimalsoccertraining.mp4": { "fundamento": "passe", "favorito": true },
-  "052_Video by hamadaadam10.mp4": { "fundamento": "chute", "favorito": true },
-  "053_Video by futblack_.mp4": { "fundamento": "chute", "favorito": false },
-  "054_Video by 777_livl.mp4": { "fundamento": "chute", "favorito": true },
-  "055_Video by alexramostraining.mp4": { "fundamento": "chute", "favorito": true },
-  "056_Video by senne_gk.mp4": { "fundamento": "chute", "favorito": true },
-  "057_Video by alexramostraining.mp4": { "fundamento": "drible", "favorito": true },
-  "058_Video by dicadogordinhoo.mp4": { "fundamento": "domínio", "favorito": true },
-  "059_Video by jawadzakari.mp4": { "fundamento": "condução", "favorito": false },
-  "060_Video by nivassfut.mp4": { "fundamento": "condução", "favorito": true },
-  "061_Video by nspsoccer.mp4": { "fundamento": "passe", "favorito": true },
-  "062_Video by brentgtraining.mp4": { "fundamento": "drible", "favorito": true },
-  "063_Video by chowkit.football.mp4": { "fundamento": "drible", "favorito": true },
-  "064_Video by the_jwl.mp4": { "fundamento": "passe", "favorito": true },
-  "065_Video by nahueloyola.mp4": { "fundamento": "chute", "favorito": true },
-  "066_Video by nxtphasesoccer.mp4": { "fundamento": "condução", "favorito": true },
-  "067_Video by nxtphasesoccer.mp4": { "fundamento": "condução", "favorito": true },
-  "068_Video by jawadzakari.mp4": { "fundamento": "drible", "favorito": true },
-  "069_Video by pierrecastempresas.mp4": { "fundamento": "chute", "favorito": false },
-  "070_Video by soccercoachtrav.mp4": { "fundamento": "chute", "favorito": true },
-  "071_Video by nspsoccer.mp4": { "fundamento": "passe", "favorito": true },
-  "072_16M views · 1.1M reactions ｜ Classic Cri.mp4": { "fundamento": "drible", "favorito": true },
-  "073_1M views · 10K reactions ｜ Quem se lembr.mp4": { "fundamento": "condução", "favorito": true },
-  "074_5 Body Feints Every Player MUST Know (Wi.mp4": { "fundamento": "drible", "favorito": true },
-  "075_Esse drible do Denilson é um absurdo! @d.mp4": { "fundamento": "drible", "favorito": true },
-  "077_O Espetáculo De Romário 😱🥵🤌🍷⚽️.mp4": { "fundamento": "drible", "favorito": true }
-        };
+        // Estrutura: cada categoria aponta para ../RepVid/<Pasta>/
+        // Adicione novos vídeos diretamente nas pastas do RepVid e inclua-os aqui.
+        const categories = [
+            {
+                label: "Domínio",
+                folder: "../RepVid/Domínio",
+                videos: [
+                    "010_Video by zth.training.mp4",
+                    "015_Video by alexramostraining.mp4",
+                    "030_Video by ricardoprofut.mp4",
+                    "037_Video by kano_aus.mp4",
+                    "045_Video by nspsoccer.mp4",
+                    "047_Video by increasefootball.mp4",
+                    "048_Video by brentgtraining.mp4",
+                    "050_Video by goalman_.mp4",
+                    "058_Video by dicadogordinhoo.mp4"
+                ]
+            },
+            {
+                label: "Passe",
+                folder: "../RepVid/Passe",
+                videos: [
+                    "006_Video by sergiuskills.mp4",
+                    "017_Video by shoheiabe6.mp4",
+                    "018_Video by prolific.soccer.mp4",
+                    "022_Video by alexramostraining.mp4",
+                    "034_Video by brentgtraining.mp4",
+                    "051_Video by optimalsoccertraining.mp4",
+                    "061_Video by nspsoccer.mp4",
+                    "064_Video by the_jwl.mp4",
+                    "071_Video by nspsoccer.mp4"
+                ]
+            },
+            {
+                label: "Chute",
+                folder: "../RepVid/Chute",
+                videos: [
+                    "003_Video by mechanicaltennis.mp4",
+                    "011_Video by zth.training.mp4",
+                    "013_Video by corneteiroonline.mp4",
+                    "019_Video by bigjohngk.mp4",
+                    "025_Video by the_jwl.mp4",
+                    "027_Video by rugbybricks.mp4",
+                    "032_Video by alexramostraining.mp4",
+                    "038_Video by futblack_.mp4",
+                    "039_Video by zth.training.mp4",
+                    "040_Video by marcelinhocariocaoficial.mp4",
+                    "042_Video by projectzeronow.mp4",
+                    "043_Video by skillafootball.mp4",
+                    "044_Video by gavindefootball.mp4",
+                    "046_Video by nspsoccer.mp4",
+                    "052_Video by hamadaadam10.mp4",
+                    "053_Video by futblack_.mp4",
+                    "054_Video by 777_livl.mp4",
+                    "055_Video by alexramostraining.mp4",
+                    "056_Video by senne_gk.mp4",
+                    "065_Video by nahueloyola.mp4",
+                    "069_Video by pierrecastempresas.mp4",
+                    "070_Video by soccercoachtrav.mp4"
+                ]
+            },
+            {
+                label: "Drible",
+                folder: "../RepVid/Drible",
+                videos: [
+                    "001_Video by chowkit.football.mp4",
+                    "002_Video by dhiraj_juventus.mp4",
+                    "005_Video by matheusspferreira.mp4",
+                    "008_Video by brandonhima.mp4",
+                    "009_Video by alexramostraining.mp4",
+                    "012_Video by nic.fut.mp4",
+                    "016_Video by football_school_iq.mp4",
+                    "021_Video by leofootz.mp4",
+                    "023_Video by hu.barry.mp4",
+                    "029_Video by alexramostraining.mp4",
+                    "041_Video by rios.futebol.mp4",
+                    "057_Video by alexramostraining.mp4",
+                    "062_Video by brentgtraining.mp4",
+                    "063_Video by chowkit.football.mp4",
+                    "068_Video by jawadzakari.mp4",
+                    "072_16M views · 1.1M reactions ｜ Classic Cri.mp4",
+                    "074_5 Body Feints Every Player MUST Know (Wi.mp4",
+                    "075_Esse drible do Denilson é um absurdo! @d.mp4",
+                    "077_O Espetáculo De Romário 😱🥵🤌🍷⚽️.mp4"
+                ]
+            },
+            {
+                label: "Condução",
+                folder: "../RepVid/Condução",
+                videos: [
+                    "004_Video by the.football_analyst.mp4",
+                    "014_Video by mercedes_roa.mp4",
+                    "028_Video by the_jwl.mp4",
+                    "033_Video by jamiebreeno.mp4",
+                    "036_Video by regate_takuya.mp4",
+                    "049_Video by roycesports.mp4",
+                    "059_Video by jawadzakari.mp4",
+                    "060_Video by nivassfut.mp4",
+                    "066_Video by nxtphasesoccer.mp4",
+                    "067_Video by nxtphasesoccer.mp4",
+                    "073_1M views · 10K reactions ｜ Quem se lembr.mp4"
+                ]
+            },
+            {
+                label: "Marcação",
+                folder: "../RepVid/Marcação",
+                videos: [
+                    "020_Video by marquinhopromessa.mp4",
+                    "035_Video by ricardoprofut.mp4"
+                ]
+            },
+            {
+                label: "Técnica Atlética",
+                folder: "../RepVid/Técnica atlética",
+                videos: [
+                    "007_Video by thespeedmechanic_.mp4"
+                ]
+            },
+            {
+                label: "Outro",
+                folder: "../RepVid/Outro",
+                videos: [
+                    "024_Video by dnafutevolei_.mp4",
+                    "026_Video by futevoleidoquebra.mp4",
+                    "031_Video by edu.shoow.mp4"
+                ]
+            }
+        ];
 
-        const numTodos = Object.keys(videoData).length;
-        const numFavs = Object.keys(videoData).filter(k => videoData[k].favorito).length;
-        document.getElementById('nav-todos').innerText = `Todos (${numTodos})`;
-        document.getElementById('nav-fav').innerText = `⭐ Favoritos (${numFavs})`;
+        // Conta totais
+        const totalVideos = categories.reduce((acc, cat) => acc + cat.videos.length, 0);
+        document.getElementById('nav-todos').innerText = `Todos (${totalVideos})`;
 
-        const categories = ["domínio", "passe", "chute", "drible", "condução", "cabeceio", "marcação", "técnica atlética", "outro", ""];
-
+        // Gera HTML com vídeos ordenados por nome dentro de cada categoria
         let html = '';
         categories.forEach(cat => {
-            const vids = Object.keys(videoData).filter(file => (videoData[file].fundamento || "") === cat);
-            if (vids.length === 0) return;
+            const sorted = [...cat.videos].sort();
+            const baseText = `${cat.label} (${sorted.length})`;
 
-            const catTitle = cat ? cat.charAt(0).toUpperCase() + cat.slice(1) : "Sem Categoria";
-            const baseText = `${catTitle} (${vids.length})`;
-            
-            // Bloco da categoria com suporte ao calculo de tempo
             html += `<div class="category-block">`;
             html += `<h2 class="section-title" data-base-text="${baseText}">${baseText} - Calculando tempo...</h2>`;
             html += `<div class="grid">`;
-            
-            vids.forEach(file => {
-                const isFav = videoData[file].favorito ? '<span class="star">⭐</span>' : '';
-                const shortName = file.substring(4, 30) + '...';
+
+            sorted.forEach(file => {
                 html += `
                 <div class="card">
-                    <video controls preload="metadata"><source src="videos_baixados/${file}" type="video/mp4"></video>
+                    <video controls preload="metadata"><source src="${cat.folder}/${encodeURIComponent(file)}" type="video/mp4"></video>
                     <div class="card-info">
-                        <span class="vid-title" title="${file}">${shortName}</span>
-                        ${isFav}
+                        <span class="vid-filename">${file}</span>
                     </div>
                 </div>`;
             });
+
             html += `</div></div>`;
         });
 
         document.getElementById('content').innerHTML = html;
 
-        // Função engenhosa que escuta quando o vídeo carrega os metadados e calcula a duração total do bloco
+        // Calcula duração total por categoria
         function updateCategoryDurations() {
             const formatTime = (seconds) => {
                 if (isNaN(seconds) || seconds === 0) return "0:00";
@@ -180,11 +223,9 @@
                 return `${m}:${s < 10 ? '0' : ''}${s}`;
             };
 
-            const blocks = document.querySelectorAll('.category-block');
-            blocks.forEach(block => {
+            document.querySelectorAll('.category-block').forEach(block => {
                 const titleEl = block.querySelector('.section-title');
                 const videos = Array.from(block.querySelectorAll('video'));
-                
                 let totalSeconds = 0;
                 let loadedCount = 0;
 
@@ -192,34 +233,24 @@
 
                 const checkDone = () => {
                     if (loadedCount === videos.length) {
-                        const baseText = titleEl.getAttribute('data-base-text');
-                        titleEl.innerText = `${baseText} - ${formatTime(totalSeconds)}`;
+                        titleEl.innerText = `${titleEl.getAttribute('data-base-text')} - ${formatTime(totalSeconds)}`;
                     }
                 };
 
                 videos.forEach(vid => {
-                    if (vid.readyState >= 1) { // metadados ja carregados
+                    if (vid.readyState >= 1) {
                         totalSeconds += vid.duration;
                         loadedCount++;
                         checkDone();
                     } else {
-                        vid.addEventListener('loadedmetadata', () => {
-                            totalSeconds += vid.duration;
-                            loadedCount++;
-                            checkDone();
-                        });
-                        vid.addEventListener('error', () => {
-                            loadedCount++;
-                            checkDone();
-                        });
+                        vid.addEventListener('loadedmetadata', () => { totalSeconds += vid.duration; loadedCount++; checkDone(); });
+                        vid.addEventListener('error', () => { loadedCount++; checkDone(); });
                     }
                 });
             });
         }
-        
-        // Dispara a rotina de somatório de tempos
-        updateCategoryDurations();
 
+        updateCategoryDurations();
     </script>
 </body>
 </html>
