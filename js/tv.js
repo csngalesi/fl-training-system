@@ -53,12 +53,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // Se já rodou todos os vídeos do Array
         if (currentVideoIndex >= playlist.length) {
             player.pause();
-            player.removeAttribute('src'); // Limpa a memória e tira o vídeo da frente na TV
-            player.load();
+            player.currentTime = 0;
+            player.style.display = 'none'; // Esconde p/ liberar a TV sem perder o cache de rede
             nextSlide(); // Acabou a fila: Pula para o Slide 1 novamente!
             return;
         }
 
+        player.style.display = 'block';
         player.src = playlist[currentVideoIndex];
         player.play().catch(e => {
             console.log('Autoplay bloqueado no navegador, forçando auto-pulo...', e);
