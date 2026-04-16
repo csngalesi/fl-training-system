@@ -152,8 +152,10 @@
         }
 
         function abrirModal() {
+            const repo = 'C:\\Users\\christiano galesi\\.gemini\\antigravity\\scratch\\fl-training-system';
             const lines = [
-                '$base = "' + 'fl-training-system\\RepVid"',
+                `Set-Location "${repo}"`,
+                `$base = "${repo}\\RepVid"`,
                 ''
             ];
             for (const [key, c] of Object.entries(changes)) {
@@ -166,9 +168,11 @@
                 }
             }
             lines.push('');
-            lines.push('# Depois rode para atualizar o catalogo e fazer deploy:');
-            lines.push('powershell -File RepVid\\gerar_catalog.ps1');
-            lines.push('git add RepVid/ && git commit -m "refactor: renomear videos classificados" && git push');
+            lines.push('# Atualizar catalogo e fazer deploy:');
+            lines.push('powershell -ExecutionPolicy Bypass -File "$base\\..\\RepVid\\gerar_catalog.ps1"');
+            lines.push('git add RepVid/');
+            lines.push('git commit -m "refactor: renomear videos classificados"');
+            lines.push('git push');
 
             document.getElementById('script-output').value = lines.join('\n');
             document.getElementById('modal').classList.add('open');
