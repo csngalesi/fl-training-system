@@ -52,6 +52,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function playNextVideo() {
         // Se já rodou todos os vídeos do Array
         if (currentVideoIndex >= playlist.length) {
+            player.pause();
+            player.removeAttribute('src'); // Limpa a memória e tira o vídeo da frente na TV
+            player.load();
             nextSlide(); // Acabou a fila: Pula para o Slide 1 novamente!
             return;
         }
