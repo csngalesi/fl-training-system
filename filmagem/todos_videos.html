@@ -105,9 +105,14 @@
     <div class="modal-overlay" id="modal">
         <div class="modal">
             <h3>📋 Script de Renomeação</h3>
-            <p style="color:#aaa; font-size:0.85rem; margin:0;">
-                Copie e cole no PowerShell rodando na pasta <code style="color:#ff6b35">fl-training-system</code>:
-            </p>
+
+            <ol style="color:#aaa; font-size:0.85rem; margin:0; padding-left:1.3rem; line-height:2;">
+                <li>Clique em <strong style="color:#ff6b35;">Copiar</strong> abaixo</li>
+                <li>Abra o <strong style="color:#fff;">PowerShell</strong> (tecla Windows → digite <code style="color:#ff6b35">powershell</code> → Enter)</li>
+                <li><strong style="color:#fff;">Cole</strong> com <code style="color:#ff6b35">Ctrl+V</code> e pressione <code style="color:#ff6b35">Enter</code></li>
+                <li>Aguarde terminar — os vídeos serão renomeados e o deploy feito automaticamente</li>
+            </ol>
+
             <textarea id="script-output" readonly></textarea>
             <div class="modal-btns">
                 <button class="btn-copy" onclick="copiarScript()">📋 Copiar</button>
