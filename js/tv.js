@@ -26,14 +26,16 @@ document.addEventListener('DOMContentLoaded', () => {
         // Exibe novo slide
         slides[currentSlide].classList.add('active');
 
-        // Lógica de Direcionamento por Cartaz
-        if (currentSlide === 0) {
-            // Primeiro Slide (Cartaz da Letra) fica por 7 Segundos
-            timerTimeout = setTimeout(nextSlide, 7000);
-        } 
-        else if (currentSlide === 1) {
-            // Slide 2: Inicia o loop mestre dos vídeos! A transição de volta ao slide 0 só vai ocorrer quando a playlist acabar.
+        // Lógica de Direcionamento por Tipo de Slide
+        const currentSlideElement = slides[currentSlide];
+        
+        // Verifica se o slide atual tem o player de vídeo dentro
+        if (currentSlideElement.querySelector('#playlist-player')) {
+            // Inicia o loop mestre dos vídeos! A transição de volta para o próximo ocorrerá apenas quando a playlist acabar.
             playVideoSequence();
+        } else {
+            // Outros slides normais (Cartaz, Equipe, etc) ficam por 7 Segundos
+            timerTimeout = setTimeout(nextSlide, 7000);
         }
     }
 

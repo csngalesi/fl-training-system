@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Football Lab - TV Portal (Aniversário)</title>
-    <!-- Usaremos a mesma fonte que já deve estar rolando no projeto principal -->
-    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;600&family=Montserrat:wght@400;700&display=swap"
+    <title>Football Lab - TV Oficial Portal</title>
+    <!-- Fontes -->
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;600&family=Montserrat:wght@400;700;900&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="css/tv.css">
 </head>
@@ -22,7 +22,46 @@
         </div>
     </div>
 
-    <!-- Slide 2: Playlist de Treinos -->
+    <!-- Slide 2: Equipe -->
+    <!-- Slide 2: Equipe -->
+    <div id="slide-equipe" class="tv-slide" style="background: url('assets/img/slide%202.jpg') center/cover no-repeat;">
+        <div class="content-wrapper" style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 40px 50px 10px 50px; box-sizing: border-box; zoom: 0.85;">
+            
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h2 style="font-size: 3.8rem; text-transform: uppercase; margin: 0 0 10px 0; font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spacing: 1px; text-shadow: 2px 2px 5px rgba(0,0,0,0.6);">
+                    <span style="color: #fff;">Quem está à frente da </span><span style="color: #fff;">formação do<br>seu filho?</span>
+                </h2>
+                <p style="font-size: 1.6rem; color: #f8fafc; font-family: 'Montserrat', sans-serif; font-weight: 700; margin: 0; text-shadow: 1px 1px 3px rgba(0,0,0,0.5);">Profissionais experientes e apaixonados por formar atletas e pessoas.</p>
+            </div>
+
+            <div style="display: flex; gap: 20px; justify-content: center; align-items: stretch; width: 100%; max-width: 1400px; padding-bottom: 80px;">
+                
+                <!-- Membro 1 -->
+                <div style="flex: 1; background: rgba(0,0,0,0.85); border-radius: 15px; padding: 25px; display: flex; flex-direction: column; align-items: center; text-align: center;">
+                    <img src="https://footballlab.com.br/assets/carlos-pereira-U4VyRhVw.jpeg" alt="Carlos Pereira" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid #559c31; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.5);">
+                    <h3 style="font-size: 2.0rem; margin: 0 0 10px 0; color: #fff; font-family: 'Montserrat', sans-serif; font-weight: 700; text-transform: uppercase;">Carlos Pereira</h3>
+                    <p style="font-size: 1.2rem; color: #cbd5e1; line-height: 1.4; font-family: 'Montserrat', sans-serif; margin: 0;">Responsável pelo futebol de base do Esporte Clube Pinheiros há mais de 20 anos. Trabalhos também com o Referência Futebol Clube, colégio Santa Cruz, entre outros.</p>
+                </div>
+
+                <!-- Membro 2 -->
+                <div style="flex: 1; background: rgba(0,0,0,0.85); border-radius: 15px; padding: 25px; display: flex; flex-direction: column; align-items: center; text-align: center;">
+                    <img src="https://footballlab.com.br/assets/felipe-chebel-CBMcFvFe.jpeg" alt="Felipe Chebel" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid #559c31; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.5);">
+                    <h3 style="font-size: 2.0rem; margin: 0 0 10px 0; color: #fff; font-family: 'Montserrat', sans-serif; font-weight: 700; text-transform: uppercase;">Felipe Chebel</h3>
+                    <p style="font-size: 1.2rem; color: #cbd5e1; line-height: 1.4; font-family: 'Montserrat', sans-serif; margin: 0;">Trabalhou por diversos anos na base do Chelsea e Arsenal da Inglaterra. Atualmente atua no Kansas City Current categoria sub 13.</p>
+                </div>
+
+                <!-- Membro 3 -->
+                <div style="flex: 1; background: rgba(0,0,0,0.85); border-radius: 15px; padding: 25px; display: flex; flex-direction: column; align-items: center; text-align: center;">
+                    <img src="https://footballlab.com.br/assets/vinicius-santos-udNFg9Ie.jpeg" alt="Vinícius dos Santos" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid #559c31; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.5);">
+                    <h3 style="font-size: 2.0rem; margin: 0 0 10px 0; color: #fff; font-family: 'Montserrat', sans-serif; font-weight: 700; text-transform: uppercase;">Vinícius dos Santos</h3>
+                    <p style="font-size: 1.2rem; color: #cbd5e1; line-height: 1.4; font-family: 'Montserrat', sans-serif; margin: 0;">Passou pela categoria de base de diversos clubes. Atualmente é responsável pela categoria sub 15 do São Paulo Futebol Clube.</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: Playlist de Treinos -->
     <div id="slide-birthday" class="tv-slide">
         <div class="content-wrapper">
             <h2 style="font-size: 3rem; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); margin-bottom: 20px; margin-top: 10px;">Bons Treinos!</h2>
@@ -35,7 +74,7 @@
     <!-- Barra inferior (Ticker) rodando notícias/avisos -->
     <div class="ticker-wrap">
         <div class="ticker">
-            <div class="ticker__item">MATRÍCULAS ABERTAS</div>
+            <div class="ticker__item">MATRÍCULAS ABERTAS • FOOTBALL LAB • GERANDO SUA MELHOR VERSÃO</div>
         </div>
     </div>
 
