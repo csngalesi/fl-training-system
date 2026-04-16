@@ -235,3 +235,9 @@ h3 {
         transform: translate3d(-100%, 0, 0);
     }
 }
+
+/* Ocultar barra de controle no TV (já que adicionamos o controls no HTML) */
+video::-webkit-media-controls,
+video::-webkit-media-controls-enclosure {
+    display: none !important;
+}
