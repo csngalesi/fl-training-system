@@ -2,7 +2,8 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     const slides = document.querySelectorAll('.tv-slide');
-    const player = document.getElementById('playlist-player');
+    const playerContainer = document.getElementById('playlist-player').parentNode;
+    const templatePlayer = document.getElementById('playlist-player');
     
     let currentSlide = 0;
     let timerTimeout = null;
@@ -13,6 +14,28 @@ document.addEventListener('DOMContentLoaded', () => {
         "TV/Dribles S_small.mp4"
     ];
     let currentVideoIndex = 0;
+    const videoElements = [];
+
+    // Pre-load de todos os vídeos (Pool) para evitar consumo repetitivo de internet no Vercel
+    // e parar as travadas nativas do hardware da TV quando se troca o src.
+    playlist.forEach((src, index) => {
+        const vid = templatePlayer.cloneNode(true);
+        vid.id = `video-pool-${index}`;
+        vid.src = src;
+        vid.preload = "auto";
+        vid.style.display = 'none';
+
+        vid.addEventListener('ended', () => {
+            currentVideoIndex++; // Próximo vídeo da fila
+            playNextVideo();
+        });
+
+        playerContainer.appendChild(vid);
+        videoElements.push(vid);
+    });
+
+    // Remove o template original
+    templatePlayer.remove();
 
     function nextSlide() {
         clearTimeout(timerTimeout);
@@ -26,12 +49,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Exibe novo slide
         slides[currentSlide].classList.add('active');
 
-        // Lógica de Direcionamento por Tipo de Slide
         const currentSlideElement = slides[currentSlide];
         
-        // Verifica se o slide atual tem o player de vídeo dentro
-        if (currentSlideElement.querySelector('#playlist-player')) {
-            // Inicia o loop mestre dos vídeos! A transição de volta para o próximo ocorrerá apenas quando a playlist acabar.
+        // Verifica se o slide atual é o dos vídeos apontando pela ID do Slide
+        if (currentSlideElement.id === 'slide-birthday') {
+            // Inicia o loop da playlist!
             playVideoSequence();
         } else {
             // Outros slides normais (Cartaz, Equipe, etc) ficam por 7 Segundos
@@ -39,9 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Engine da Playlist Sequencial
     function playVideoSequence() {
-        if (!player || playlist.length === 0) {
+        if (videoElements.length === 0) {
             timerTimeout = setTimeout(nextSlide, 5000); // Fallback
             return;
         }
@@ -50,28 +71,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function playNextVideo() {
+        // Esconde e pausa todos preventivamente
+        videoElements.forEach(v => {
+            v.style.display = 'none';
+            v.pause();
+            v.currentTime = 0;
+        });
+
         // Se já rodou todos os vídeos do Array
         if (currentVideoIndex >= playlist.length) {
-            player.pause();
-            player.currentTime = 0;
-            player.style.display = 'none'; // Esconde p/ liberar a TV sem perder o cache de rede
             nextSlide(); // Acabou a fila: Pula para o Slide 1 novamente!
             return;
         }
 
-        player.style.display = 'block';
-        player.src = playlist[currentVideoIndex];
-        player.play().catch(e => {
+        const activeVid = videoElements[currentVideoIndex];
+        activeVid.style.display = 'block';
+        activeVid.play().catch(e => {
             console.log('Autoplay bloqueado no navegador, forçando auto-pulo...', e);
             currentVideoIndex++;
-            playNextVideo();
-        });
-    }
-
-    // Escutador de Fim de Vídeo (O Pulo Automático entre vídeos da mesma fatia)
-    if (player) {
-        player.addEventListener('ended', () => {
-            currentVideoIndex++; // Próximo vídeo da fila
             playNextVideo();
         });
     }
