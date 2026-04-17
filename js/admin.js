@@ -1794,6 +1794,34 @@
         });
     }
 
+    function _setupUploadBtn(btnId, fileInputId, getArr, listId) {
+        const btn       = document.getElementById(btnId);
+        const fileInput = document.getElementById(fileInputId);
+        btn.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', async () => {
+            const file = fileInput.files[0];
+            if (!file) return;
+            const origLabel = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            try {
+                const url  = await window.FLApi.Storage.upload(file);
+                const type = file.type.startsWith('image/') ? 'image' : 'video_url';
+                const arr  = getArr();
+                arr.push({ type, value: url, caption: '' });
+                const remove = (idx) => { arr.splice(idx, 1); _renderMediaList(listId, arr, remove); };
+                _renderMediaList(listId, arr, remove);
+                toast('Upload concluído!');
+            } catch (e) {
+                toast('Erro no upload: ' + e.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = origLabel;
+                fileInput.value = '';
+            }
+        });
+    }
+
     async function initMensagemModule() {
         const plansList = document.getElementById('msg-plans-list');
         const formWrap  = document.getElementById('msg-form-wrap');
@@ -1830,6 +1858,12 @@
         _setupMediaAdder('tec-media-type', 'tec-media-value', 'tec-media-caption', 'btn-tec-media-add',
             () => _mediaTecnica, (arr) => { _mediaTecnica = arr; },
             'tec-media-list');
+
+        // Wire up upload buttons (once)
+        _setupUploadBtn('btn-msg-upload', 'msg-media-file',
+            () => _mediaMensagem, 'msg-media-list');
+        _setupUploadBtn('btn-tec-upload', 'tec-media-file',
+            () => _mediaTecnica, 'tec-media-list');
 
         document.getElementById('btn-save-mensagem').addEventListener('click', _saveMensagem);
     }

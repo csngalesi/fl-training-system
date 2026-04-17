@@ -268,6 +268,21 @@
         },
     };
 
+    // ── Storage ───────────────────────────────────────────────────
+    const Storage = {
+        async upload(file) {
+            const ext      = file.name.split('.').pop();
+            const fileName = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+            const { data, error } = await db()
+                .storage
+                .from('fl-media')
+                .upload(fileName, file, { contentType: file.type, upsert: false });
+            if (error) throw error;
+            const { data: urlData } = db().storage.from('fl-media').getPublicUrl(data.path);
+            return urlData.publicUrl;
+        },
+    };
+
     // ── FL Gestão (external Supabase via REST) ────────────────────
     const FL_GESTAO_URL = 'https://negipnauepyeztarwvye.supabase.co';
     const FL_GESTAO_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5lZ2lwbmF1ZXB5ZXp0YXJ3dnllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NTMyNjMsImV4cCI6MjA4ODIyOTI2M30.GZ49uxi39X6RSDHdyksAw8XnKxwvvq_QvH5WCNi0NGg';
@@ -306,7 +321,7 @@
         },
     };
 
-    window.FLApi = { Fundamentals, Drills, Templates, WeekPlans, Mensagem, CargaRegistros, FLGestao };
+    window.FLApi = { Fundamentals, Drills, Templates, WeekPlans, Mensagem, CargaRegistros, FLGestao, Storage };
 
     console.info('[FL] API module loaded.');
 })();
