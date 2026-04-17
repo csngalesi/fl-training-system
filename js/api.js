@@ -209,12 +209,11 @@
 
     // ── Mensagem ──────────────────────────────────────────────────
     const Mensagem = {
-        async get() {
+        async getByPlan(planId) {
             const { data, error } = await db()
                 .from('fl_mensagem')
                 .select('*')
-                .order('updated_at', { ascending: false })
-                .limit(1)
+                .eq('week_plan_id', planId)
                 .maybeSingle();
             if (error) throw error;
             return data;

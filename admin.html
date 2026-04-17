@@ -1747,20 +1747,82 @@
 
         <!-- ══ Module: Mensagem ══ -->
         <div id="module-mensagem" class="admin-module hidden">
-            <h2 style="margin-bottom:24px"><i class="fa-solid fa-message" style="color:#a78bfa"></i> Mensagem da Semana</h2>
-            <div class="glass-card" style="max-width:700px;padding:28px;display:flex;flex-direction:column;gap:20px;">
-                <div>
-                    <label class="form-label" style="display:block;margin-bottom:8px;font-weight:600">Mensagem</label>
-                    <textarea id="msg-mensagem" rows="6" placeholder="Digite a mensagem da semana..."
-                        style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:var(--text-main);padding:12px;font-size:.92rem;resize:vertical;font-family:inherit;box-sizing:border-box;"></textarea>
+            <h2 style="margin-bottom:20px"><i class="fa-solid fa-message" style="color:#a78bfa"></i> Mensagem &amp; Técnica</h2>
+
+            <!-- Plan selector -->
+            <div style="margin-bottom:24px">
+                <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:10px">Selecione o plano para editar sua mensagem e técnica:</p>
+                <div id="msg-plans-list" style="display:flex;flex-wrap:wrap;gap:10px;">
+                    <span style="color:var(--text-muted);font-size:.88rem;">Carregando...</span>
                 </div>
-                <div>
-                    <label class="form-label" style="display:block;margin-bottom:8px;font-weight:600">Destaque Técnico</label>
-                    <textarea id="msg-destaque" rows="4" placeholder="Digite o destaque técnico..."
-                        style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:var(--text-main);padding:12px;font-size:.92rem;resize:vertical;font-family:inherit;box-sizing:border-box;"></textarea>
+            </div>
+
+            <!-- Form (hidden until plan selected) -->
+            <div id="msg-form-wrap" class="hidden" style="max-width:700px;display:flex;flex-direction:column;gap:24px;">
+
+                <!-- Mensagem -->
+                <div style="background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:12px;padding:20px;">
+                    <h3 style="font-size:.9rem;font-weight:700;color:#0ea5e9;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+                        <i class="fa-solid fa-message"></i> Mensagem
+                    </h3>
+                    <div class="form-group">
+                        <label>Texto</label>
+                        <textarea id="msg-mensagem" rows="5" placeholder="Digite a mensagem da semana..."
+                            style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:var(--text-main);padding:12px;font-size:.92rem;resize:vertical;font-family:inherit;box-sizing:border-box;"></textarea>
+                    </div>
+                    <div>
+                        <label style="font-size:.8rem;font-weight:600;color:var(--text-muted);display:block;margin-bottom:8px;">
+                            <i class="fa-solid fa-photo-film"></i> Mídia
+                        </label>
+                        <div id="msg-media-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;"></div>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+                            <select id="msg-media-type" class="form-select" style="width:130px;flex-shrink:0;">
+                                <option value="youtube">YouTube ID</option>
+                                <option value="image">Imagem URL</option>
+                                <option value="video_url">Vídeo URL</option>
+                            </select>
+                            <input id="msg-media-value" class="form-input" type="text" placeholder="Cole o ID ou URL" style="flex:1;min-width:160px;">
+                            <input id="msg-media-caption" class="form-input" type="text" placeholder="Legenda (opcional)" style="flex:1;min-width:120px;">
+                            <button id="btn-msg-media-add" class="btn btn-secondary btn-sm" style="white-space:nowrap;">
+                                <i class="fa-solid fa-plus"></i> Adicionar
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <div style="display:flex;align-items:center;gap:12px">
-                    <button id="btn-save-mensagem" class="btn-primary" style="background:linear-gradient(135deg,#7c3aed,#4f46e5)">
+
+                <!-- Técnica -->
+                <div style="background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:12px;padding:20px;">
+                    <h3 style="font-size:.9rem;font-weight:700;color:#f59e0b;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+                        <i class="fa-solid fa-star"></i> Destaque Técnico
+                    </h3>
+                    <div class="form-group">
+                        <label>Texto</label>
+                        <textarea id="msg-destaque" rows="4" placeholder="Digite o destaque técnico..."
+                            style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:var(--text-main);padding:12px;font-size:.92rem;resize:vertical;font-family:inherit;box-sizing:border-box;"></textarea>
+                    </div>
+                    <div>
+                        <label style="font-size:.8rem;font-weight:600;color:var(--text-muted);display:block;margin-bottom:8px;">
+                            <i class="fa-solid fa-photo-film"></i> Mídia
+                        </label>
+                        <div id="tec-media-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;"></div>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+                            <select id="tec-media-type" class="form-select" style="width:130px;flex-shrink:0;">
+                                <option value="youtube">YouTube ID</option>
+                                <option value="image">Imagem URL</option>
+                                <option value="video_url">Vídeo URL</option>
+                            </select>
+                            <input id="tec-media-value" class="form-input" type="text" placeholder="Cole o ID ou URL" style="flex:1;min-width:160px;">
+                            <input id="tec-media-caption" class="form-input" type="text" placeholder="Legenda (opcional)" style="flex:1;min-width:120px;">
+                            <button id="btn-tec-media-add" class="btn btn-secondary btn-sm" style="white-space:nowrap;">
+                                <i class="fa-solid fa-plus"></i> Adicionar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Save -->
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <button id="btn-save-mensagem" class="btn btn-primary" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);">
                         <i class="fa-solid fa-floppy-disk"></i> Salvar
                     </button>
                     <span id="msg-save-status" style="font-size:.85rem;color:var(--text-muted)"></span>

@@ -1748,35 +1748,135 @@
     });
 
     // ── Módulo Mensagem ───────────────────────────────────────────
-    let _mensagemId = null;
+    let _mensagemId        = null;
+    let _mensagemPlanId    = null;
+    let _mediaMensagem     = [];   // [{type, value, caption}]
+    let _mediaTecnica      = [];
+
+    function _renderMediaList(containerId, mediaArr, onRemove) {
+        const el = document.getElementById(containerId);
+        if (!el) return;
+        if (!mediaArr.length) {
+            el.innerHTML = '<span style="font-size:.78rem;color:var(--text-muted)">Nenhuma mídia adicionada.</span>';
+            return;
+        }
+        el.innerHTML = mediaArr.map((m, i) => {
+            const label = m.type === 'youtube' ? `▶ YouTube: ${m.value}` :
+                          m.type === 'image'   ? `🖼 Imagem: ${m.value.substring(0,40)}...` :
+                                                  `🎬 Vídeo: ${m.value.substring(0,40)}...`;
+            return `<div style="display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.25);border:1px solid var(--glass-border);border-radius:6px;padding:7px 10px;">
+                <span style="flex:1;font-size:.78rem;color:#cbd5e1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${label}${m.caption ? ' — ' + m.caption : ''}</span>
+                <button class="btn btn-danger btn-sm" data-idx="${i}" style="padding:3px 8px;font-size:.72rem;">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>`;
+        }).join('');
+        el.querySelectorAll('button[data-idx]').forEach(btn => {
+            btn.addEventListener('click', () => onRemove(Number(btn.dataset.idx)));
+        });
+    }
+
+    function _setupMediaAdder(typeId, valueId, captionId, btnId, getArr, setArr, listId) {
+        document.getElementById(btnId).addEventListener('click', () => {
+            const type    = document.getElementById(typeId).value;
+            const value   = document.getElementById(valueId).value.trim();
+            const caption = document.getElementById(captionId).value.trim();
+            if (!value) { toast('Informe o ID ou URL.', 'error'); return; }
+            const arr = getArr();
+            arr.push({ type, value, caption });
+            setArr(arr);
+            document.getElementById(valueId).value   = '';
+            document.getElementById(captionId).value = '';
+            _renderMediaList(listId, arr, (idx) => {
+                arr.splice(idx, 1);
+                _renderMediaList(listId, arr, arguments.callee);
+            });
+        });
+    }
 
     async function initMensagemModule() {
-        const statusEl = document.getElementById('msg-save-status');
-        statusEl.textContent = 'Carregando...';
+        const plansList = document.getElementById('msg-plans-list');
+        const formWrap  = document.getElementById('msg-form-wrap');
+        formWrap.classList.add('hidden');
+        plansList.innerHTML = '<span style="color:var(--text-muted);font-size:.88rem;">Carregando...</span>';
+
         try {
-            const data = await window.FLApi.Mensagem.get();
+            const plans = await window.FLApi.WeekPlans.getAll();
+            if (!plans.length) {
+                plansList.innerHTML = '<span style="color:var(--text-muted);font-size:.88rem;">Nenhum plano criado ainda.</span>';
+                return;
+            }
+            plansList.innerHTML = plans.map(p => `
+                <button class="btn btn-secondary msg-plan-btn" data-id="${p.id}"
+                    style="padding:9px 16px;border-radius:10px;font-weight:600;font-size:.88rem;">
+                    ${p.title}
+                </button>`).join('');
+
+            plansList.querySelectorAll('.msg-plan-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    plansList.querySelectorAll('.msg-plan-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    _loadMensagemForPlan(btn.dataset.id);
+                });
+            });
+        } catch (e) {
+            plansList.innerHTML = `<span style="color:#ef4444;">Erro: ${e.message}</span>`;
+        }
+
+        // Wire up media adders (once)
+        _setupMediaAdder('msg-media-type', 'msg-media-value', 'msg-media-caption', 'btn-msg-media-add',
+            () => _mediaMensagem, (arr) => { _mediaMensagem = arr; },
+            'msg-media-list');
+        _setupMediaAdder('tec-media-type', 'tec-media-value', 'tec-media-caption', 'btn-tec-media-add',
+            () => _mediaTecnica, (arr) => { _mediaTecnica = arr; },
+            'tec-media-list');
+
+        document.getElementById('btn-save-mensagem').addEventListener('click', _saveMensagem);
+    }
+
+    async function _loadMensagemForPlan(planId) {
+        _mensagemPlanId = planId;
+        const statusEl = document.getElementById('msg-save-status');
+        const formWrap = document.getElementById('msg-form-wrap');
+        statusEl.textContent = 'Carregando...';
+        formWrap.classList.remove('hidden');
+        try {
+            const data = await window.FLApi.Mensagem.getByPlan(planId);
             if (data) {
-                _mensagemId = data.id;
-                document.getElementById('msg-mensagem').value = data.mensagem || '';
+                _mensagemId   = data.id;
+                _mediaMensagem = data.media_mensagem || [];
+                _mediaTecnica  = data.media_tecnica  || [];
+                document.getElementById('msg-mensagem').value = data.mensagem         || '';
                 document.getElementById('msg-destaque').value = data.destaque_tecnico || '';
                 statusEl.textContent = `Última atualização: ${new Date(data.updated_at).toLocaleString('pt-BR')}`;
             } else {
-                _mensagemId = null;
+                _mensagemId    = null;
+                _mediaMensagem = [];
+                _mediaTecnica  = [];
                 document.getElementById('msg-mensagem').value = '';
                 document.getElementById('msg-destaque').value = '';
-                statusEl.textContent = 'Nenhuma mensagem cadastrada ainda.';
+                statusEl.textContent = 'Nenhum conteúdo para este plano ainda.';
             }
         } catch (err) {
             statusEl.textContent = 'Erro ao carregar: ' + err.message;
         }
+
+        const removeMsg = (idx) => { _mediaMensagem.splice(idx, 1); _renderMediaList('msg-media-list', _mediaMensagem, removeMsg); };
+        const removeTec = (idx) => { _mediaTecnica.splice(idx,  1); _renderMediaList('tec-media-list', _mediaTecnica,  removeTec);  };
+        _renderMediaList('msg-media-list', _mediaMensagem, removeMsg);
+        _renderMediaList('tec-media-list', _mediaTecnica,  removeTec);
     }
 
-    document.getElementById('btn-save-mensagem').addEventListener('click', async () => {
-        const btn = document.getElementById('btn-save-mensagem');
+    async function _saveMensagem() {
+        if (!_mensagemPlanId) { toast('Selecione um plano primeiro.', 'error'); return; }
+        const btn      = document.getElementById('btn-save-mensagem');
         const statusEl = document.getElementById('msg-save-status');
-        const payload = {
+        const payload  = {
             mensagem:         document.getElementById('msg-mensagem').value.trim(),
             destaque_tecnico: document.getElementById('msg-destaque').value.trim(),
+            media_mensagem:   _mediaMensagem,
+            media_tecnica:    _mediaTecnica,
+            week_plan_id:     _mensagemPlanId,
         };
         btn.disabled = true;
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
@@ -1791,7 +1891,7 @@
             btn.disabled = false;
             btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar';
         }
-    });
+    }
 
     // ── Módulo Carga ──────────────────────────────────────────────
     const PSE_COLORS_ADMIN = ['#94a3b8','#22c55e','#22c55e','#84cc16','#84cc16','#eab308','#eab308','#f97316','#f97316','#ef4444','#7c3aed'];

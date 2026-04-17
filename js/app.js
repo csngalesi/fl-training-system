@@ -130,7 +130,36 @@ document.addEventListener('DOMContentLoaded', () => {
         // Controle de Carga
         initCarga();
 
-        // Mensagem modal (só campo mensagem)
+        // ── Helper: renderiza lista de mídia no modal ──────────────
+        function renderModalMedia(containerId, mediaArr) {
+            const el = document.getElementById(containerId);
+            if (!el) return;
+            if (!mediaArr || !mediaArr.length) { el.innerHTML = ''; return; }
+            el.innerHTML = mediaArr.map(m => {
+                if (m.type === 'youtube') {
+                    return `<div style="margin-top:12px;">
+                        ${m.caption ? `<p style="font-size:.82rem;color:var(--text-muted);margin-bottom:6px;">${m.caption}</p>` : ''}
+                        <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;">
+                            <iframe src="https://www.youtube.com/embed/${m.value}" frameborder="0" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen
+                                style="position:absolute;top:0;left:0;width:100%;height:100%;border-radius:10px;"></iframe>
+                        </div>
+                    </div>`;
+                }
+                if (m.type === 'image') {
+                    return `<div style="margin-top:12px;">
+                        ${m.caption ? `<p style="font-size:.82rem;color:var(--text-muted);margin-bottom:6px;">${m.caption}</p>` : ''}
+                        <img src="${m.value}" style="width:100%;border-radius:10px;object-fit:cover;" loading="lazy">
+                    </div>`;
+                }
+                // video_url
+                return `<div style="margin-top:12px;">
+                    ${m.caption ? `<p style="font-size:.82rem;color:var(--text-muted);margin-bottom:6px;">${m.caption}</p>` : ''}
+                    <video src="${m.value}" controls style="width:100%;border-radius:10px;" preload="none"></video>
+                </div>`;
+            }).join('');
+        }
+
+        // Mensagem modal
         document.getElementById('btn-mensagem').addEventListener('click', async () => {
             const modal   = document.getElementById('mensagem-modal');
             const loading = document.getElementById('mensagem-loading');
@@ -141,10 +170,11 @@ document.addEventListener('DOMContentLoaded', () => {
             empty.classList.add('hidden');
             modal.classList.remove('hidden');
             try {
-                const data = await window.FLApi.Mensagem.get();
+                const data = await window.FLApi.Mensagem.getByPlan(selectedPlanId);
                 loading.classList.add('hidden');
                 if (data && data.mensagem) {
                     document.getElementById('mensagem-texto').textContent = data.mensagem;
+                    renderModalMedia('mensagem-media', data.media_mensagem);
                     content.classList.remove('hidden');
                 } else {
                     empty.classList.remove('hidden');
@@ -152,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (e) {
                 loading.classList.add('hidden');
                 empty.classList.remove('hidden');
-                console.error('[FL] Mensagem.get() error:', e);
+                console.error('[FL] Mensagem.getByPlan() error:', e);
             }
         });
         document.getElementById('btn-close-mensagem').addEventListener('click', () => {
@@ -163,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('mensagem-modal').classList.add('hidden');
         });
 
-        // Técnica modal (só campo destaque_tecnico)
+        // Técnica modal
         document.getElementById('btn-tecnica').addEventListener('click', async () => {
             const modal   = document.getElementById('tecnica-modal');
             const loading = document.getElementById('tecnica-loading');
@@ -174,10 +204,11 @@ document.addEventListener('DOMContentLoaded', () => {
             empty.classList.add('hidden');
             modal.classList.remove('hidden');
             try {
-                const data = await window.FLApi.Mensagem.get();
+                const data = await window.FLApi.Mensagem.getByPlan(selectedPlanId);
                 loading.classList.add('hidden');
                 if (data && data.destaque_tecnico) {
                     document.getElementById('tecnica-texto').textContent = data.destaque_tecnico;
+                    renderModalMedia('tecnica-media', data.media_tecnica);
                     content.classList.remove('hidden');
                 } else {
                     empty.classList.remove('hidden');
@@ -185,7 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (e) {
                 loading.classList.add('hidden');
                 empty.classList.remove('hidden');
-                console.error('[FL] Mensagem.get() error:', e);
+                console.error('[FL] Mensagem.getByPlan() error:', e);
             }
         });
         document.getElementById('btn-close-tecnica').addEventListener('click', () => {
