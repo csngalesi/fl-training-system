@@ -848,13 +848,16 @@ document.addEventListener('DOMContentLoaded', () => {
             list.innerHTML = '<p style="color:var(--text-muted);font-size:.88rem;padding:12px 0;">Nenhum aluno encontrado.</p>';
             return;
         }
-        list.innerHTML = students.map(s => `
-            <button class="btn-secondary carga-student-btn"
+        list.innerHTML = students.map(s => {
+            const isPre = s.student_type === 'pre-cadastro';
+            const badge = isPre ? '<span style="font-size:.65rem;font-weight:700;padding:2px 6px;border-radius:4px;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.35);margin-left:6px;">Pré</span>' : '';
+            return `<button class="btn-secondary carga-student-btn"
                 data-id="${escHtml(s.id || '')}" data-name="${escHtml(s.full_name)}"
-                style="text-align:left;padding:12px 14px;border-radius:10px;font-size:.92rem;">
-                <i class="fa-solid fa-user" style="color:#a78bfa;margin-right:8px;"></i>
-                ${escHtml(s.full_name)}
-            </button>`).join('');
+                style="text-align:left;padding:12px 14px;border-radius:10px;font-size:.92rem;display:flex;align-items:center;">
+                <i class="fa-solid fa-user" style="color:#a78bfa;margin-right:8px;flex-shrink:0;"></i>
+                ${escHtml(s.full_name)}${badge}
+            </button>`;
+        }).join('');
         list.querySelectorAll('.carga-student-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 _cargaStudent = { id: btn.dataset.id, name: btn.dataset.name };

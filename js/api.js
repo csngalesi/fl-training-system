@@ -286,7 +286,7 @@
 
     const FLGestao = {
         async getAllStudents() {
-            return flGestaoFetch('students?student_type=eq.aluno&select=id,full_name&order=full_name.asc');
+            return flGestaoFetch('students?student_type=in.(aluno,pre-cadastro)&select=id,full_name,student_type&order=full_name.asc');
         },
 
         async getSessionStudents(dayOfWeek, startTime) {
