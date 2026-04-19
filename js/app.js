@@ -265,8 +265,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Map: { time -> { day -> class_id } }
                 const grid = {};
                 classes.forEach(c => {
+                    if (!c.start_time || !c.day_of_week) return;
                     const t = c.start_time.substring(0, 5);
-                    const d = activeDays.find(ad => ad.toLowerCase() === c.day_of_week.toLowerCase()) || c.day_of_week;
+                    const d = activeDays.find(ad => String(ad).toLowerCase() === String(c.day_of_week).toLowerCase()) || String(c.day_of_week);
                     if (!grid[t]) grid[t] = {};
                     grid[t][d] = c.id;
                 });
