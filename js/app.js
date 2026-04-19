@@ -256,10 +256,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 // Collect all unique days and times from schedule_classes
-                const daysInData = [...new Set(classes.map(c => c.day_of_week))];
-                const days = DAYS_ORDER.filter(d => daysInData.some(dd => dd.toLowerCase() === d.toLowerCase()));
-                // fallback: use raw days if none matched
-                const activeDays = days.length ? days : daysInData;
+                const daysInData = [...new Set(classes.map(c => c.day_of_week).filter(Boolean))];
+                const days = DAYS_ORDER.filter(d => daysInData.some(dd => String(dd).toLowerCase() === d.toLowerCase()));
+                const activeDays = days.length ? days : daysInData.filter(Boolean);
 
                 const times = [...new Set(classes.map(c => c.start_time.substring(0, 5)))].sort();
 
