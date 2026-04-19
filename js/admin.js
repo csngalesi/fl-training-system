@@ -1762,17 +1762,25 @@
         }
         el.innerHTML = mediaArr.map((m, i) => {
             const label = m.type === 'youtube' ? `▶ YouTube: ${m.value}` :
-                          m.type === 'image'   ? `🖼 Imagem: ${m.value.substring(0,40)}...` :
-                                                  `🎬 Vídeo: ${m.value.substring(0,40)}...`;
+                          m.type === 'image'   ? `🖼 Imagem: ${m.value.substring(0,50)}` :
+                                                  `🎬 Vídeo: ${m.value.substring(0,50)}`;
             return `<div style="display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.25);border:1px solid var(--glass-border);border-radius:6px;padding:7px 10px;">
                 <span style="flex:1;font-size:.78rem;color:#cbd5e1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${label}${m.caption ? ' — ' + m.caption : ''}</span>
-                <button class="btn btn-danger btn-sm" data-idx="${i}" style="padding:3px 8px;font-size:.72rem;">
+                <button class="btn btn-secondary btn-sm media-copy-btn" data-value="${m.value}" title="Copiar URL" style="padding:3px 8px;font-size:.72rem;flex-shrink:0;">
+                    <i class="fa-regular fa-copy"></i>
+                </button>
+                <button class="btn btn-danger btn-sm media-del-btn" data-idx="${i}" style="padding:3px 8px;font-size:.72rem;flex-shrink:0;">
                     <i class="fa-solid fa-trash"></i>
                 </button>
             </div>`;
         }).join('');
-        el.querySelectorAll('button[data-idx]').forEach(btn => {
+        el.querySelectorAll('.media-del-btn').forEach(btn => {
             btn.addEventListener('click', () => onRemove(Number(btn.dataset.idx)));
+        });
+        el.querySelectorAll('.media-copy-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                navigator.clipboard.writeText(btn.dataset.value).then(() => toast('URL copiada!')).catch(() => toast('Erro ao copiar.', 'error'));
+            });
         });
     }
 
