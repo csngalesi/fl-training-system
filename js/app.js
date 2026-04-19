@@ -234,6 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Grade Horária modal
         const DAYS_ORDER = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+        const DAY_NUM_TO_NAME = { 1:'Segunda', 2:'Terça', 3:'Quarta', 4:'Quinta', 5:'Sexta', 6:'Sábado' };
 
         document.getElementById('btn-open-grade').addEventListener('click', async () => {
             const modal   = document.getElementById('grade-modal');
@@ -256,18 +257,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 // Collect all unique days and times from schedule_classes
-                const daysInData = [...new Set(classes.map(c => c.day_of_week).filter(Boolean))];
-                const days = DAYS_ORDER.filter(d => daysInData.some(dd => String(dd).toLowerCase() === d.toLowerCase()));
-                const activeDays = days.length ? days : daysInData.filter(Boolean);
+                // day_of_week é número inteiro (1=Segunda … 6=Sábado)
+                const dayNums = [...new Set(classes.map(c => c.day_of_week).filter(n => n != null))].sort((a,b) => a-b);
+                const activeDays = dayNums.map(n => DAY_NUM_TO_NAME[n] || `Dia ${n}`);
 
                 const times = [...new Set(classes.map(c => c.start_time.substring(0, 5)))].sort();
 
-                // Map: { time -> { day -> class_id } }
+                // Map: { time -> { dayName -> class_id } }
                 const grid = {};
                 classes.forEach(c => {
-                    if (!c.start_time || !c.day_of_week) return;
+                    if (!c.start_time || c.day_of_week == null) return;
                     const t = c.start_time.substring(0, 5);
-                    const d = activeDays.find(ad => String(ad).toLowerCase() === String(c.day_of_week).toLowerCase()) || String(c.day_of_week);
+                    const d = DAY_NUM_TO_NAME[c.day_of_week] || `Dia ${c.day_of_week}`;
                     if (!grid[t]) grid[t] = {};
                     grid[t][d] = c.id;
                 });
