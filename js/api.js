@@ -304,6 +304,12 @@
             return flGestaoFetch('students?student_type=in.(aluno,pre-cadastro)&select=id,full_name,student_type&order=full_name.asc');
         },
 
+        async getSchedule() {
+            return flGestaoFetch(
+                'class_enrollments?select=schedule_class_id,students(full_name,student_type),schedule_classes(day_of_week,start_time)'
+            );
+        },
+
         async getSessionStudents(dayOfWeek, startTime) {
             // Find the schedule_class for this day+time
             const classes = await flGestaoFetch(

@@ -231,6 +231,81 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('btn-metodologia').addEventListener('click', () => {
             document.getElementById('metodologia-modal').classList.remove('hidden');
         });
+
+        // Grade Horária modal
+        const DAYS_ORDER = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+
+        document.getElementById('btn-open-grade').addEventListener('click', async () => {
+            const modal   = document.getElementById('grade-modal');
+            const loading = document.getElementById('grade-loading');
+            const wrap    = document.getElementById('grade-table-wrap');
+            modal.classList.remove('hidden');
+            loading.classList.remove('hidden');
+            wrap.classList.add('hidden');
+            wrap.innerHTML = '';
+
+            try {
+                const enrollments = await window.FLApi.FLGestao.getSchedule();
+
+                // Build map: { time -> { day -> [names] } }
+                const map = {};
+                enrollments.forEach(e => {
+                    const sc = e.schedule_classes;
+                    if (!sc) return;
+                    const time = sc.start_time.substring(0, 5);
+                    const day  = sc.day_of_week;
+                    const name = e.students ? e.students.full_name : '?';
+                    const type = e.students ? e.students.student_type : 'aluno';
+                    if (!map[time]) map[time] = {};
+                    if (!map[time][day]) map[time][day] = [];
+                    map[time][day].push({ name, type });
+                });
+
+                const times = Object.keys(map).sort();
+                const days  = DAYS_ORDER.filter(d => enrollments.some(e => e.schedule_classes && e.schedule_classes.day_of_week === d));
+
+                let html = '<table style="width:100%;border-collapse:collapse;font-size:.82rem;">';
+                // Header
+                html += '<thead><tr>';
+                html += '<th style="padding:10px 14px;text-align:left;color:var(--text-muted);font-size:.75rem;letter-spacing:.06em;border-bottom:1px solid var(--glass-border);white-space:nowrap;">HORÁRIO</th>';
+                days.forEach(d => {
+                    html += `<th style="padding:10px 14px;text-align:left;color:var(--text-muted);font-size:.75rem;letter-spacing:.06em;border-bottom:1px solid var(--glass-border);white-space:nowrap;">${d.toUpperCase()}</th>`;
+                });
+                html += '</tr></thead><tbody>';
+
+                times.forEach(time => {
+                    html += '<tr>';
+                    html += `<td style="padding:10px 14px;color:var(--text-muted);font-size:.82rem;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:top;">${time}</td>`;
+                    days.forEach(day => {
+                        const students = (map[time] && map[time][day]) || [];
+                        const chips = students.map(s => {
+                            const isPre = s.type === 'pre-cadastro';
+                            const bg    = isPre ? 'rgba(251,191,36,.12)' : 'rgba(16,185,129,.12)';
+                            const color = isPre ? '#fbbf24' : '#10b981';
+                            const border= isPre ? 'rgba(251,191,36,.35)' : 'rgba(16,185,129,.35)';
+                            return `<span style="display:inline-block;padding:3px 8px;border-radius:20px;background:${bg};color:${color};border:1px solid ${border};font-size:.75rem;font-weight:600;white-space:nowrap;margin:2px 2px 2px 0;">${escHtml(s.name)}</span>`;
+                        }).join('');
+                        html += `<td style="padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:top;">${chips || '<span style="color:rgba(255,255,255,.12);font-size:.75rem;">—</span>'}</td>`;
+                    });
+                    html += '</tr>';
+                });
+
+                html += '</tbody></table>';
+                loading.classList.add('hidden');
+                wrap.innerHTML = html;
+                wrap.classList.remove('hidden');
+            } catch(e) {
+                loading.innerHTML = `<span style="color:#ef4444;">Erro ao carregar: ${escHtml(e.message)}</span>`;
+            }
+        });
+
+        document.getElementById('btn-close-grade').addEventListener('click', () => {
+            document.getElementById('grade-modal').classList.add('hidden');
+        });
+        document.getElementById('grade-modal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('grade-modal'))
+                document.getElementById('grade-modal').classList.add('hidden');
+        });
         document.getElementById('btn-close-metodologia').addEventListener('click', () => {
             document.getElementById('metodologia-modal').classList.add('hidden');
         });
