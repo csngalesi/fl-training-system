@@ -245,47 +245,67 @@ document.addEventListener('DOMContentLoaded', () => {
             wrap.innerHTML = '';
 
             try {
-                const enrollments = await window.FLApi.FLGestao.getSchedule();
+                const { classes, enrollments } = await window.FLApi.FLGestao.getSchedule();
 
-                // Build map: { time -> { day -> [names] } }
-                const map = {};
+                // Map enrollments by schedule_class_id
+                const enrollMap = {};
                 enrollments.forEach(e => {
-                    const sc = e.schedule_classes;
-                    if (!sc) return;
-                    const time = sc.start_time.substring(0, 5);
-                    const day  = sc.day_of_week;
-                    const name = e.students ? e.students.full_name : '?';
-                    const type = e.students ? e.students.student_type : 'aluno';
-                    if (!map[time]) map[time] = {};
-                    if (!map[time][day]) map[time][day] = [];
-                    map[time][day].push({ name, type });
+                    const sid = e.schedule_class_id;
+                    if (!enrollMap[sid]) enrollMap[sid] = [];
+                    if (e.students) enrollMap[sid].push(e.students);
                 });
 
-                const times = Object.keys(map).sort();
-                const days  = DAYS_ORDER.filter(d => enrollments.some(e => e.schedule_classes && e.schedule_classes.day_of_week === d));
+                // Collect all unique days and times from schedule_classes
+                const daysInData = [...new Set(classes.map(c => c.day_of_week))];
+                const days = DAYS_ORDER.filter(d => daysInData.some(dd => dd.toLowerCase() === d.toLowerCase()));
+                // fallback: use raw days if none matched
+                const activeDays = days.length ? days : daysInData;
+
+                const times = [...new Set(classes.map(c => c.start_time.substring(0, 5)))].sort();
+
+                // Map: { time -> { day -> class_id } }
+                const grid = {};
+                classes.forEach(c => {
+                    const t = c.start_time.substring(0, 5);
+                    const d = activeDays.find(ad => ad.toLowerCase() === c.day_of_week.toLowerCase()) || c.day_of_week;
+                    if (!grid[t]) grid[t] = {};
+                    grid[t][d] = c.id;
+                });
+
+                const thStyle = 'padding:10px 14px;text-align:left;color:var(--text-muted);font-size:.75rem;font-weight:700;letter-spacing:.06em;border-bottom:1px solid var(--glass-border);white-space:nowrap;position:sticky;top:0;background:#1e293b;z-index:1;';
+                const tdTimeStyle = 'padding:10px 14px;color:var(--text-muted);font-size:.82rem;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:top;font-weight:600;';
+                const tdStyle = 'padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:top;min-width:120px;';
 
                 let html = '<table style="width:100%;border-collapse:collapse;font-size:.82rem;">';
-                // Header
                 html += '<thead><tr>';
-                html += '<th style="padding:10px 14px;text-align:left;color:var(--text-muted);font-size:.75rem;letter-spacing:.06em;border-bottom:1px solid var(--glass-border);white-space:nowrap;">HORÁRIO</th>';
-                days.forEach(d => {
-                    html += `<th style="padding:10px 14px;text-align:left;color:var(--text-muted);font-size:.75rem;letter-spacing:.06em;border-bottom:1px solid var(--glass-border);white-space:nowrap;">${d.toUpperCase()}</th>`;
+                html += `<th style="${thStyle}">HORÁRIO</th>`;
+                activeDays.forEach(d => {
+                    html += `<th style="${thStyle}">${d.toUpperCase()}</th>`;
                 });
                 html += '</tr></thead><tbody>';
 
                 times.forEach(time => {
                     html += '<tr>';
-                    html += `<td style="padding:10px 14px;color:var(--text-muted);font-size:.82rem;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:top;">${time}</td>`;
-                    days.forEach(day => {
-                        const students = (map[time] && map[time][day]) || [];
-                        const chips = students.map(s => {
-                            const isPre = s.type === 'pre-cadastro';
-                            const bg    = isPre ? 'rgba(251,191,36,.12)' : 'rgba(16,185,129,.12)';
-                            const color = isPre ? '#fbbf24' : '#10b981';
-                            const border= isPre ? 'rgba(251,191,36,.35)' : 'rgba(16,185,129,.35)';
-                            return `<span style="display:inline-block;padding:3px 8px;border-radius:20px;background:${bg};color:${color};border:1px solid ${border};font-size:.75rem;font-weight:600;white-space:nowrap;margin:2px 2px 2px 0;">${escHtml(s.name)}</span>`;
-                        }).join('');
-                        html += `<td style="padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:top;">${chips || '<span style="color:rgba(255,255,255,.12);font-size:.75rem;">—</span>'}</td>`;
+                    html += `<td style="${tdTimeStyle}">${time}</td>`;
+                    activeDays.forEach(day => {
+                        const classId  = grid[time] && grid[time][day];
+                        const students = classId ? (enrollMap[classId] || []) : null;
+                        let cell = '';
+                        if (students === null) {
+                            // No class configured for this slot
+                            cell = '';
+                        } else if (students.length === 0) {
+                            cell = '<span style="color:rgba(255,255,255,.15);font-size:.72rem;">vazio</span>';
+                        } else {
+                            cell = students.map(s => {
+                                const isPre  = s.student_type === 'pre-cadastro';
+                                const bg     = isPre ? 'rgba(251,191,36,.12)' : 'rgba(16,185,129,.12)';
+                                const color  = isPre ? '#fbbf24' : '#10b981';
+                                const border = isPre ? 'rgba(251,191,36,.35)' : 'rgba(16,185,129,.35)';
+                                return `<span style="display:inline-block;padding:3px 8px;border-radius:20px;background:${bg};color:${color};border:1px solid ${border};font-size:.72rem;font-weight:600;white-space:nowrap;margin:2px 2px 2px 0;">${escHtml(s.full_name)}</span>`;
+                            }).join('');
+                        }
+                        html += `<td style="${tdStyle}">${cell}</td>`;
                     });
                     html += '</tr>';
                 });
