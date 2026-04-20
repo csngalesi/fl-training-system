@@ -231,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const metodologiasConfig = [
             'metodologia/blueprint.html',
             'metodologia/bloco_a.html',
-            'metodologia/armadura_neuromotora.html',
+            'metodologia/bloco_b.html',
             'metodologia/bloco_c.html',
             'metodologia/bloco_d.html',
             'metodologia/bloco_e.html'
