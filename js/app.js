@@ -231,7 +231,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const metodologiasConfig = [
             'metodologia/blueprint.html',
             'metodologia/bloco_a.html',
-            'metodologia/armadura_neuromotora.html'
+            'metodologia/armadura_neuromotora.html',
+            'metodologia/bloco_c.html'
         ];
         let currentMetoIdx = 0;
         const frameMeto = document.getElementById('metodologia-frame');

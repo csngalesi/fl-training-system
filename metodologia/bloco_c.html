@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Bloco C - Football Lab</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #020617; 
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; margin: 0; 
+        }
+
+        .infographic { 
+            width: 1040px; height: 720px; background: #0f172a; position: relative; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5); border-radius: 16px; overflow: hidden; 
+            background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), 
+                              linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); 
+            background-size: 20px 20px; 
+            color: #f8fafc;
+        }
+
+        .header {
+            position: absolute;
+            top: 40px;
+            left: 50px;
+            z-index: 10;
+        }
+
+        .header h1 {
+            font-weight: 900;
+            font-size: 34px;
+            margin: 0;
+            color: #f8fafc;
+            letter-spacing: -0.5px;
+        }
+        
+        .header h2 {
+            font-weight: 600;
+            font-size: 20px;
+            margin: 5px 0 0 0;
+            color: #3b82f6; /* Azul claro para o subtítulo */
+        }
+
+        .logo {
+            position: absolute;
+            top: 40px;
+            right: 50px;
+            width: 180px;
+            z-index: 10;
+        }
+
+        .content-area {
+            position: absolute;
+            top: 150px;
+            left: 50px;
+            width: 940px;
+            display: flex;
+            gap: 40px;
+            z-index: 10;
+            align-items: flex-start;
+        }
+
+        .main-box {
+            flex: 1;
+            background: #1e293b;
+            border-left: 6px solid #eab308;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.3);
+        }
+
+        .main-box h3 {
+            font-weight: 800;
+            font-size: 24px;
+            margin: 0 0 15px 0;
+            color: #f8fafc;
+        }
+
+        .main-box p {
+            font-size: 17px;
+            margin: 0;
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+        
+        .blocks-container {
+            flex: 1.2;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            align-content: flex-start;
+        }
+
+        .skill-block {
+            background: #0f172a;
+            border: 2px solid #334155;
+            padding: 18px 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: calc(50% - 10px); /* Dividido em 2 colunas */
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        .skill-block:hover {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .skill-block .icon {
+            color: #22c55e;
+            font-size: 22px;
+            width: 30px;
+            text-align: center;
+        }
+
+        .skill-block .text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #f8fafc;
+        }
+
+        .skill-block.highlight {
+            width: 100%;
+            border-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+        }
+        
+        .skill-block.highlight .icon {
+            color: #f59e0b;
+        }
+
+        .footer-box {
+            position: absolute;
+            bottom: 40px;
+            left: 50px;
+            width: 940px;
+            background: rgba(30, 41, 59, 0.9);
+            border-left: 4px solid #22c55e;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-sizing: border-box;
+            text-align: left;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+
+        .footer-box p {
+            font-size: 18px;
+            color: #f8fafc;
+            margin: 0;
+            line-height: 1.5;
+        }
+        
+        .footer-box strong {
+            color: #22c55e;
+            font-weight: 800;
+        }
+    </style>
+</head>
+<body>
+    <div class="infographic">
+        <img src="../assets/img/logo-football-lab.svg" alt="Football Lab" class="logo">
+
+        <div class="header">
+            <h1>Bloco C: Fundamentos Técnicos</h1>
+            <h2>O Acervo Motor (O Sistema Operacional)</h2>
+        </div>
+
+        <div class="content-area">
+            <!-- Coluna da Esquerda (Definição Principal) -->
+            <div class="main-box">
+                <h3>Acervo Motor</h3>
+                <p>O vocabulário de movimentos que a criança domina para resolver problemas em campo. Quanto maior o vocabulário, mais fluida é a resposta.</p>
+            </div>
+
+            <!-- Coluna da Direita (Blocos do Tetris adaptados para UI) -->
+            <div class="blocks-container">
+                <div class="skill-block">
+                    <div class="icon"><i class="fa-solid fa-arrows-turn-to-dots"></i></div>
+                    <div class="text">Mudanças de Direção</div>
+                </div>
+                <div class="skill-block">
+                    <div class="icon"><i class="fa-solid fa-arrow-up-right-dots"></i></div>
+                    <div class="text">Saltos</div>
+                </div>
+                <div class="skill-block">
+                    <div class="icon"><i class="fa-solid fa-rotate"></i></div>
+                    <div class="text">Giros</div>
+                </div>
+                <div class="skill-block">
+                    <div class="icon"><i class="fa-regular fa-futbol"></i></div>
+                    <div class="text">Manipulação da Bola</div>
+                </div>
+                <div class="skill-block highlight">
+                    <div class="icon"><i class="fa-solid fa-layer-group"></i></div>
+                    <div class="text">Movimentos Combinados</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Insight Footer -->
+        <div class="footer-box">
+            <p><strong>Insight:</strong> Não ensinamos apenas a chutar; construímos um repertório onde o corpo se adapta instantaneamente a qualquer exigência física do jogo.</p>
+        </div>
+    </div>
+</body>
+</html>
