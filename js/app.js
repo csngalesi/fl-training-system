@@ -232,7 +232,9 @@ document.addEventListener('DOMContentLoaded', () => {
             'metodologia/blueprint.html',
             'metodologia/bloco_a.html',
             'metodologia/armadura_neuromotora.html',
-            'metodologia/bloco_c.html'
+            'metodologia/bloco_c.html',
+            'metodologia/bloco_d.html',
+            'metodologia/bloco_e.html'
         ];
         let currentMetoIdx = 0;
         const frameMeto = document.getElementById('metodologia-frame');
