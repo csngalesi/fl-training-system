@@ -335,6 +335,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('metodologia-modal').classList.add('hidden');
         });
 
+        document.getElementById('btn-close-drill-info').addEventListener('click', () => {
+            document.getElementById('drill-info-modal').classList.add('hidden');
+        });
+        document.getElementById('drill-info-modal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('drill-info-modal'))
+                document.getElementById('drill-info-modal').classList.add('hidden');
+        });
+
         // Event Listeners
         btnReplay.addEventListener('click', () => {
             if (currentDrill) playDrillAnimation(currentDrill);
@@ -687,6 +695,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderWeekSessions(sessions) {
         weekDrillsList.innerHTML = sessions.map((s, i) => `
             <div class="week-session-card" data-drill-id="${s.drill_id}">
+                <button class="drill-info-btn" data-drill-id="${s.drill_id}" title="Ver descrição">i</button>
                 <div class="week-session-num">Sessão ${i + 1}</div>
                 <div class="week-session-title">${escHtml(s.title)}</div>
                 <div class="week-session-meta">
@@ -697,6 +706,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
         weekDrillsList.querySelectorAll('.week-session-card').forEach(card => {
             card.addEventListener('click', () => selectWeekSession(card, card.dataset.drillId));
+        });
+
+        weekDrillsList.querySelectorAll('.drill-info-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const drillId = btn.dataset.drillId;
+                const modal = document.getElementById('drill-info-modal');
+                const titleEl = document.getElementById('drill-info-title');
+                const descEl = document.getElementById('drill-info-desc');
+                titleEl.textContent = '…';
+                descEl.textContent = '';
+                modal.classList.remove('hidden');
+                try {
+                    const drill = await window.FLApi.Drills.getById(drillId);
+                    titleEl.textContent = drill.title;
+                    descEl.textContent = drill.description || 'Sem descrição.';
+                } catch (err) {
+                    titleEl.textContent = 'Erro';
+                    descEl.textContent = err.message;
+                }
+            });
         });
     }
 
