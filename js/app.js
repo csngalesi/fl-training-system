@@ -695,7 +695,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderWeekSessions(sessions) {
         weekDrillsList.innerHTML = sessions.map((s, i) => `
             <div class="week-session-card" data-drill-id="${s.drill_id}">
-                <button class="drill-info-btn" data-drill-id="${s.drill_id}" title="Ver descrição">i</button>
+                <button class="drill-info-btn${s.description ? ' has-desc' : ''}" data-drill-id="${s.drill_id}" title="Ver descrição">i</button>
                 <div class="week-session-num">Sessão ${i + 1}</div>
                 <div class="week-session-title">${escHtml(s.title)}</div>
                 <div class="week-session-meta">

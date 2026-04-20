@@ -220,6 +220,7 @@ h3 {
     transition: background .15s, color .15s;
 }
 .drill-info-btn:hover { background: rgba(16,185,129,.25); color: var(--acc-primary); border-color: var(--acc-primary); }
+.drill-info-btn.has-desc { color: var(--acc-primary); border-color: var(--acc-primary); background: rgba(16,185,129,.12); }
 
 .week-session-card:hover { border-color: rgba(255,255,255,.2); }
 
