@@ -227,8 +227,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('tecnica-modal').classList.add('hidden');
         });
 
-        // Metodologia modal
+        // Metodologia modal slideshow
+        const metodologiasConfig = [
+            'metodologia/blueprint.html',
+            'metodologia/armadura_neuromotora.html'
+        ];
+        let currentMetoIdx = 0;
+        const frameMeto = document.getElementById('metodologia-frame');
+
+        document.getElementById('btn-metodologia-prev').addEventListener('click', () => {
+            currentMetoIdx = (currentMetoIdx - 1 + metodologiasConfig.length) % metodologiasConfig.length;
+            if(frameMeto) frameMeto.src = metodologiasConfig[currentMetoIdx];
+        });
+
+        document.getElementById('btn-metodologia-next').addEventListener('click', () => {
+            currentMetoIdx = (currentMetoIdx + 1) % metodologiasConfig.length;
+            if(frameMeto) frameMeto.src = metodologiasConfig[currentMetoIdx];
+        });
+
         document.getElementById('btn-metodologia').addEventListener('click', () => {
+            currentMetoIdx = 0; // always open on the first slide
+            if(frameMeto) frameMeto.src = metodologiasConfig[0];
             document.getElementById('metodologia-modal').classList.remove('hidden');
         });
 

@@ -176,12 +176,18 @@
 
     <!-- Modal Metodologia -->
     <div id="metodologia-modal" class="modal-overlay hidden">
-        <div class="modal-content glass-panel" style="max-width:1100px;width:97%;padding:0;overflow:hidden;">
-            <div class="modal-header" style="padding:14px 18px;">
-                <h2><i class="fa-solid fa-book-open" style="color:#16a34a;"></i> Metodologia</h2>
+        <div class="modal-content glass-panel" style="max-width:1100px;width:97%;padding:0;overflow:hidden; display:flex; flex-direction:column;">
+            <div class="modal-header" style="padding:14px 18px; align-items:center; display:flex; justify-content:space-between;">
+                <div style="display:flex; align-items:center; gap:20px;">
+                    <h2 style="margin:0;"><i class="fa-solid fa-book-open" style="color:#16a34a;"></i> Metodologia</h2>
+                    <div style="display:flex; gap:8px;">
+                        <button id="btn-metodologia-prev" class="btn-secondary" style="padding:6px 12px; font-size:0.85rem;"><i class="fa-solid fa-chevron-left"></i> Anterior</button>
+                        <button id="btn-metodologia-next" class="btn-secondary" style="padding:6px 12px; font-size:0.85rem;">Próximo <i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                </div>
                 <button id="btn-close-metodologia" class="btn-icon"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <iframe src="blueprint.html" style="width:100%;height:75vh;border:none;display:block;" title="Blueprint de 60 Minutos"></iframe>
+            <iframe id="metodologia-frame" src="metodologia/blueprint.html" style="width:100%;height:75vh;border:none;display:block;" title="Metodologia Football Lab"></iframe>
         </div>
     </div>
 
