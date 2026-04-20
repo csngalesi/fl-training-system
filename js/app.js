@@ -230,6 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Metodologia modal slideshow
         const metodologiasConfig = [
             'metodologia/blueprint.html',
+            'metodologia/bloco_a.html',
             'metodologia/armadura_neuromotora.html'
         ];
         let currentMetoIdx = 0;
