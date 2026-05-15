@@ -84,6 +84,14 @@ h3 {
     box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
 }
 
+.btn-primary:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+    filter: grayscale(50%);
+}
+
 /* SIDEBAR */
 .sidebar {
     width: 280px;

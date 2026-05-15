@@ -708,11 +708,23 @@ document.addEventListener('DOMContentLoaded', () => {
             weekPlanName.textContent = plan.title;
             weekSessionCount.textContent = '0 sessões';
             weekDrillsList.innerHTML = '<p style="color:var(--text-muted);font-size:.88rem;padding:16px 0">Nenhuma sessão neste plano.</p>';
-            return;
+        } else {
+            weekPlanName.textContent = plan.title;
+            weekSessionCount.textContent = `${plan.sessions.length} sessões`;
+            renderWeekSessions(plan.sessions);
         }
-        weekPlanName.textContent = plan.title;
-        weekSessionCount.textContent = `${plan.sessions.length} sessões`;
-        renderWeekSessions(plan.sessions);
+
+        // Enable buttons optimistically, then disable if no content
+        const btnMsg = document.getElementById('btn-mensagem');
+        const btnTec = document.getElementById('btn-tecnica');
+        btnMsg.disabled = false;
+        btnTec.disabled = false;
+        const checkId = plan.id;
+        window.FLApi.Mensagem.getByPlan(plan.id).then(data => {
+            if (selectedPlanId !== checkId) return;
+            btnMsg.disabled = !(data && data.mensagem);
+            btnTec.disabled = !(data && data.destaque_tecnico);
+        }).catch(() => {});
     }
 
     function renderWeekSessions(sessions) {
