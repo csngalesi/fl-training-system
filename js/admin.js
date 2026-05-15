@@ -1188,6 +1188,7 @@
     let weekSessions       = [];     // sessions currently in editor
     let weekDrillsCache    = {};     // fundamentalId → drills[]
     let weekActiveFundId   = null;
+    let weekPlanDragSrcIdx = null;
 
     // ── DOM refs (week) ───────────────────────────────────────────
     const wbPlanList       = document.getElementById('wb-plan-list');
@@ -1217,9 +1218,11 @@
             wbPlanList.innerHTML = '<p style="color:var(--text-muted);font-size:.8rem">Nenhum plano.</p>';
             return;
         }
-        wbPlanList.innerHTML = weekPlans.map(p => `
+        wbPlanList.innerHTML = weekPlans.map((p, i) => `
             <div class="wb-plan-item ${p.id === editingWeekPlanId ? 'active' : ''}"
-                 data-plan-id="${p.id}" title="Clique para abrir · Duplo clique para renomear">
+                 data-plan-id="${p.id}" data-idx="${i}" draggable="true"
+                 title="Clique para abrir · Duplo clique para renomear">
+                <i class="fa-solid fa-grip-vertical wb-plan-grip"></i>
                 <div class="wb-plan-item-title">${esc(p.title)}</div>
                 ${p.is_active ? '<span class="wb-plan-item-active-badge">Ativo</span>' : ''}
                 <button class="wb-session-remove ${p.visible_in_week ? 'wb-eye-on' : ''}"
@@ -1234,6 +1237,32 @@
 
         wbPlanList.querySelectorAll('.wb-plan-item').forEach(item => {
             const titleEl = item.querySelector('.wb-plan-item-title');
+            const idx     = parseInt(item.dataset.idx);
+
+            item.addEventListener('dragstart', () => {
+                weekPlanDragSrcIdx = idx;
+                setTimeout(() => item.classList.add('dragging'), 0);
+            });
+            item.addEventListener('dragend', () => {
+                item.classList.remove('dragging');
+                wbPlanList.querySelectorAll('.wb-plan-item').forEach(i => i.classList.remove('drag-over'));
+            });
+            item.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                if (weekPlanDragSrcIdx !== idx) {
+                    wbPlanList.querySelectorAll('.wb-plan-item').forEach(i => i.classList.remove('drag-over'));
+                    item.classList.add('drag-over');
+                }
+            });
+            item.addEventListener('drop', async (e) => {
+                e.preventDefault();
+                if (weekPlanDragSrcIdx === null || weekPlanDragSrcIdx === idx) return;
+                const moved = weekPlans.splice(weekPlanDragSrcIdx, 1)[0];
+                weekPlans.splice(idx, 0, moved);
+                weekPlanDragSrcIdx = null;
+                renderWeekPlanList();
+                await saveWeekPlanOrder();
+            });
 
             item.addEventListener('click', (e) => {
                 if (e.target.closest('[data-action="delete"]')) return;
@@ -1309,6 +1338,14 @@
                 window._wbDeletePlan(item.dataset.planId);
             });
         });
+    }
+
+    async function saveWeekPlanOrder() {
+        try {
+            for (let i = 0; i < weekPlans.length; i++) {
+                await window.FLApi.WeekPlans.update(weekPlans[i].id, { sort_order: i + 1 });
+            }
+        } catch (err) { toast('Erro ao salvar ordem: ' + err.message, 'error'); }
     }
 
     // Update highlight without rebuilding DOM (preserves elements for dblclick)
