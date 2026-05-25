@@ -185,12 +185,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('[FL] Mensagem.getByPlan() error:', e);
             }
         });
-        document.getElementById('btn-close-mensagem').addEventListener('click', () => {
+        const closeMensagemModal = () => {
             document.getElementById('mensagem-modal').classList.add('hidden');
-        });
+            const el = document.getElementById('mensagem-media');
+            if (el) el.innerHTML = '';
+        };
+        document.getElementById('btn-close-mensagem').addEventListener('click', closeMensagemModal);
         document.getElementById('mensagem-modal').addEventListener('click', (e) => {
             if (e.target === document.getElementById('mensagem-modal'))
-                document.getElementById('mensagem-modal').classList.add('hidden');
+                closeMensagemModal();
         });
 
         // Técnica modal
@@ -219,12 +222,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('[FL] Mensagem.getByPlan() error:', e);
             }
         });
-        document.getElementById('btn-close-tecnica').addEventListener('click', () => {
+        const closeTecnicaModal = () => {
             document.getElementById('tecnica-modal').classList.add('hidden');
-        });
+            const el = document.getElementById('tecnica-media');
+            if (el) el.innerHTML = '';
+        };
+        document.getElementById('btn-close-tecnica').addEventListener('click', closeTecnicaModal);
         document.getElementById('tecnica-modal').addEventListener('click', (e) => {
             if (e.target === document.getElementById('tecnica-modal'))
-                document.getElementById('tecnica-modal').classList.add('hidden');
+                closeTecnicaModal();
         });
 
         // Metodologia modal slideshow
