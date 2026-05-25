@@ -1709,7 +1709,7 @@
     function extractYouTubeId(input) {
         input = input.trim();
         if (/^[A-Za-z0-9_-]{11}$/.test(input)) return input;
-        const m = input.match(/(?:youtu\.be\/|[?&]v=|embed\/)([A-Za-z0-9_-]{11})/);
+        const m = input.match(/(?:youtu\.be\/|[?&]v=|embed\/|shorts\/)([A-Za-z0-9_-]{11})/);
         return m ? m[1] : null;
     }
 
@@ -1824,9 +1824,20 @@
     function _setupMediaAdder(typeId, valueId, captionId, btnId, getArr, setArr, listId) {
         document.getElementById(btnId).addEventListener('click', () => {
             const type    = document.getElementById(typeId).value;
-            const value   = document.getElementById(valueId).value.trim();
+            let value     = document.getElementById(valueId).value.trim();
             const caption = document.getElementById(captionId).value.trim();
             if (!value) { toast('Informe o ID ou URL.', 'error'); return; }
+
+            if (type === 'youtube') {
+                const ytId = extractYouTubeId(value);
+                if (!ytId) {
+                    toast('URL ou ID do YouTube inválido.', 'error');
+                    document.getElementById(valueId).focus();
+                    return;
+                }
+                value = ytId;
+            }
+
             const arr = getArr();
             arr.push({ type, value, caption });
             setArr(arr);
