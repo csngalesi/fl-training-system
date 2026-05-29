@@ -1987,6 +1987,7 @@
     const PSE_COLORS_ADMIN = ['#94a3b8','#22c55e','#22c55e','#84cc16','#84cc16','#eab308','#eab308','#f97316','#f97316','#ef4444','#7c3aed'];
     const PSE_LABELS_ADMIN = ['Repouso','Muito Leve','Muito Leve','Leve','Leve','Moderado','Moderado','Intenso','Intenso','Muito Intenso','Máximo'];
     let _cargaSelectedPlanId = null;
+    let _cargaSelectedPlanName = '';
 
     async function initCargaModule() {
         // Load plans
@@ -2008,7 +2009,8 @@
                     plansList.querySelectorAll('.carga-plan-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     _cargaSelectedPlanId = btn.dataset.id;
-                    loadCargaRecords(_cargaSelectedPlanId, btn.textContent.trim());
+                    _cargaSelectedPlanName = btn.textContent.trim();
+                    loadCargaRecords(_cargaSelectedPlanId, _cargaSelectedPlanName);
                 });
             });
         } catch(e) {
@@ -2026,7 +2028,10 @@
         const table   = document.getElementById('carga-records-table');
         const btnRef  = document.getElementById('btn-carga-refresh');
 
-        if (planName) title.textContent = `Registros — ${planName}`;
+        if (planName) _cargaSelectedPlanName = planName;
+        const currentPlanName = _cargaSelectedPlanName || 'Plano';
+
+        title.textContent = `Registros — ${currentPlanName}`;
         title.style.color = 'var(--text-main)';
         btnRef.style.display = '';
         loading.classList.remove('hidden');
@@ -2035,6 +2040,22 @@
         try {
             const records = await window.FLApi.CargaRegistros.getByPlan(planId);
             loading.classList.add('hidden');
+
+            const count = records.length;
+            let avgStr = '-';
+            if (count > 0) {
+                const sum = records.reduce((acc, r) => acc + r.pse_value, 0);
+                avgStr = (sum / count).toFixed(1);
+            }
+
+            title.innerHTML = `
+                <div style="display:inline-flex; align-items:center; gap:8px; vertical-align:middle;">
+                    <span>Registros — ${esc(currentPlanName)}</span>
+                    <span class="badge" style="font-size:0.75rem; padding:3px 10px; background:rgba(14,165,233,0.15); color:#38bdf8; border:1px solid rgba(14,165,233,0.3); font-weight:700; border-radius:20px; display:inline-flex; align-items:center; gap:4px;"><i class="fa-solid fa-users" style="font-size:0.7rem;"></i> ${count} registros</span>
+                    <span class="badge" style="font-size:0.75rem; padding:3px 10px; background:rgba(167,139,250,0.15); color:#c084fc; border:1px solid rgba(167,139,250,0.3); font-weight:700; border-radius:20px; display:inline-flex; align-items:center; gap:4px;"><i class="fa-solid fa-chart-simple" style="font-size:0.7rem;"></i> Média: ${avgStr}</span>
+                </div>
+            `;
+
             if (!records.length) {
                 table.innerHTML = '<p style="color:var(--text-muted);font-size:.88rem;">Nenhum registro para este plano.</p>';
                 return;
