@@ -376,6 +376,130 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.target === document.getElementById('grade-modal'))
                 document.getElementById('grade-modal').classList.add('hidden');
         });
+
+        // ── Modal Registros de Carga (PSE Viewer) ──────────────────
+        let _appCargaSelectedPlanId = null;
+        let _appCargaSelectedPlanName = '';
+
+        document.getElementById('btn-open-carga-records').addEventListener('click', async () => {
+            const modal     = document.getElementById('carga-records-modal');
+            const plansList = document.getElementById('app-carga-plans-list');
+            const title     = document.getElementById('app-carga-records-title');
+            const loading   = document.getElementById('app-carga-records-loading');
+            const table     = document.getElementById('app-carga-records-table');
+            const btnRef    = document.getElementById('btn-app-carga-refresh');
+
+            modal.classList.remove('hidden');
+            plansList.innerHTML = '<span style="color:var(--text-muted);font-size:.85rem;">Carregando planos...</span>';
+            title.textContent = 'Selecione um plano acima';
+            title.style.color = 'var(--text-muted)';
+            btnRef.style.display = 'none';
+            loading.classList.add('hidden');
+            table.innerHTML = '';
+
+            try {
+                const plans = await window.FLApi.WeekPlans.getAll();
+                if (!plans.length) {
+                    plansList.innerHTML = '<span style="color:var(--text-muted);font-size:.85rem;">Nenhum plano cadastrado.</span>';
+                    return;
+                }
+                plansList.innerHTML = plans.map(p => `
+                    <button class="btn btn-secondary app-carga-plan-btn" data-id="${p.id}"
+                        style="padding:10px 18px;border-radius:10px;font-weight:600;font-size:.85rem;">
+                        ${escHtml(p.title)}
+                    </button>`).join('');
+
+                plansList.querySelectorAll('.app-carga-plan-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        plansList.querySelectorAll('.app-carga-plan-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        _appCargaSelectedPlanId = btn.dataset.id;
+                        _appCargaSelectedPlanName = btn.textContent.trim();
+                        loadAppCargaRecords(_appCargaSelectedPlanId, _appCargaSelectedPlanName);
+                    });
+                });
+            } catch (err) {
+                plansList.innerHTML = `<span style="color:#ef4444;font-size:.85rem;">Erro: ${escHtml(err.message)}</span>`;
+            }
+        });
+
+        const closeCargaRecordsModal = () => {
+            document.getElementById('carga-records-modal').classList.add('hidden');
+        };
+        document.getElementById('btn-close-carga-records').addEventListener('click', closeCargaRecordsModal);
+        document.getElementById('carga-records-modal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('carga-records-modal'))
+                closeCargaRecordsModal();
+        });
+
+        document.getElementById('btn-app-carga-refresh').addEventListener('click', () => {
+            if (_appCargaSelectedPlanId) loadAppCargaRecords(_appCargaSelectedPlanId);
+        });
+
+        async function loadAppCargaRecords(planId, planName) {
+            const title   = document.getElementById('app-carga-records-title');
+            const loading = document.getElementById('app-carga-records-loading');
+            const table   = document.getElementById('app-carga-records-table');
+            const btnRef  = document.getElementById('btn-app-carga-refresh');
+
+            if (planName) _appCargaSelectedPlanName = planName;
+            const currentPlanName = _appCargaSelectedPlanName || 'Plano';
+
+            title.textContent = `Registros — ${currentPlanName}`;
+            title.style.color = 'var(--text-main)';
+            btnRef.style.display = '';
+            loading.classList.remove('hidden');
+            table.innerHTML = '';
+
+            try {
+                const records = await window.FLApi.CargaRegistros.getByPlan(planId);
+                loading.classList.add('hidden');
+
+                const count = records.length;
+                let avgStr = '-';
+                if (count > 0) {
+                    const sum = records.reduce((acc, r) => acc + r.pse_value, 0);
+                    avgStr = (sum / count).toFixed(1);
+                }
+
+                title.innerHTML = `
+                    <div style="display:inline-flex; align-items:center; gap:8px; vertical-align:middle;">
+                        <span>Registros — ${escHtml(currentPlanName)}</span>
+                        <span class="badge" style="font-size:0.75rem; padding:3px 10px; background:rgba(14,165,233,0.15); color:#38bdf8; border:1px solid rgba(14,165,233,0.3); font-weight:700; border-radius:20px; display:inline-flex; align-items:center; gap:4px;"><i class="fa-solid fa-users" style="font-size:0.7rem;"></i> ${count} registros</span>
+                        <span class="badge" style="font-size:0.75rem; padding:3px 10px; background:rgba(167,139,250,0.15); color:#c084fc; border:1px solid rgba(167,139,250,0.3); font-weight:700; border-radius:20px; display:inline-flex; align-items:center; gap:4px;"><i class="fa-solid fa-chart-simple" style="font-size:0.7rem;"></i> Média: ${avgStr}</span>
+                    </div>
+                `;
+
+                if (!records.length) {
+                    table.innerHTML = '<p style="color:var(--text-muted);font-size:.88rem;text-align:center;padding:20px 0;">Nenhum registro para este plano.</p>';
+                    return;
+                }
+
+                table.innerHTML = records.map(r => {
+                    const pse   = r.pse_value;
+                    const color = PSE_COLORS[pse] || '#94a3b8';
+                    const label = PSE_LABELS[pse] || '';
+                    const dt    = new Date(r.recorded_at).toLocaleString('pt-BR');
+                    return `
+                    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+                                background:rgba(255,255,255,.04);border-radius:10px;padding:12px 16px;
+                                border-left:4px solid ${color};">
+                        <div style="flex:1;min-width:120px;font-weight:600;color:var(--text-primary);">${escHtml(r.student_name)}</div>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span style="background:${color}22;color:${color};border-radius:20px;
+                                         padding:3px 12px;font-size:.82rem;font-weight:700;">PSE ${pse}</span>
+                            <span style="color:${color};font-size:.82rem;">${label}</span>
+                        </div>
+                        ${r.session_label ? `<span style="font-size:.78rem;color:var(--text-muted);"><i class="fa-solid fa-clock"></i> ${escHtml(r.session_label)}</span>` : ''}
+                        <span style="font-size:.78rem;color:var(--text-muted);margin-left:auto;">${dt}</span>
+                    </div>`;
+                }).join('');
+
+            } catch (err) {
+                loading.classList.add('hidden');
+                table.innerHTML = `<p style="color:#ef4444;text-align:center;padding:20px 0;">Erro: ${escHtml(err.message)}</p>`;
+            }
+        }
         document.getElementById('btn-close-metodologia').addEventListener('click', () => {
             document.getElementById('metodologia-modal').classList.add('hidden');
         });

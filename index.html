@@ -161,6 +161,39 @@
         </div>
     </div>
 
+    <!-- Modal Registros de Carga -->
+    <div id="carga-records-modal" class="modal-overlay hidden" style="align-items:flex-start;padding:20px;">
+        <div class="glass-panel" style="width:100%;max-width:850px;max-height:90vh;display:flex;flex-direction:column;border-radius:16px;overflow:hidden;">
+            <div class="modal-header" style="padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--glass-border);flex-shrink:0;">
+                <h2 style="font-size:1.1rem;display:flex;align-items:center;gap:10px;">
+                    <i class="fa-solid fa-gauge-high" style="color:#a78bfa;"></i> Registros de Carga (PSE)
+                </h2>
+                <button id="btn-close-carga-records" class="btn-icon"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div style="overflow:auto;flex:1;padding:20px;display:flex;flex-direction:column;gap:20px;">
+                <!-- Planos -->
+                <div>
+                    <h3 style="margin:0 0 12px 0;font-size:0.85rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;">Selecione o Plano da Semana</h3>
+                    <div id="app-carga-plans-list" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
+                </div>
+
+                <!-- Registros -->
+                <div style="border-top:1px solid var(--glass-border);padding-top:20px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:16px;flex-wrap:wrap;">
+                        <h3 id="app-carga-records-title" style="margin:0;font-size:0.95rem;color:var(--text-muted);font-weight:600;">Selecione um plano acima</h3>
+                        <button id="btn-app-carga-refresh" class="btn btn-secondary btn-sm" style="display:none;">
+                            <i class="fa-solid fa-rotate"></i> Atualizar
+                        </button>
+                    </div>
+                    <div id="app-carga-records-loading" class="hidden" style="color:var(--text-muted);padding:12px 0;text-align:center;">
+                        <i class="fa-solid fa-spinner fa-spin"></i> Carregando...
+                    </div>
+                    <div id="app-carga-records-table" style="display:flex;flex-direction:column;gap:8px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Drill Info -->
     <div id="drill-info-modal" class="modal-overlay hidden">
         <div class="modal-content glass-panel" style="max-width:420px;width:95%;">
@@ -238,6 +271,9 @@
                     </a>
                     <button id="btn-open-grade" class="mode-btn" style="margin: 0; padding: 10px 4px; font-size: 0.8rem; height: 100%; grid-column: span 2;">
                         <div style="display:flex; flex-direction:row; align-items:center; justify-content:center; gap:8px;"><i class="fa-solid fa-border-all" style="font-size:1rem; margin:0;"></i> <span>Grade Horária</span></div>
+                    </button>
+                    <button id="btn-open-carga-records" class="mode-btn" style="margin: 0; padding: 10px 4px; font-size: 0.8rem; height: 100%; grid-column: span 2; background: linear-gradient(135deg, rgba(124,58,237,0.12), rgba(79,70,229,0.12)); border: 1px solid rgba(124,58,237,0.25);">
+                        <div style="display:flex; flex-direction:row; align-items:center; justify-content:center; gap:8px;"><i class="fa-solid fa-gauge-high" style="font-size:1rem; margin:0; color:#a78bfa;"></i> <span>Registros de Carga</span></div>
                     </button>
                 </div>
             </div>
