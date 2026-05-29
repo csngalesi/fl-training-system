@@ -329,9 +329,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         } else {
                             cell = students.map(s => {
                                 const isPre  = s.student_type === 'pre-cadastro';
-                                const bg     = isPre ? 'rgba(251,191,36,.12)' : 'rgba(16,185,129,.12)';
-                                const color  = isPre ? '#fbbf24' : '#10b981';
-                                const border = isPre ? 'rgba(251,191,36,.35)' : 'rgba(16,185,129,.35)';
+                                const bg     = isPre ? 'rgba(251,191,36,.12)' : 'rgba(59, 130, 246, .12)';
+                                const color  = isPre ? '#fbbf24' : '#3b82f6';
+                                const border = isPre ? 'rgba(251,191,36,.35)' : 'rgba(59, 130, 246, .35)';
                                 return `<span style="display:inline-block;padding:3px 8px;border-radius:20px;background:${bg};color:${color};border:1px solid ${border};font-size:.72rem;font-weight:600;white-space:nowrap;margin:2px 2px 2px 0;">${escHtml(s.full_name)}</span>`;
                             }).join('');
                         }
