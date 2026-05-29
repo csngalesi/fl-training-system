@@ -282,7 +282,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 enrollments.forEach(e => {
                     const sid = e.schedule_class_id;
                     if (!enrollMap[sid]) enrollMap[sid] = [];
-                    if (e.students) enrollMap[sid].push(e.students);
+                    if (e.students) {
+                        enrollMap[sid].push({
+                            id: e.students.id,
+                            full_name: e.students.full_name,
+                            student_type: e.students.student_type,
+                            is_reschedule: e.is_reschedule || false
+                        });
+                    }
                 });
 
                 // Collect all unique days and times from schedule_classes
@@ -328,10 +335,23 @@ document.addEventListener('DOMContentLoaded', () => {
                             cell = '<span style="color:rgba(255,255,255,.15);font-size:.72rem;">vazio</span>';
                         } else {
                             cell = students.map(s => {
-                                const isPre  = s.student_type === 'pre-cadastro';
-                                const bg     = isPre ? 'rgba(251,191,36,.12)' : 'rgba(59, 130, 246, .12)';
-                                const color  = isPre ? '#fbbf24' : '#3b82f6';
-                                const border = isPre ? 'rgba(251,191,36,.35)' : 'rgba(59, 130, 246, .35)';
+                                const isPre     = s.student_type === 'pre-cadastro';
+                                const isResched = s.is_reschedule;
+                                
+                                let bg     = 'rgba(16,185,129,.12)'; // Verde default
+                                let color  = '#10b981';
+                                let border = 'rgba(16,185,129,.35)';
+                                
+                                if (isPre) {
+                                    bg     = 'rgba(251,191,36,.12)'; // Amarelo
+                                    color  = '#fbbf24';
+                                    border = 'rgba(251,191,36,.35)';
+                                } else if (isResched) {
+                                    bg     = 'rgba(59, 130, 246, .12)'; // Azul
+                                    color  = '#3b82f6';
+                                    border = 'rgba(59, 130, 246, .35)';
+                                }
+                                
                                 return `<span style="display:inline-block;padding:3px 8px;border-radius:20px;background:${bg};color:${color};border:1px solid ${border};font-size:.72rem;font-weight:600;white-space:nowrap;margin:2px 2px 2px 0;">${escHtml(s.full_name)}</span>`;
                             }).join('');
                         }
