@@ -287,6 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             id: e.students.id,
                             full_name: e.students.full_name,
                             student_type: e.students.student_type,
+                            birth_date: e.students.birth_date || null,
                             is_reschedule: e.is_reschedule || false
                         });
                     }
@@ -352,7 +353,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                     border = 'rgba(59, 130, 246, .35)';
                                 }
                                 
-                                return `<span style="display:inline-block;padding:3px 8px;border-radius:20px;background:${bg};color:${color};border:1px solid ${border};font-size:.72rem;font-weight:600;white-space:nowrap;margin:2px 2px 2px 0;">${escHtml(s.full_name)}</span>`;
+                                return (() => {
+                                    const age    = calcAge(s.birth_date);
+                                    const ageStr = age !== null ? ` (${age})` : '';
+                                    return `<span title="${escHtml(s.full_name)}${ageStr}" style="display:inline-block;padding:3px 8px;border-radius:20px;background:${bg};color:${color};border:1px solid ${border};font-size:.72rem;font-weight:600;white-space:nowrap;margin:2px 2px 2px 0;">${escHtml(s.full_name)}${ageStr}</span>`;
+                                })();
                             }).join('');
                         }
                         html += `<td style="${tdStyle}">${cell}</td>`;
@@ -1305,6 +1310,16 @@ document.addEventListener('DOMContentLoaded', () => {
         // Close
         document.getElementById('btn-close-carga').addEventListener('click', () => cargaModal.classList.add('hidden'));
         cargaModal.addEventListener('click', e => { if (e.target === cargaModal) cargaModal.classList.add('hidden'); });
+    }
+
+    function calcAge(birthDate) {
+        if (!birthDate) return null;
+        const today = new Date();
+        const dob   = new Date(birthDate);
+        let age = today.getFullYear() - dob.getFullYear();
+        const m = today.getMonth() - dob.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+        return age;
     }
 
     function escHtml(str) {
