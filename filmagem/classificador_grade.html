@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classificador em Grade - Football Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;600&family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #121212; --accent: #ff6b35; --text: #fff; --card-bg: #1e1e1e; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; }
+        .header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;
+        }
+        h1 { color: #3b82f6; margin: 0; text-transform: uppercase; font-weight: 900;}
+        .export-btn { 
+            background: #559c31; color: white; padding: 12px 24px; border-radius: 8px; border: none;
+            font-weight: 900; font-size: 1.1rem; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 10px rgba(85,156,49,0.4);
+        }
+        .export-btn:hover { background: #4a8c2a; transform: translateY(-2px); }
+        .help-text { color: #facc15; font-size: 0.9rem; font-weight: bold; background: rgba(250, 204, 21, 0.1); padding: 10px; border-radius: 8px; border: 1px dashed #facc15; }
+        
+        .section-title { font-size: 1.5rem; margin: 30px 0 15px; border-left: 5px solid #3b82f6; padding-left: 15px; text-transform: uppercase; color: #ddd; font-weight: 900;}
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+        .card { background: var(--card-bg); border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.5); display: flex; flex-direction: column; border: 2px solid #333;}
+        .card.estrela-ative { border-color: #facc15; box-shadow: 0 0 15px rgba(250, 204, 21, 0.3); }
+        
+        video { width: 100%; height: 260px; object-fit: contain; background: #000; }
+        
+        .card-controls { padding: 15px; display: flex; flex-direction: column; gap: 10px; background: #222; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: #94a3b8; font-weight: bold; }
+        .card-cam { background: #475569; padding: 3px 8px; border-radius: 4px; color: white; }
+        
+        .input-row { display: flex; gap: 10px; align-items: center; }
+        .estrela-btn { 
+            background: transparent; border: 2px solid #64748b; color: #64748b; font-size: 1.2rem; 
+            padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold;
+        }
+        .estrela-btn.active { color: #facc15; border-color: #facc15; background: rgba(250, 204, 21, 0.1); }
+        
+        input[type="text"] { flex: 1; padding: 10px; border-radius: 6px; border: 1px solid #444; background: #111; color: #fff; font-family: inherit; font-weight: 700; font-size: 1rem; }
+        
+        .save-btn { background: #3b82f6; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: 700; transition: 0.2s; }
+        .save-btn.saved { background: #559c31; }
+        
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div>
+            <h1>Classificador em Grade Absoluto</h1>
+            <p style="margin: 5px 0 0 0; color: #94a3b8; font-weight: 600;">Visualize múltiplos vídeos ao mesmo tempo e edite rapidamente.</p>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px; align-items:flex-end;">
+            <p class="help-text">⚠️ Se os vídeos não abrirem, copie este arquivo .html e o catalogo_simples.js para a pasta E:\DATA\ onde estão os vídeos reais!</p>
+            <button class="export-btn" onclick="exportarScript()">💾 Baixar Script Definitivo (.ps1)</button>
+        </div>
+    </div>
+
+    <div id="content"></div>
+
+    <script src="catalogo_simples.js"></script>
+    <script>
+        // Carrega modificações salvas do formato em Grade
+        let userEdits = JSON.parse(localStorage.getItem('fl_grade_classifications')) || {};
+
+        // Função mágica do sequencial para derivar o assunto inicial
+        function extractTopicFromFilename(pathUri) {
+            if (!pathUri) return "";
+            const filename = pathUri.split('/').pop().split('.')[0];
+            let clean = filename.replace(/_cartao[12]$/i, '');
+            clean = clean.replace(/_ESTRELA$/i, '');
+            clean = clean.replace(/^\d{3}_/, '');
+            
+            if (clean.match(/^C\d{4}$/) || clean.match(/^GUI\d{4}$/)) return "";
+            return clean.replace(/_/g, ' ');
+        }
+
+        function buildData() {
+            let processedVideos = [];
+            videosData.forEach((v, idx) => {
+                const physicalTopic = extractTopicFromFilename(v.Path);
+                const isEstrelaFisica = v.Path.includes("_ESTRELA.");
+                
+                // Se o usuário editou na grade, sobrescrevemos a inteligência física
+                const edit = userEdits[v.Path];
+                const assuntoReal = edit ? edit.assunto : physicalTopic;
+                const estrelaReal = edit ? edit.estrela : isEstrelaFisica;
+                
+                processedVideos.push({
+                    index: idx,
+                    path: v.Path,
+                    card: v.Card,
+                    assunto: assuntoReal,
+                    estrela: estrelaReal,
+                    grupo: assuntoReal ? assuntoReal.toUpperCase() : "NÃO CLASSIFICADOS"
+                });
+            });
+            return processedVideos;
+        }
+
+        let allData = buildData();
+
+        function renderGrid() {
+            const content = document.getElementById('content');
+            content.innerHTML = '';
+
+            // Extrair grupos
+            const gruposSet = new Set(allData.map(v => v.grupo));
+            // Força o "NÃO CLASSIFICADOS" no topo se existir
+            let grupos = Array.from(gruposSet).sort();
+            if(grupos.includes("NÃO CLASSIFICADOS")){
+                grupos = ["NÃO CLASSIFICADOS", ...grupos.filter(g => g !== "NÃO CLASSIFICADOS")];
+            }
+
+            let html = '';
+            grupos.forEach(grupo => {
+                const videosNoGrupo = allData.filter(v => v.grupo === grupo);
+                if (videosNoGrupo.length === 0) return;
+
+                html += `<div class="category-block">`;
+                html += `<h2 class="section-title">${grupo} <span style="font-size:1rem; color:#64748b;">(${videosNoGrupo.length} vídeos)</span></h2>`;
+                html += `<div class="grid">`;
+
+                videosNoGrupo.forEach(v => {
+                    const estrelaClass = v.estrela ? 'active' : '';
+                    const cardEstrelaClass = v.estrela ? 'estrela-ative' : '';
+                    const btnText = v.estrela ? "⭐" : "☆";
+                    
+                    const ext1 = v.path.substring(v.path.lastIndexOf('.'));
+                    const estrelaSufixo = v.estrela ? "_ESTRELA" : "";
+                    const safeAssunto = v.assunto ? v.assunto.trim().replace(/ /g, '_') : 'SEM_NOME';
+                    const numFormatado = String(v.index + 1).padStart(3, '0');
+                    const nomeFinal = `${numFormatado}_${safeAssunto}_cartao${v.card}${estrelaSufixo}${ext1}`;
+
+                    html += `
+                    <div class="card ${cardEstrelaClass}" id="card-${v.index}">
+                        <!-- Lazy load do metadata pra não travar a memória de 200 vídeos! -->
+                        <video controls preload="metadata"><source src="${v.path}" type="video/mp4"></video>
+                        <div class="card-controls">
+                            <div class="card-header">
+                                <span title="${v.path}" id="preview-name-${v.index}" style="font-family: monospace; color:#3b82f6;">${nomeFinal}</span>
+                                <span class="card-cam" style="background:${v.card === 1 ? '#559c31' : '#3b82f6'}">CAM ${v.card}</span>
+                            </div>
+                            <div class="input-row">
+                                <button class="estrela-btn ${estrelaClass}" id="btn-star-${v.index}" onclick="toggleStar(${v.index})">${btnText}</button>
+                                <input type="text" id="input-ass-${v.index}" value="${v.assunto}" placeholder="Sem assunto...">
+                            </div>
+                            <button class="save-btn" id="btn-save-${v.index}" onclick="saveCard(${v.index})">💾 Salvar Alteração</button>
+                        </div>
+                    </div>`;
+                });
+                
+                html += `</div></div>`;
+            });
+
+            content.innerHTML = html;
+        }
+
+        // Toggles local state dynamically in UI
+        window.toggleStar = function(idx) {
+            const v = allData.find(vd => vd.index === idx);
+            v.estrela = !v.estrela;
+            
+            const btn = document.getElementById(`btn-star-${idx}`);
+            const card = document.getElementById(`card-${idx}`);
+            
+            if (v.estrela) {
+                btn.classList.add('active');
+                btn.innerText = "⭐";
+                card.classList.add('estrela-ative');
+            } else {
+                btn.classList.remove('active');
+                btn.innerText = "☆";
+                card.classList.remove('estrela-ative');
+            }
+            
+            updatePreview(idx, v);
+        };
+
+        // Atualiza a visualização do nome renomeado na tela
+        function updatePreview(idx, vData) {
+            const el = document.getElementById(`preview-name-${idx}`);
+            if(!el) return;
+            const ext1 = vData.path.substring(vData.path.lastIndexOf('.'));
+            const estrelaSufixo = vData.estrela ? "_ESTRELA" : "";
+            const safeAssunto = vData.assunto ? vData.assunto.trim().replace(/ /g, '_') : 'SEM_NOME';
+            const numFormatado = String(vData.index + 1).padStart(3, '0');
+            el.innerText = `${numFormatado}_${safeAssunto}_cartao${vData.card}${estrelaSufixo}${ext1}`;
+        }
+
+        // Salvar individual
+        window.saveCard = function(idx) {
+            const v = allData.find(vd => vd.index === idx);
+            const inputVal = document.getElementById(`input-ass-${idx}`).value.trim().replace(/[^a-zA-Z0-9 -]/g, "");
+            
+            v.assunto = inputVal;
+            v.grupo = inputVal ? inputVal.toUpperCase() : "NÃO CLASSIFICADOS";
+            
+            // Grava no localStorage
+            userEdits[v.path] = { assunto: v.assunto, estrela: v.estrela };
+            localStorage.setItem('fl_grade_classifications', JSON.stringify(userEdits));
+            
+            updatePreview(idx, v);
+
+            // Animação visual de sucesso sem renderizar a grade inteira e perder o lugar do scroll
+            const saveBtn = document.getElementById(`btn-save-${idx}`);
+            saveBtn.classList.add("saved");
+            saveBtn.innerText = "✔ Salvo!";
+            setTimeout(() => {
+                saveBtn.classList.remove("saved");
+                saveBtn.innerText = "💾 Salvar Alteração";
+                // Optionally if they changed the subject deeply, we could re-render, but usually they just rename next in line
+            }, 1500);
+        };
+
+        window.exportarScript = function() {
+            let script = "# Script Gerado pelo FL Classificador em GRADE\\r\\n";
+            script += "# Execute este script no PowerShell para aplicar os Assuntos e as tags Estrela nas centenas de arquivos de uma vez!\\r\\n\\r\\n";
+
+            try {
+                let count = 0;
+                allData.forEach((c) => {
+                    // Só exportar se tiver "assunto" preenchido
+                    if (!c.assunto) return;
+
+                    count++;
+                    const timePrefix = String(count).padStart(3, '0');
+
+                    const toWinPath = (uri) => {
+                        if (!uri) return null;
+                        let p = decodeURI(uri).replace('file:///', '');
+                        return p.split('/').join('\\\\');
+                    };
+
+                    const makeSafeName = (name) => name.trim().replace(/ /g, '_');
+
+                    const p1 = toWinPath(c.path);
+                    if (!p1) return;
+                    
+                    const ext1 = p1.substring(p1.lastIndexOf('.'));
+                    const cam = c.card;
+                    const safeAssunto = makeSafeName(c.assunto);
+                    const estrelaSufixo = c.estrela ? "_ESTRELA" : "";
+                    
+                    const newName1 = `${timePrefix}_${safeAssunto}_cartao${cam}${estrelaSufixo}${ext1}`;
+                    
+                    const isAlreadyNamed = p1.endsWith("\\\\" + newName1);
+                    if (!isAlreadyNamed) {
+                        script += `Rename-Item -Path "${p1}" -NewName "${newName1}" -ErrorAction SilentlyContinue\\r\\n`;
+                    }
+                });
+
+                if(count === 0) {
+                    alert("Ainda não há nenhum vídeo com 'Assunto' preenchido para exportar!");
+                    return;
+                }
+
+                const blob = new Blob([script], { type: "text/plain;charset=utf-8" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "FL_Renomear_Grade.ps1";
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+                alert("Sucesso! Baixando o script para "+count+" vídeos qualificados.");
+            } catch (err) {
+                alert("Erro exportando: " + err.message);
+            }
+        };
+
+        // Render Inicial
+        renderGrid();
+
+    </script>
+</body>
+</html>

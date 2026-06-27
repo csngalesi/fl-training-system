@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✂️ Mestre de Cortes Duplos - Football Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #0f172a; --panel: #1e293b; --accent: #e1306c; --text: #f8fafc; --text-muted: #94a3b8; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--text); padding: 0; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: #0b1120; border-bottom: 2px solid #1e293b; }
+        h1 { color: #3b82f6; margin: 0; text-transform: uppercase; font-weight: 900; font-size: 1.5rem;}
+        
+        .export-btn { background: var(--accent); color: white; padding: 10px 20px; border-radius: 8px; border: none; font-weight: 900; font-size: 1rem; cursor: pointer; box-shadow: 0 4px 10px rgba(225, 48, 108, 0.4); }
+        .export-btn:hover { background: #bd2759; transform: translateY(-2px); }
+
+        .app-layout { display: flex; flex: 1; overflow: hidden; }
+        
+        /* Menu Lateral (Catálogo) */
+        .sidebar { width: 350px; background: var(--panel); border-right: 2px solid #0f172a; display: flex; flex-direction: column; overflow-y: auto; }
+        .sidebar-header { padding: 15px; background: #0b1120; font-weight: 900; color: #3b82f6; font-size: 1.1rem; text-align: center; border-bottom: 2px solid #1e293b; position: sticky; top: 0; z-index: 10;}
+        
+        .group-header { 
+            background: #334155; color: #fff; padding: 10px 15px; font-weight: bold; 
+            text-transform: uppercase; font-size: 0.9rem; cursor: pointer; display: flex; justify-content: space-between; 
+            border-bottom: 1px solid #0f172a; margin-top: 10px;
+        }
+        .group-list { display: flex; flex-direction: column; padding: 5px 10px; gap: 5px; }
+        .vid-btn { 
+            background: #1e293b; border: 1px solid #475569; color: var(--text-muted); padding: 10px;
+            border-radius: 6px; cursor: pointer; text-align: left; font-size: 0.8rem; font-family: monospace;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: 0.2s;
+        }
+        .vid-btn:hover { background: #334155; color: #fff; }
+        .vid-btn.active { background: #3b82f6; color: #fff; font-weight: bold; border-color: #60a5fa; }
+
+        /* Área Principal do Editor */
+        .main-editor { flex: 1; display: flex; flex-direction: column; padding: 15px; overflow-y: auto; align-items: center; }
+        
+        .video-container { 
+            position: relative; width: 100%; max-width: 900px;
+            aspect-ratio: 16/9; /* Impede esmagamento físico da div pela janela */
+            border: 3px solid #333; border-radius: 10px; overflow: hidden; background: #000; 
+            margin: 0 auto 15px auto; flex-shrink: 0;
+        }
+        video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; }
+
+        /* Controles de Corte */
+        .controls { display: flex; justify-content: center; gap: 15px; align-items: center; margin-bottom: 20px; width: 100%; max-width: 900px; }
+        .btn { padding: 12px 20px; font-size: 1.2rem; border: none; border-radius: 8px; cursor: pointer; font-weight: 900; color: #fff; transition: 0.2s; }
+        .btn-in { background: #3b82f6; } .btn-in:hover { background: #2563eb; }
+        .btn-out { background: #facc15; color: #000; } .btn-out:hover { background: #eab308; }
+        .btn-save { background: #559c31; flex: 1; } .btn-save:hover { background: #4a8c2a; }
+        
+        .time-display { font-size: 1.3rem; font-family: monospace; background: #0b1120; padding: 10px 20px; border-radius: 10px; border: 1px solid #334155; min-width: 250px; text-align: center; }
+
+        /* Fila de Filmes */
+        .list-container { width: 100%; max-width: 900px; background: var(--panel); padding: 15px; border-radius: 10px; border: 1px solid #334155;}
+        .list-header { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 2px solid #334155; padding-bottom: 10px; }
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #0f172a; background: #273449; margin-bottom: 5px; border-radius: 6px;}
+        .list-remove { color: #f87171; font-weight: bold; cursor: pointer; background: transparent; border: none; font-size: 1rem;}
+        .list-remove:hover { color: #ef4444; text-decoration: underline; }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div>
+            <h1>Mestre de Cortes 🎥</h1>
+            <p style="margin: 0; color: var(--text-muted); font-size: 0.85rem;">Exporte os melhores horizontais com rapidez. Multi-Cortes ativado!</p>
+        </div>
+        <button class="export-btn" onclick="exportarScriptFFmpeg()">💾 Baixar AutoRender de MultiCortes (.ps1)</button>
+    </div>
+
+    <div class="app-layout">
+        
+        <!-- Catálogo Dinâmico (Esquerda) -->
+        <div class="sidebar">
+            <div class="sidebar-header">Catálogo Agrupado</div>
+            <div id="catalog-content">
+                <!-- Gerado via JS -->
+            </div>
+        </div>
+
+        <!-- Workbench (Direita) -->
+        <div class="main-editor">
+            
+            <div style="width: 100%; max-width: 900px; display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 5px;">
+                <span id="vid-name" style="font-weight:900; color: #3b82f6; font-size:1.1rem; font-family: monospace;">Nenhum vídeo carregado</span>
+            </div>
+
+            <!-- Player -->
+            <div class="video-container">
+                <video id="vidPlayer" controls autoplay loop playsinline></video>
+            </div>
+
+            <!-- Barra de Tempo e Navegação do Vídeo Externa -->
+            <div style="width: 100%; max-width: 900px; display: flex; gap: 10px; align-items: center; margin-bottom: 15px; background: #1e293b; padding: 10px 15px; border-radius: 8px; border: 1px solid #334155;">
+                <button onclick="document.getElementById('vidPlayer').play()" style="background:#559c31; border:none; color:white; padding: 10px 15px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:1rem;">▶ Play</button>
+                <button onclick="document.getElementById('vidPlayer').pause()" style="background:#64748b; border:none; color:white; padding: 10px 15px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:1rem;">⏸ Pause</button>
+                <input type="range" id="seek-bar" value="0" min="0" max="100" step="0.1" style="flex:1; cursor:pointer;">
+                <span id="current-time-view" style="font-family:monospace; font-size:1.1rem; color:#60a5fa; min-width:80px; text-align:right;">00:00.0</span>
+            </div>
+
+            <!-- Controles IN/OUT -->
+            <div class="controls">
+                <button class="btn btn-in" onclick="markIn()">[ I ] IN</button>
+                <div class="time-display">
+                    <span style="color:#60a5fa;">IN: <span id="timeIn">--:--.---</span></span><br>
+                    <span style="color:#fde047;">OUT: <span id="timeOut">--:--.---</span></span>
+                </div>
+                <button class="btn btn-out" onclick="markOut()">OUT [ O ]</button>
+                <button class="btn btn-save" onclick="saveClip()">✂️ Salvar Recorte</button>
+            </div>
+
+            <!-- Fila de Exportação -->
+            <div class="list-container">
+                <div class="list-header">
+                    <h3 style="margin:0;">Fila de Recortes</h3>
+                    <strong style="background:var(--accent); padding:2px 8px; border-radius:10px;"><span id="queueCount">0</span> itens</strong>
+                </div>
+                <div id="queueList"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Catálogo base do PowerShell (tem "videosData") -->
+    <script src="catalogo_simples.js"></script>
+
+    <script>
+        let currentVideoPath = localStorage.getItem('fl_multi_last_vid') || null;
+        let cutQueue = JSON.parse(localStorage.getItem('fl_multi_queue')) || [];
+        
+        const player = document.getElementById('vidPlayer');
+        let currentIn = null;
+        let currentOut = null;
+        let videosAgrupados = {};
+
+        // Extrai assunto como fizemos antes!
+        function extractTopic(pathUri) {
+            if (!pathUri) return "Desconhecido";
+            const filename = pathUri.split('/').pop().split('.')[0];
+            let clean = filename.replace(/_cartao[12]$/i, '').replace(/_ESTRELA$/i, '').replace(/^\d{3}_/, '');
+            if (clean.match(/^C\d{4}$/) || clean.match(/^GUI\d{4}$/)) return "NAO_CLASSIFICADO";
+            return clean.replace(/_/g, ' ').toUpperCase();
+        }
+
+        // Constrói Árvore da Sidebar
+        function buildSidebar() {
+            videosData.forEach(v => {
+                const assunto = extractTopic(v.Path);
+                if (!videosAgrupados[assunto]) videosAgrupados[assunto] = [];
+                videosAgrupados[assunto].push(v);
+            });
+
+            const sidebarObj = document.getElementById('catalog-content');
+            sidebarObj.innerHTML = '';
+
+            // Renderizar em ordem alfabética, mas manter NAO_CLASSIFICADO no topo
+            let chaves = Object.keys(videosAgrupados).sort();
+            if(chaves.includes("NAO_CLASSIFICADO")) {
+                chaves = ["NAO_CLASSIFICADO", ...chaves.filter(c => c !== "NAO_CLASSIFICADO")];
+            }
+
+            chaves.forEach(grupo => {
+                const arr = videosAgrupados[grupo];
+                let grupoHtml = `<div class="group-header" onclick="toggleGroup('${grupo}')">${grupo} <span>[${arr.length}]</span></div>`;
+                grupoHtml += `<div class="group-list" id="group-${grupo}" style="display:none;">`;
+                
+                arr.forEach(v => {
+                    const shortname = v.Path.split('/').pop();
+                    grupoHtml += `<button class="vid-btn" id="btn-${shortname}" onclick="loadVideo('${v.Path}')">${shortname}</button>`;
+                });
+                
+                grupoHtml += `</div>`;
+                sidebarObj.innerHTML += grupoHtml;
+            });
+        }
+
+        window.toggleGroup = function(grupo) {
+            const el = document.getElementById(`group-${grupo}`);
+            el.style.display = el.style.display === 'none' ? 'flex' : 'none';
+        }
+
+        window.loadVideo = function(path) {
+            currentVideoPath = path;
+            localStorage.setItem('fl_multi_last_vid', path);
+            
+            // UI styles for active button
+            document.querySelectorAll('.vid-btn').forEach(b => b.classList.remove('active'));
+            const filename = path.split('/').pop();
+            const btn = document.getElementById(`btn-${filename}`);
+            if(btn) btn.classList.add('active');
+            
+            document.getElementById('vid-name').innerText = filename;
+            player.src = path;
+            
+            // Auto abre o menu Accordion de onde o clique/load veio!
+            const assunto = extractTopic(path);
+            const menu = document.getElementById(`group-${assunto}`);
+            if(menu) menu.style.display = 'flex';
+            
+            // Reseta controles de corte (Pois trocamos de video)
+            currentIn = null;
+            currentOut = null;
+            updateTimeDisplay();
+        }
+
+        // Format to mm:ss.ms
+        function fmTime(sec) {
+            if (sec === null) return "--:--.---";
+            const date = new Date(sec * 1000);
+            const m = String(date.getUTCMinutes()).padStart(2, '0');
+            const s = String(date.getUTCSeconds()).padStart(2, '0');
+            const ms = String(date.getUTCMilliseconds()).padStart(3, '0');
+            return `${m}:${s}.${ms}`;
+        }
+
+        function markIn() {
+            currentIn = player.currentTime;
+            if (currentOut !== null && currentIn >= currentOut) currentOut = null;
+            updateTimeDisplay();
+        }
+
+        function markOut() {
+            currentOut = player.currentTime;
+            if (currentIn !== null && currentOut <= currentIn) { alert("IN deve ser menor que OUT!"); currentOut = null; }
+            updateTimeDisplay();
+        }
+
+        function updateTimeDisplay() {
+            document.getElementById('timeIn').innerText = fmTime(currentIn);
+            document.getElementById('timeOut').innerText = fmTime(currentOut);
+        }
+
+        function renderQueue() {
+            const list = document.getElementById('queueList');
+            document.getElementById('queueCount').innerText = cutQueue.length;
+            list.innerHTML = '';
+            
+            // Sort by filename physically so it looks clean
+            cutQueue.forEach((q, idx) => {
+                const fname = q.path.split('/').pop();
+                const diffSecs = (q.outTime - q.inTime).toFixed(2);
+                
+                list.innerHTML += `
+                    <div class="list-item">
+                        <div>
+                            <strong style="color: #3b82f6; font-family:monospace;">${fname}</strong><br>
+                            <span style="font-size: 0.85rem; color: #94a3b8;">🔄 WIDE | In: ${q.inTime.toFixed(3)}s ➔ Out: ${q.outTime.toFixed(3)}s (Duração: ${diffSecs}s)</span>
+                        </div>
+                        <button class="list-remove" onclick="removeQueue(${idx})">Remover</button>
+                    </div>
+                `;
+            });
+        }
+
+        window.saveClip = function() {
+            if (!currentVideoPath) { alert("Carregue um vídeo primeiro clicando no menu à esquerda!"); return; }
+            if (currentIn === null || currentOut === null) { alert("Marque IN e OUT apertando I e O enquanto assiste o lance!"); return; }
+            
+            cutQueue.push({
+                path: currentVideoPath,
+                inTime: currentIn,
+                outTime: currentOut
+            });
+            
+            localStorage.setItem('fl_multi_queue', JSON.stringify(cutQueue));
+            renderQueue();
+            
+            // A MÁGICA DO MULTICORTE: Zeramos o IN e OUT, mas mantemos o vídeo rolando!
+            // O usuário pode simplesmente apertar "IN" de novo na próxima jogada do mesmo video.
+            currentIn = null;
+            currentOut = null;
+            updateTimeDisplay();
+        }
+
+        window.removeQueue = function(idx) {
+            cutQueue.splice(idx, 1);
+            localStorage.setItem('fl_multi_queue', JSON.stringify(cutQueue));
+            renderQueue();
+        }
+
+        window.exportarScriptFFmpeg = function() {
+            if (cutQueue.length === 0) { alert("Sua fila de cortes está vazia!"); return; }
+
+            // Script PS1 Modificado APENAS WIDE
+            let script = "# Script FFmpeg - Gerado pelo Mestre de Cortes\r\n";
+            script += "# Execute com o PowerShell dentro da pasta E:\\DATA\\\r\n\r\n";
+            
+            script += "cd $PSScriptRoot\r\n";
+            script += "if (-not (Test-Path '.\\ffmpeg.exe')) { Write-Host 'ERRO CRÍTICO: ffmpeg.exe não foi encontrado nesta pasta E:\DATA!' -ForegroundColor Red; Read-Host 'Aperte ENTER para sair'; exit }\r\n\r\n";
+
+            script += "Write-Host 'Criando pasta destino Cortes_Wide...'\r\n";
+            script += `New-Item -ItemType Directory -Force -Path ".\\Cortes_Wide" | Out-Null\r\n\r\n`;
+
+            cutQueue.forEach((q, idx) => {
+                const toWinPath = (uri) => {
+                    let p = decodeURI(uri).replace('file:///', '');
+                    return p.split('/').join('\\\\');
+                };
+
+                const absolutePath = toWinPath(q.path);
+                
+                // O original filename LIMPO usando split('/').pop() sem bug de barra `\` !!
+                const originalName = q.path.split('/').pop();
+                const nameWithoutExt = originalName.substring(0, originalName.lastIndexOf('.'));
+                const ext = originalName.substring(originalName.lastIndexOf('.'));
+                
+                const timePrefix = String(idx+1).padStart(3, '0');
+                const outWide = `.\\Cortes_Wide\\${timePrefix}_${nameWithoutExt}_WIDE${ext}`;
+
+                script += `Write-Host "Processando Corte ${timePrefix}/${String(cutQueue.length).padStart(3,'0')} - [ WIDE ]" -ForegroundColor Cyan\r\n`;
+                
+                // 1. RENDER: WIDE (Original proportions, just trimmed in time)
+                script += `.\\ffmpeg.exe -i "${absolutePath}" -y -ss ${q.inTime.toFixed(3)} -to ${q.outTime.toFixed(3)} -c:v libx264 -preset fast -crf 18 -c:a aac "${outWide}"\r\n\r\n`;
+            });
+
+            script += "\r\nWrite-Host 'TUDO FINALIZADO COM SUCESSO!' -ForegroundColor Green\r\n";
+            script += "Read-Host 'Pressione ENTER para fechar a tela...'\r\n";
+
+            const blob = new Blob([script], { type: "text/plain;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "FL_Render_Duplo.ps1";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // Barra de progresso Customizada Externa!!
+        player.addEventListener('timeupdate', () => {
+            if (player.duration) {
+                document.getElementById('seek-bar').value = (player.currentTime / player.duration) * 100;
+                const m = String(Math.floor(player.currentTime / 60)).padStart(2, '0');
+                const s = String(Math.floor(player.currentTime % 60)).padStart(2, '0');
+                const ds = String(Math.floor((player.currentTime % 1) * 10)); // Decimos
+                document.getElementById('current-time-view').innerText = `${m}:${s}.${ds}`;
+            }
+        });
+        
+        document.getElementById('seek-bar').addEventListener('input', (e) => {
+            if(player.duration) {
+                player.currentTime = (e.target.value / 100) * player.duration;
+            }
+        });
+
+        // Atalhos de teclado (I, O, S, Espaço para play/pause)
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                if (e.key === 'i' || e.key === 'I') markIn();
+                if (e.key === 'o' || e.key === 'O') markOut();
+                if (e.key === 's' || e.key === 'S') saveClip();
+                if (e.key === ' ') { 
+                    e.preventDefault(); 
+                    if(player.paused) player.play(); else player.pause(); 
+                }
+            }
+        });
+
+        buildSidebar();
+        
+        // Auto-load last viewed video
+        if(currentVideoPath) {
+            loadVideo(currentVideoPath);
+        } else if(videosData.length > 0) {
+            loadVideo(videosData[0].Path);
+        }
+        renderQueue();
+
+    </script>
+</body>
+</html>

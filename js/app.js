@@ -310,11 +310,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     grid[t][d] = c.id;
                 });
 
-                const thStyle = 'padding:10px 14px;text-align:left;color:var(--text-muted);font-size:.75rem;font-weight:700;letter-spacing:.06em;border-bottom:1px solid var(--glass-border);white-space:nowrap;position:sticky;top:0;background:#1e293b;z-index:1;';
-                const tdTimeStyle = 'padding:10px 14px;color:var(--text-muted);font-size:.82rem;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:top;font-weight:600;';
-                const tdStyle = 'padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:top;min-width:120px;';
+                const thStyle = 'padding:10px 14px;text-align:left;color:var(--text-muted);font-size:.75rem;font-weight:700;letter-spacing:.06em;border-bottom:1px solid var(--glass-border);white-space:nowrap;position:sticky;top:0;background:#1e293b;z-index:1;overflow:hidden;';
+                const tdTimeStyle = 'padding:10px 14px;color:var(--text-muted);font-size:.82rem;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:top;font-weight:600;width:72px;';
+                const tdStyle = 'padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:top;';
 
-                let html = '<table style="width:100%;border-collapse:collapse;font-size:.82rem;">';
+                let html = '<table style="width:100%;border-collapse:collapse;font-size:.82rem;table-layout:fixed;">';
+                html += '<colgroup>';
+                html += '<col style="width:72px">';  // Horário
+                activeDays.forEach(() => { html += `<col>`; });  // dias dividem o restante igualmente
+                html += '</colgroup>';
                 html += '<thead><tr>';
                 html += `<th style="${thStyle}">HORÁRIO</th>`;
                 activeDays.forEach(d => {
@@ -356,7 +360,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 return (() => {
                                     const age    = calcAge(s.birth_date);
                                     const ageStr = age !== null ? ` (${age})` : '';
-                                    return `<span title="${escHtml(s.full_name)}${ageStr}" style="display:inline-block;padding:3px 8px;border-radius:20px;background:${bg};color:${color};border:1px solid ${border};font-size:.72rem;font-weight:600;white-space:nowrap;margin:2px 2px 2px 0;">${escHtml(s.full_name)}${ageStr}</span>`;
+                                    return `<span title="${escHtml(s.full_name)}${ageStr}" style="display:inline-block;padding:3px 8px;border-radius:20px;background:${bg};color:${color};border:1px solid ${border};font-size:.72rem;font-weight:600;white-space:normal;word-break:break-word;margin:2px 2px 2px 0;max-width:100%;">${escHtml(s.full_name)}${ageStr}</span>`;
                                 })();
                             }).join('');
                         }
