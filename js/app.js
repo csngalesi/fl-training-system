@@ -373,6 +373,57 @@ document.addEventListener('DOMContentLoaded', () => {
                 loading.classList.add('hidden');
                 wrap.innerHTML = html;
                 wrap.classList.remove('hidden');
+
+                // ── Tooltip no clique (nome completo para chips truncados) ──
+                // Usa delegação no scrollDiv para não acumular listeners a cada abertura
+                const scrollDiv = modal.querySelector('div[style*="overflow"]');
+                if (scrollDiv && !scrollDiv._gradeTipBound) {
+                    scrollDiv._gradeTipBound = true;
+                    scrollDiv.addEventListener('click', function (e) {
+                        const chip = e.target.closest('span[title]');
+                        // Remove tooltip existente
+                        document.getElementById('fl-grade-tip')?.remove();
+                        if (!chip) return;
+                        e.stopPropagation();
+
+                        const tip = document.createElement('div');
+                        tip.id = 'fl-grade-tip';
+                        tip.textContent = chip.getAttribute('title');
+                        tip.style.cssText = [
+                            'position:fixed',
+                            'background:#0f172a',
+                            'color:#f8fafc',
+                            'padding:8px 14px',
+                            'border-radius:10px',
+                            'font-size:.82rem',
+                            'font-weight:600',
+                            'z-index:9999',
+                            'pointer-events:none',
+                            'border:1px solid rgba(255,255,255,.2)',
+                            'box-shadow:0 8px 24px rgba(0,0,0,.6)',
+                            'max-width:260px',
+                            'line-height:1.4',
+                            'word-break:break-word',
+                            'animation:tipIn .15s ease',
+                        ].join(';');
+                        document.body.appendChild(tip);
+
+                        // Posiciona abaixo do chip, ajustando para não sair da tela
+                        const rect = chip.getBoundingClientRect();
+                        let top  = rect.bottom + 8;
+                        let left = rect.left;
+                        if (top  + 80  > window.innerHeight) top  = rect.top - tip.offsetHeight - 8;
+                        if (left + 268 > window.innerWidth)  left = window.innerWidth - 272;
+                        if (left < 4) left = 4;
+                        tip.style.top  = top  + 'px';
+                        tip.style.left = left + 'px';
+
+                        // Some no próximo clique em qualquer lugar
+                        setTimeout(() => {
+                            document.addEventListener('click', () => document.getElementById('fl-grade-tip')?.remove(), { once: true });
+                        }, 10);
+                    });
+                }
             } catch(e) {
                 loading.innerHTML = `<span style="color:#ef4444;">Erro ao carregar: ${escHtml(e.message)}</span>`;
             }
