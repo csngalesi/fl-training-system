@@ -360,7 +360,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 return (() => {
                                     const age    = calcAge(s.birth_date);
                                     const ageStr = age !== null ? ` (${age})` : '';
-                                    return `<span title="${escHtml(s.full_name)}${ageStr}" style="display:inline-block;padding:3px 8px;border-radius:20px;background:${bg};color:${color};border:1px solid ${border};font-size:.72rem;font-weight:600;white-space:normal;word-break:break-word;margin:2px 2px 2px 0;max-width:100%;">${escHtml(s.full_name)}${ageStr}</span>`;
+                                    return `<span title="${escHtml(s.full_name)}${ageStr}" style="display:block;padding:3px 8px;border-radius:6px;background:${bg};color:${color};border:1px solid ${border};font-size:.72rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:2px 0;cursor:default;">${escHtml(s.full_name)}${ageStr}</span>`;
                                 })();
                             }).join('');
                         }
