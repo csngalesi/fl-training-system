@@ -94,7 +94,7 @@ h3 {
 
 /* SIDEBAR */
 .sidebar {
-    width: 280px;
+    width: 200px;
     height: calc(100vh - 32px);
     margin: 16px;
     display: flex;
@@ -175,7 +175,27 @@ h3 {
     color: var(--acc-primary);
 }
 
-/* ── Week plan nav cards (sidebar) ── */
+/* ── Training cards in main content column ── */
+#trainings-main-col {
+    width: 240px;
+    flex-shrink: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-right: 4px;
+    padding-bottom: 24px;
+}
+#trainings-main-col .nav-label {
+    font-size: .7rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: .06em;
+    padding: 0 4px 8px 4px;
+    flex-shrink: 0;
+}
+
+/* ── Week plan nav cards (training column) ── */
 .week-plan-nav-btn {
     display: flex;
     align-items: center;
@@ -533,7 +553,7 @@ h3 {
     flex: 1;
     display: flex;
     flex-direction: column;
-    min-width: 350px;
+    min-width: 0;
     overflow-y: auto;
     padding-right: 8px;
 }
@@ -613,11 +633,33 @@ h3 {
 
 /* VISUAL PITCH */
 .visual-panel {
-    width: 600px;
+    width: 140px;
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
     overflow: hidden;
     background: #0b1121;
+    border-radius: 16px;
+    border: 1px solid var(--glass-border);
+}
+
+/* Hide functional controls in decorative pitch panel */
+.visual-panel .visual-header,
+.visual-panel .visual-footer { display: none; }
+.visual-panel .pitch-container {
+    flex: 1;
+    padding: 0;
+    overflow: hidden;
+    position: relative;
+}
+.visual-panel .pitch {
+    width: 460px;
+    height: 580px;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%) scale(0.3);
+    transform-origin: top center;
 }
 
 .visual-header {

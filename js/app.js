@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Treinos elements
     const btnModeWeek      = document.getElementById('btn-mode-week');
     const navFundamentals  = document.getElementById('nav-fundamentals');
-    const navWeekPlans     = document.getElementById('nav-week-plans');
+    const navWeekPlans     = document.getElementById('trainings-main-col');
     const weekPlansNavList = document.getElementById('week-plans-nav-list');
     const fundamentalsPanel = document.getElementById('fundamentals-panel');
     const weekPanel        = document.getElementById('week-sessions-panel');
@@ -122,8 +122,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnModeWeek) btnModeWeek.addEventListener('click', () => switchMode('week'));
         switchMode('week');
 
-        // Prancheta
-        initPrancheta();
+        // Prancheta (panel removed from layout, guard against missing elements)
+        try { initPrancheta(); } catch (e) { /* prancheta panel not in current layout */ }
 
         // Controle de Carga
         initCarga();
