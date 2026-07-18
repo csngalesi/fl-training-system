@@ -1,5 +1,5 @@
-/**
- * FL Training System — API Module
+﻿/**
+ * FL Training System â€” API Module
  * Queries Supabase. Exposed via window.FLApi.
  */
 (function () {
@@ -7,7 +7,7 @@
 
     const db = () => window.supabaseClient;
 
-    // ── Fundamentals ─────────────────────────────────────────────
+    // â”€â”€ Fundamentals â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const Fundamentals = {
         async getAll() {
             const { data, error } = await db()
@@ -47,7 +47,7 @@
         },
     };
 
-    // ── Drills ────────────────────────────────────────────────────
+    // â”€â”€ Drills â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const Drills = {
         async getByFundamental(fundamentalId) {
             const { data, error } = await db()
@@ -101,7 +101,7 @@
         },
     };
 
-    // ── Templates ─────────────────────────────────────────────────
+    // â”€â”€ Templates â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const Templates = {
         async getAll() {
             const { data, error } = await db()
@@ -142,7 +142,7 @@
         },
     };
 
-    // ── Week Plans ────────────────────────────────────────────────
+    // â”€â”€ Week Plans â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const WeekPlans = {
         async getAll() {
             const { data, error } = await db()
@@ -209,7 +209,7 @@
         },
     };
 
-    // ── Trainings ─────────────────────────────────────────────────
+    // â”€â”€ Trainings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const Trainings = {
         async getAll() {
             const { data, error } = await db()
@@ -263,7 +263,7 @@
         },
     };
 
-    // ── Mensagem ──────────────────────────────────────────────────
+    // â”€â”€ Mensagem â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const Mensagem = {
         async getByPlan(planId) {
             const { data, error } = await db()
@@ -293,7 +293,7 @@
         },
     };
 
-    // ── Carga Registros ───────────────────────────────────────────
+    // â”€â”€ Carga Registros â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const CargaRegistros = {
         async create(payload) {
             const { data, error } = await db()
@@ -333,7 +333,7 @@
         },
     };
 
-    // ── Storage ───────────────────────────────────────────────────
+    // â”€â”€ Storage â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const Storage = {
         async upload(file) {
             const ext      = file.name.split('.').pop();
@@ -348,7 +348,7 @@
         },
     };
 
-    // ── FL Gestão (external Supabase via REST) ────────────────────
+    // â”€â”€ FL GestÃ£o (external Supabase via REST) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const FL_GESTAO_URL = 'https://negipnauepyeztarwvye.supabase.co';
     const FL_GESTAO_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5lZ2lwbmF1ZXB5ZXp0YXJ3dnllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NTMyNjMsImV4cCI6MjA4ODIyOTI2M30.GZ49uxi39X6RSDHdyksAw8XnKxwvvq_QvH5WCNi0NGg';
 
@@ -360,7 +360,7 @@
                 Accept: 'application/json',
             },
         });
-        if (!res.ok) throw new Error(`FL Gestão API error: ${res.status}`);
+        if (!res.ok) throw new Error(`FL GestÃ£o API error: ${res.status}`);
         return res.json();
     }
 
@@ -394,7 +394,7 @@
         },
     };
 
-    // ── Camisetas ─────────────────────────────────────────────────
+    // â”€â”€ Camisetas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const Camisetas = {
         async load() {
             const { data, error } = await db()
