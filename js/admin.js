@@ -2171,6 +2171,10 @@
                         style="flex-shrink:0;color:${t.visible ? 'var(--acc-primary)' : 'var(--text-muted)'};">
                     <i class="fa-solid fa-eye${t.visible ? '' : '-slash'}"></i>
                 </button>
+                <button class="btn-icon tr-btn-copy" data-id="${_trEsc(t.id)}"
+                        title="Duplicar treino" style="flex-shrink:0;color:var(--acc-blue);">
+                    <i class="fa-solid fa-copy"></i>
+                </button>
                 <button class="btn-icon tr-btn-del" data-id="${_trEsc(t.id)}"
                         title="Excluir" style="color:var(--acc-danger);flex-shrink:0;">
                     <i class="fa-solid fa-trash-can"></i>
@@ -2180,7 +2184,7 @@
 
         el.querySelectorAll('.tr-list-item').forEach(row => {
             row.addEventListener('click', (e) => {
-                if (e.target.closest('.tr-btn-del') || e.target.closest('.tr-btn-vis')) return;
+                if (e.target.closest('.tr-btn-del') || e.target.closest('.tr-btn-vis') || e.target.closest('.tr-btn-copy')) return;
                 const t = trTrainings.find(x => x.id === row.dataset.id);
                 if (t) _openTrainingEditor(t);
             });
@@ -2205,9 +2209,38 @@
                 } catch(err) { toast('Erro: ' + err.message, 'error'); }
             });
         });
+        el.querySelectorAll('.tr-btn-copy').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                _duplicateTraining(btn.dataset.id);
+            });
+        });
 
         _initTrainingListDnD(el);
         _trUpdateHighlight();
+    }
+
+    async function _duplicateTraining(id) {
+        const src = trTrainings.find(t => t.id === id);
+        if (!src) return;
+        try {
+            const maxOrder = trTrainings.reduce((m, t) => Math.max(m, t.sort_order || 0), 0);
+            const payload = {
+                title: src.title + ' (cópia)',
+                visible: false,
+                sessions: JSON.parse(JSON.stringify(src.sessions || [])),
+                mensagem_text: src.mensagem_text || '',
+                mensagem_media: src.mensagem_media ? JSON.parse(JSON.stringify(src.mensagem_media)) : [],
+                destaque_text: src.destaque_text || '',
+                destaque_media: src.destaque_media ? JSON.parse(JSON.stringify(src.destaque_media)) : [],
+                sort_order: maxOrder + 1,
+            };
+            const created = await window.FLApi.Trainings.create(payload);
+            toast('Treino duplicado!');
+            await loadTrainingModule();
+            const newT = trTrainings.find(t => t.id === created.id);
+            if (newT) _openTrainingEditor(newT);
+        } catch(err) { toast('Erro ao duplicar: ' + err.message, 'error'); }
     }
 
     function _trUpdateHighlight() {
