@@ -394,7 +394,27 @@
         },
     };
 
-    window.FLApi = { Fundamentals, Drills, Templates, WeekPlans, Trainings, Mensagem, CargaRegistros, FLGestao, Storage };
+    // ── Camisetas ─────────────────────────────────────────────────
+    const Camisetas = {
+        async load() {
+            const { data, error } = await db()
+                .from('fl_camisetas')
+                .select('quantities')
+                .eq('id', 'global')
+                .single();
+            if (error) throw error;
+            return data?.quantities || {};
+        },
+        async save(quantities) {
+            const { error } = await db()
+                .from('fl_camisetas')
+                .update({ quantities })
+                .eq('id', 'global');
+            if (error) throw error;
+        },
+    };
+
+    window.FLApi = { Fundamentals, Drills, Templates, WeekPlans, Trainings, Mensagem, CargaRegistros, FLGestao, Storage, Camisetas };
 
 
     console.info('[FL] API module loaded.');

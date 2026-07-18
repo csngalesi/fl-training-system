@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Football Lab | Application Logic & Animation Engine
  * Upgraded to explicitly manage a squad of 4 interacting players (p1, p2, p3, p4).
  */
@@ -1352,153 +1352,66 @@ document.addEventListener('DOMContentLoaded', () => {
     // Run
     init();
 
-    // ── Camisetas Module ────────────────────────────────────────────────────────
+    // -- Camisetas Module (Supabase) -----------------------------------------------
     (function () {
-        const STORAGE_KEY = 'fl_camisetas_v1';
-
-        const GROUPS = [
-            {
-                label: 'Camiseta Infantil',
-                icon:  'fa-child',
-                color: '#34d399',
-                items: ['P', 'M', 'G'],
-            },
-            {
-                label: 'Camiseta Adulto',
-                icon:  'fa-person',
-                color: '#60a5fa',
-                items: ['PP', 'P', 'M', 'G', 'GG'],
-            },
-            {
-                label: 'Moletom Infantil',
-                icon:  'fa-child-reaching',
-                color: '#f59e0b',
-                items: ['10', '12', '14', '16'],
-            },
-            {
-                label: 'Moletom Adulto',
-                icon:  'fa-user',
-                color: '#a78bfa',
-                items: ['P', 'M', 'G', 'GG'],
-            },
+        var GROUPS = [
+            { label: 'Camiseta Infantil',  icon: 'fa-child',          color: '#34d399', items: ['P', 'M', 'G'] },
+            { label: 'Camiseta Adulto',    icon: 'fa-person',         color: '#60a5fa', items: ['PP', 'P', 'M', 'G', 'GG'] },
+            { label: 'Moletom Infantil',   icon: 'fa-child-reaching', color: '#f59e0b', items: ['10', '12', '14', '16'] },
+            { label: 'Moletom Adulto',     icon: 'fa-user',           color: '#a78bfa', items: ['P', 'M', 'G', 'GG'] }
         ];
-
-        let _adjusting = false;
-
-        function _loadData() {
-            try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
-            catch (_) { return {}; }
+        var _adjusting = false, _data = {}, _saving = false;
+        function _key(gi, sz) { return 'g' + gi + '_' + sz; }
+        async function _load() { try { _data = await window.FLApi.Camisetas.load(); } catch(e) { _data = {}; } }
+        async function _save() {
+            if (_saving) return; _saving = true;
+            try { await window.FLApi.Camisetas.save(_data); }
+            catch(e) { console.error('[Camisetas] save', e); toast('Erro ao salvar camisetas.', 'error'); }
+            finally { _saving = false; }
         }
-
-        function _saveData(data) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        }
-
-        function _slotKey(groupIdx, size) {
-            return `g${groupIdx}_${size}`;
-        }
-
         function _render() {
-            const body = document.getElementById('camisetas-body');
-            if (!body) return;
-            const data = _loadData();
-
-            body.innerHTML = GROUPS.map((g, gi) => {
-                const rows = g.items.map(size => {
-                    const key = _slotKey(gi, size);
-                    const qty = data[key] !== undefined ? data[key] : 0;
-                    return `
-                        <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;
-                            background:rgba(255,255,255,.04);border-radius:8px;border:1px solid var(--glass-border);">
-                            <span style="font-size:.82rem;font-weight:600;color:var(--text-secondary);
-                                min-width:32px;text-align:center;">${size}</span>
-                            <button class="cam-btn-minus btn-icon" data-key="${key}"
-                                style="flex-shrink:0;color:var(--acc-danger);width:28px;height:28px;font-size:.85rem;">
-                                <i class="fa-solid fa-minus"></i>
-                            </button>
-                            <input type="number" class="cam-input form-input" data-key="${key}"
-                                value="${qty}" min="0"
-                                style="flex:1;text-align:center;font-size:1rem;font-weight:700;
-                                    padding:6px 8px;${_adjusting ? '' : 'pointer-events:none;background:transparent;border-color:transparent;'}">
-                        </div>`;
+            var body = document.getElementById('camisetas-body'); if (!body) return;
+            var noEdit = 'pointer-events:none;background:transparent;border-color:transparent;';
+            body.innerHTML = GROUPS.map(function(g, gi) {
+                var rows = g.items.map(function(sz) {
+                    var k = _key(gi, sz), qty = _data[k] !== undefined ? _data[k] : 0;
+                    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:rgba(255,255,255,.04);border-radius:8px;border:1px solid var(--glass-border);">' +
+                        '<span style="font-size:.82rem;font-weight:600;color:var(--text-secondary);min-width:32px;text-align:center;">' + sz + '</span>' +
+                        '<button class="cam-btn-minus btn-icon" data-key="' + k + '" style="flex-shrink:0;color:var(--acc-danger);width:28px;height:28px;font-size:.85rem;"><i class="fa-solid fa-minus"></i></button>' +
+                        '<input type="number" class="cam-input form-input" data-key="' + k + '" value="' + qty + '" min="0" style="flex:1;text-align:center;font-size:1rem;font-weight:700;padding:6px 8px;' + (_adjusting ? '' : noEdit) + '"> </div>';
                 }).join('');
-
-                return `
-                    <div>
-                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-                            <i class="fa-solid ${g.icon}" style="color:${g.color};font-size:.95rem;"></i>
-                            <span style="font-size:.88rem;font-weight:700;color:${g.color};text-transform:uppercase;
-                                letter-spacing:.04em;">${g.label}</span>
-                        </div>
-                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;">
-                            ${rows}
-                        </div>
-                    </div>`;
+                return '<div><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><i class="fa-solid ' + g.icon + '" style="color:' + g.color + ';font-size:.95rem;"></i><span style="font-size:.88rem;font-weight:700;color:' + g.color + ';text-transform:uppercase;letter-spacing:.04em;">' + g.label + '</span></div>' +
+                       '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;">' + rows + '</div></div>';
             }).join('');
-
-            // Wiring: minus buttons
-            body.querySelectorAll('.cam-btn-minus').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const d = _loadData();
-                    const k = btn.dataset.key;
-                    d[k] = Math.max(0, (d[k] || 0) - 1);
-                    _saveData(d);
-                    // update input without full re-render
-                    const inp = body.querySelector(`.cam-input[data-key="${k}"]`);
-                    if (inp) inp.value = d[k];
+            body.querySelectorAll('.cam-btn-minus').forEach(function(btn) {
+                btn.addEventListener('click', async function() {
+                    var k = btn.dataset.key; _data[k] = Math.max(0, (_data[k] || 0) - 1);
+                    var inp = body.querySelector('.cam-input[data-key="' + k + '"]');
+                    if (inp) inp.value = _data[k]; await _save();
                 });
             });
-
-            // Wiring: input changes
-            body.querySelectorAll('.cam-input').forEach(inp => {
-                inp.addEventListener('change', () => {
-                    const d = _loadData();
-                    d[inp.dataset.key] = Math.max(0, parseInt(inp.value) || 0);
-                    inp.value = d[inp.dataset.key];
-                    _saveData(d);
+            body.querySelectorAll('.cam-input').forEach(function(inp) {
+                inp.addEventListener('change', async function() {
+                    _data[inp.dataset.key] = Math.max(0, parseInt(inp.value) || 0);
+                    inp.value = _data[inp.dataset.key]; await _save();
                 });
             });
         }
-
-        function _updateAjustarBtn() {
-            const btn = document.getElementById('btn-camisetas-ajustar');
-            if (!btn) return;
-            if (_adjusting) {
-                btn.innerHTML = '<i class="fa-solid fa-check"></i> Concluir';
-                btn.style.background = 'rgba(16,185,129,.15)';
-                btn.style.borderColor = 'rgba(16,185,129,.4)';
-                btn.style.color = '#34d399';
-            } else {
-                btn.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Ajustar quantidades';
-                btn.style.background = '';
-                btn.style.borderColor = '';
-                btn.style.color = '';
-            }
+        function _updateBtn() {
+            var btn = document.getElementById('btn-camisetas-ajustar'); if (!btn) return;
+            if (_adjusting) { btn.innerHTML = '<i class="fa-solid fa-check"></i> Concluir'; btn.style.background='rgba(16,185,129,.15)'; btn.style.borderColor='rgba(16,185,129,.4)'; btn.style.color='#34d399'; }
+            else { btn.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Ajustar quantidades'; btn.style.background=''; btn.style.borderColor=''; btn.style.color=''; }
         }
-
-        // Open modal
-        document.getElementById('btn-open-camisetas')?.addEventListener('click', () => {
-            _adjusting = false;
-            _render();
-            _updateAjustarBtn();
+        document.getElementById('btn-open-camisetas')?.addEventListener('click', async function() {
+            _adjusting = false; _updateBtn();
+            var body = document.getElementById('camisetas-body');
+            body.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Carregando...</div>';
             document.getElementById('camisetas-modal').classList.remove('hidden');
+            await _load(); _render();
         });
-
-        // Close modal
-        document.getElementById('btn-close-camisetas')?.addEventListener('click', () => {
-            document.getElementById('camisetas-modal').classList.add('hidden');
-        });
-        document.getElementById('camisetas-modal')?.addEventListener('click', (e) => {
-            if (e.target === document.getElementById('camisetas-modal'))
-                document.getElementById('camisetas-modal').classList.add('hidden');
-        });
-
-        // Toggle ajustar
-        document.getElementById('btn-camisetas-ajustar')?.addEventListener('click', () => {
-            _adjusting = !_adjusting;
-            _updateAjustarBtn();
-            _render();
-        });
+        document.getElementById('btn-close-camisetas')?.addEventListener('click', function() { document.getElementById('camisetas-modal').classList.add('hidden'); });
+        document.getElementById('camisetas-modal')?.addEventListener('click', function(e) { if (e.target === document.getElementById('camisetas-modal')) document.getElementById('camisetas-modal').classList.add('hidden'); });
+        document.getElementById('btn-camisetas-ajustar')?.addEventListener('click', function() { _adjusting = !_adjusting; _updateBtn(); _render(); });
     })();
 
 });
