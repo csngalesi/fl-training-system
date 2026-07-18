@@ -1992,19 +1992,18 @@
     let _cargaSelectedPlanName = '';
 
     async function initCargaModule() {
-        // Load plans
         const plansList = document.getElementById('carga-plans-list');
         plansList.innerHTML = '<span style="color:var(--text-muted);font-size:.88rem;">Carregando...</span>';
         try {
-            const plans = await window.FLApi.WeekPlans.getAll();
-            if (!plans.length) {
-                plansList.innerHTML = '<span style="color:var(--text-muted);font-size:.88rem;">Nenhum plano cadastrado.</span>';
+            const trainings = await window.FLApi.Trainings.getAll();
+            if (!trainings.length) {
+                plansList.innerHTML = '<span style="color:var(--text-muted);font-size:.88rem;">Nenhum treino cadastrado.</span>';
                 return;
             }
-            plansList.innerHTML = plans.map(p => `
-                <button class="btn btn-secondary carga-plan-btn" data-id="${p.id}"
+            plansList.innerHTML = trainings.map(t => `
+                <button class="btn btn-secondary carga-plan-btn" data-id="${t.id}"
                     style="padding:10px 18px;border-radius:10px;font-weight:600;font-size:.88rem;">
-                    ${p.title}
+                    ${t.title}
                 </button>`).join('');
             plansList.querySelectorAll('.carga-plan-btn').forEach(btn => {
                 btn.addEventListener('click', () => {

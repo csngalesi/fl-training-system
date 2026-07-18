@@ -293,11 +293,20 @@
             return data;
         },
 
-        async getByPlan(weekPlanId) {
+        async getByPlan(trainingId) {
             const { data, error } = await db()
                 .from('fl_carga_registros')
                 .select('*')
-                .eq('week_plan_id', weekPlanId)
+                .eq('training_id', trainingId)
+                .order('recorded_at', { ascending: false });
+            if (error) throw error;
+            return data || [];
+        },
+
+        async getAll() {
+            const { data, error } = await db()
+                .from('fl_carga_registros')
+                .select('*')
                 .order('recorded_at', { ascending: false });
             if (error) throw error;
             return data || [];
