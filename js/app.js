@@ -1351,8 +1351,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Run
     init();
-    // Run
-    init();
 
 });
 

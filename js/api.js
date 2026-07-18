@@ -394,27 +394,7 @@
         },
     };
 
-    // â”€â”€ Camisetas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    const Camisetas = {
-        async load() {
-            const { data, error } = await db()
-                .from('fl_camisetas')
-                .select('quantities')
-                .eq('id', 'global')
-                .single();
-            if (error) throw error;
-            return data?.quantities || {};
-        },
-        async save(quantities) {
-            const { error } = await db()
-                .from('fl_camisetas')
-                .update({ quantities })
-                .eq('id', 'global');
-            if (error) throw error;
-        },
-    };
-
-    window.FLApi = { Fundamentals, Drills, Templates, WeekPlans, Trainings, Mensagem, CargaRegistros, FLGestao, Storage, Camisetas };
+    window.FLApi = { Fundamentals, Drills, Templates, WeekPlans, Trainings, Mensagem, CargaRegistros, FLGestao, Storage };
 
 
     console.info('[FL] API module loaded.');
