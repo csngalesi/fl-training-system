@@ -921,8 +921,10 @@ document.addEventListener('DOMContentLoaded', () => {
         weekDrillsList.innerHTML = sessions.map((s, i) => {
             const name = escHtml(s.name || s.title || `Sessão ${i + 1}`);
             const desc = (s.description || '').trim();
+            const hasdesc = desc ? `<span class="session-has-desc-badge" title="Ver descrição">!</span>` : '';
             return `
                 <div class="week-session-card" data-idx="${i}">
+                    ${hasdesc}
                     <div class="week-session-num">Sessão ${i + 1}</div>
                     <div class="week-session-title">${name}</div>
                     <div class="week-session-inline-desc" style="max-height:0;overflow:hidden;transition:max-height .35s ease,margin-top .35s ease,opacity .35s ease;opacity:0;font-size:.82rem;line-height:1.6;color:var(--text-muted);white-space:pre-wrap;">${escHtml(desc)}</div>

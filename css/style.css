@@ -250,6 +250,32 @@ h3 {
 .drill-info-btn:hover { background: rgba(16,185,129,.25); color: var(--acc-primary); border-color: var(--acc-primary); }
 .drill-info-btn.has-desc { color: var(--acc-primary); border-color: var(--acc-primary); background: rgba(16,185,129,.12); }
 
+/* "!" badge for sessions with description */
+.session-has-desc-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(16,185,129,.18);
+    border: 1px solid var(--acc-primary);
+    color: var(--acc-primary);
+    font-size: .65rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    pointer-events: none;
+    transition: background .2s, transform .2s;
+}
+.week-session-card.active .session-has-desc-badge {
+    background: var(--acc-primary);
+    color: #fff;
+    transform: scale(1.1);
+}
+
 .week-session-card:hover { border-color: rgba(255,255,255,.2); }
 
 .week-session-card.active {
