@@ -243,6 +243,25 @@
         </div>
     </div>
 
+    <!-- Modal Camisetas -->
+    <div id="camisetas-modal" class="modal-overlay hidden" style="align-items:flex-start;padding:20px;">
+        <div class="glass-panel" style="width:100%;max-width:720px;max-height:92vh;display:flex;flex-direction:column;border-radius:16px;overflow:hidden;">
+            <div class="modal-header" style="padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--glass-border);flex-shrink:0;">
+                <h2 style="font-size:1.1rem;display:flex;align-items:center;gap:10px;">
+                    <i class="fa-solid fa-shirt" style="color:#38bdf8;"></i> Camisetas
+                </h2>
+                <div style="display:flex;gap:10px;align-items:center;">
+                    <button id="btn-camisetas-ajustar" class="btn btn-secondary btn-sm">
+                        <i class="fa-solid fa-pen-to-square"></i> Ajustar quantidades
+                    </button>
+                    <button id="btn-close-camisetas" class="btn-icon"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+            <div id="camisetas-body" style="overflow-y:auto;flex:1;padding:20px;display:flex;flex-direction:column;gap:20px;">
+            </div>
+        </div>
+    </div>
+
     <!-- App Wrapper -->
     <div class="app-wrapper">
     <!-- Mobile sidebar backdrop -->
@@ -268,6 +287,9 @@
                     </button>
                     <button id="btn-open-carga-records" class="mode-btn" style="margin: 0; padding: 11px 12px; font-size: 0.85rem; width: 100%; background: linear-gradient(135deg, rgba(124,58,237,0.12), rgba(79,70,229,0.12)); border: 1px solid rgba(124,58,237,0.25);">
                         <div style="display:flex; flex-direction:row; align-items:center; justify-content:center; gap:8px;"><i class="fa-solid fa-gauge-high" style="font-size:1rem; margin:0; color:#a78bfa;"></i> <span>Registros de Carga</span></div>
+                    </button>
+                    <button id="btn-open-camisetas" class="mode-btn" style="margin: 0; padding: 11px 12px; font-size: 0.85rem; width: 100%; background: linear-gradient(135deg, rgba(14,165,233,0.12), rgba(99,102,241,0.12)); border: 1px solid rgba(14,165,233,0.25);">
+                        <div style="display:flex; flex-direction:row; align-items:center; justify-content:center; gap:8px;"><i class="fa-solid fa-shirt" style="font-size:1rem; margin:0; color:#38bdf8;"></i> <span>Camisetas</span></div>
                     </button>
                 </div>
             </div>
