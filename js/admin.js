@@ -2189,11 +2189,18 @@
         });
     }
 
+    function _toMediaArray(val) {
+        if (!val) return [];
+        const parsed = typeof val === 'string' ? JSON.parse(val) : val;
+        return Array.isArray(parsed) ? parsed : [parsed];
+    }
+
     function _openTrainingEditor(t) {
         editingTrainingId = t ? t.id : null;
         trSessions  = t ? JSON.parse(JSON.stringify(t.sessions  || [])) : [];
-        _trMsgMedia = t ? JSON.parse(JSON.stringify(t.mensagem_media || [])) : [];
-        _trTecMedia = t ? JSON.parse(JSON.stringify(t.destaque_media  || [])) : [];
+        _trMsgMedia = t ? _toMediaArray(t.mensagem_media) : [];
+        _trTecMedia = t ? _toMediaArray(t.destaque_media) : [];
+
 
         document.getElementById('tr-title-input').value    = t ? (t.title || '') : '';
         document.getElementById('tr-chk-visible').checked  = t ? !!t.visible : false;
