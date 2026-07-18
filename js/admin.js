@@ -2109,6 +2109,7 @@
     let _trMsgMedia       = [];   // [{type, value, caption}]
     let _trTecMedia       = [];
     let _trMediaWired     = false;
+    let _trDragIdx        = null; // drag-and-drop source index
 
     function _trEsc(s) {
         return String(s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -2154,11 +2155,23 @@
             el.innerHTML = '<p style="color:var(--text-muted);font-size:.8rem;">Nenhum treino.</p>';
             return;
         }
-        el.innerHTML = trTrainings.map(t => `
-            <div class="tr-list-item" data-id="${_trEsc(t.id)}"
-                 style="cursor:pointer;padding:10px 12px;border-radius:8px;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;transition:background .15s;">
-                <span style="font-size:.88rem;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${_trEsc(t.title)}">${_trEsc(t.title)}</span>
-                <button class="btn-icon tr-btn-del" data-id="${_trEsc(t.id)}" title="Excluir" style="color:var(--acc-danger);flex-shrink:0;">
+        el.innerHTML = trTrainings.map((t, i) => `
+            <div class="tr-list-item" data-id="${_trEsc(t.id)}" data-idx="${i}"
+                 draggable="true"
+                 style="cursor:pointer;padding:10px 12px;border-radius:8px;display:flex;align-items:center;gap:8px;justify-content:space-between;margin-bottom:4px;transition:background .15s,border-color .15s;border:1px solid transparent;">
+                <span class="tr-drag-handle" title="Arrastar para reordenar"
+                      style="color:var(--text-muted);cursor:grab;flex-shrink:0;opacity:.55;">
+                    <i class="fa-solid fa-grip-vertical"></i>
+                </span>
+                <span style="font-size:.88rem;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+                      title="${_trEsc(t.title)}">${_trEsc(t.title)}</span>
+                <button class="btn-icon tr-btn-vis" data-id="${_trEsc(t.id)}"
+                        title="${t.visible ? 'Visível — clique para ocultar' : 'Oculto — clique para tornar visível'}"
+                        style="flex-shrink:0;color:${t.visible ? 'var(--acc-primary)' : 'var(--text-muted)'};">
+                    <i class="fa-solid fa-eye${t.visible ? '' : '-slash'}"></i>
+                </button>
+                <button class="btn-icon tr-btn-del" data-id="${_trEsc(t.id)}"
+                        title="Excluir" style="color:var(--acc-danger);flex-shrink:0;">
                     <i class="fa-solid fa-trash-can"></i>
                 </button>
             </div>
@@ -2166,7 +2179,7 @@
 
         el.querySelectorAll('.tr-list-item').forEach(row => {
             row.addEventListener('click', (e) => {
-                if (e.target.closest('.tr-btn-del')) return;
+                if (e.target.closest('.tr-btn-del') || e.target.closest('.tr-btn-vis')) return;
                 const t = trTrainings.find(x => x.id === row.dataset.id);
                 if (t) _openTrainingEditor(t);
             });
@@ -2177,6 +2190,22 @@
                 _deleteTraining(btn.dataset.id);
             });
         });
+        el.querySelectorAll('.tr-btn-vis').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const t = trTrainings.find(x => x.id === btn.dataset.id);
+                if (!t) return;
+                try {
+                    await window.FLApi.Trainings.update(t.id, { visible: !t.visible });
+                    t.visible = !t.visible;
+                    if (editingTrainingId === t.id)
+                        document.getElementById('tr-chk-visible').checked = t.visible;
+                    _renderTrainingList();
+                } catch(err) { toast('Erro: ' + err.message, 'error'); }
+            });
+        });
+
+        _initTrainingListDnD(el);
         _trUpdateHighlight();
     }
 
@@ -2185,6 +2214,81 @@
             row.style.background = row.dataset.id === editingTrainingId
                 ? 'rgba(16,185,129,.15)'
                 : 'transparent';
+        });
+    }
+
+    // ── Drag-and-drop reordering for training list ────────────────
+    function _initTrainingListDnD(container) {
+        let _dndTarget = null;
+
+        container.querySelectorAll('.tr-list-item').forEach(item => {
+            item.addEventListener('dragstart', (e) => {
+                _trDragIdx = parseInt(item.dataset.idx);
+                e.dataTransfer.effectAllowed = 'move';
+                setTimeout(() => { item.style.opacity = '0.4'; }, 0);
+            });
+
+            item.addEventListener('dragend', () => {
+                item.style.opacity = '';
+                container.querySelectorAll('.tr-list-item').forEach(i => {
+                    i.style.borderTop = '';
+                    i.style.borderBottom = '';
+                });
+                _dndTarget = null;
+            });
+
+            item.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                const rect = item.getBoundingClientRect();
+                const isBefore = e.clientY < rect.top + rect.height / 2;
+                container.querySelectorAll('.tr-list-item').forEach(i => {
+                    i.style.borderTop = '';
+                    i.style.borderBottom = '';
+                });
+                if (isBefore) {
+                    item.style.borderTop = '2px solid var(--acc-primary)';
+                } else {
+                    item.style.borderBottom = '2px solid var(--acc-primary)';
+                }
+                _dndTarget = { idx: parseInt(item.dataset.idx), before: isBefore };
+            });
+
+            item.addEventListener('dragleave', (e) => {
+                if (!item.contains(e.relatedTarget)) {
+                    item.style.borderTop = '';
+                    item.style.borderBottom = '';
+                }
+            });
+
+            item.addEventListener('drop', async (e) => {
+                e.preventDefault();
+                if (_trDragIdx === null || !_dndTarget) return;
+
+                const from = _trDragIdx;
+                let to = _dndTarget.before ? _dndTarget.idx : _dndTarget.idx + 1;
+                // Adjust for removal of source element
+                if (from < to) to -= 1;
+                _trDragIdx = null;
+
+                if (from === to) { _renderTrainingList(); return; }
+
+                const [moved] = trTrainings.splice(from, 1);
+                trTrainings.splice(to, 0, moved);
+                _renderTrainingList();
+
+                // Persist new sort_order to Supabase
+                try {
+                    await Promise.all(
+                        trTrainings.map((t, i) =>
+                            window.FLApi.Trainings.update(t.id, { sort_order: i + 1 })
+                        )
+                    );
+                    toast('Sequência salva!');
+                } catch(err) {
+                    toast('Erro ao salvar sequência: ' + err.message, 'error');
+                }
+            });
         });
     }
 

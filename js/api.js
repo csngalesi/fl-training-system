@@ -214,8 +214,9 @@
         async getAll() {
             const { data, error } = await db()
                 .from('fl_trainings')
-                .select('id, title, visible, sessions, mensagem_text, mensagem_media, destaque_text, destaque_media, created_at')
-                .order('created_at', { ascending: true });
+                .select('id, title, visible, sessions, mensagem_text, mensagem_media, destaque_text, destaque_media, sort_order, created_at')
+                .order('sort_order', { ascending: true })
+                .order('created_at',  { ascending: true });
             if (error) throw error;
             return data || [];
         },
@@ -223,9 +224,10 @@
         async getVisible() {
             const { data, error } = await db()
                 .from('fl_trainings')
-                .select('id, title, visible, sessions, mensagem_text, mensagem_media, destaque_text, destaque_media, created_at')
+                .select('id, title, visible, sessions, mensagem_text, mensagem_media, destaque_text, destaque_media, sort_order, created_at')
                 .eq('visible', true)
-                .order('created_at', { ascending: true });
+                .order('sort_order', { ascending: true })
+                .order('created_at',  { ascending: true });
             if (error) throw error;
             return data || [];
         },
