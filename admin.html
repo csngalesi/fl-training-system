@@ -1369,6 +1369,9 @@
             <button class="sidebar-item" data-module="carga">
                 <i class="fa-solid fa-gauge-high"></i> Carga
             </button>
+            <button class="sidebar-item" data-module="treinos">
+                <i class="fa-solid fa-clipboard-list"></i> Treinos
+            </button>
         </nav>
 
         <!-- ── Main Content ── -->
@@ -1843,6 +1846,129 @@
                 </div>
             </div>
         </div><!-- /#module-mensagem -->
+
+        <!-- ══ Module: Treinos ══ -->
+        <div id="module-treinos" class="admin-module hidden"
+             style="margin:-32px -28px;height:calc(100vh - 65px);display:flex;overflow:hidden;">
+
+            <!-- Left: list -->
+            <div style="width:240px;flex-shrink:0;border-right:1px solid var(--glass-border);display:flex;flex-direction:column;overflow:hidden;">
+                <div style="padding:20px 16px 12px;border-bottom:1px solid var(--glass-border);">
+                    <h3 style="font-size:.9rem;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+                        <i class="fa-solid fa-clipboard-list" style="color:#10b981"></i> Treinos
+                    </h3>
+                    <button id="tr-btn-new" class="btn btn-primary btn-sm" style="width:100%;justify-content:center;">
+                        <i class="fa-solid fa-plus"></i> Novo Treino
+                    </button>
+                </div>
+                <div id="tr-training-list" style="flex:1;overflow-y:auto;padding:12px;">
+                    <p style="color:var(--text-muted);font-size:.8rem;">Nenhum treino.</p>
+                </div>
+            </div>
+
+            <!-- Right: editor -->
+            <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+
+                <!-- Fixed header -->
+                <div style="padding:16px 24px;border-bottom:1px solid var(--glass-border);flex-shrink:0;">
+                    <div id="tr-editor-header" class="hidden">
+                        <input id="tr-title-input" class="form-input" type="text"
+                               placeholder="Nome do treino"
+                               style="margin-bottom:8px;font-size:1rem;font-weight:600;">
+                        <div style="display:flex;align-items:center;gap:16px;">
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.88rem;color:var(--text-muted);">
+                                <input type="checkbox" id="tr-chk-visible">
+                                <span>Visível no app</span>
+                            </label>
+                            <div style="display:flex;gap:6px;margin-left:auto;">
+                                <button id="tr-btn-save" class="btn btn-success btn-sm">
+                                    <i class="fa-solid fa-floppy-disk"></i> Salvar
+                                </button>
+                                <button id="tr-btn-cancel" class="btn btn-secondary btn-sm">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <p id="tr-select-hint" style="color:var(--text-muted);font-size:.85rem;margin:0;">
+                        Selecione ou crie um treino.
+                    </p>
+                </div>
+
+                <!-- Scrollable body -->
+                <div id="tr-editor-body" class="hidden"
+                     style="flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:20px;">
+
+                    <!-- Sessions -->
+                    <div style="background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:12px;padding:20px;">
+                        <h3 style="font-size:.9rem;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+                            <i class="fa-solid fa-list-check" style="color:#10b981;"></i> Sessões
+                        </h3>
+                        <div id="tr-session-rows" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;min-height:20px;"></div>
+                        <button id="tr-btn-add-session" class="btn btn-secondary btn-sm" style="width:100%;justify-content:center;">
+                            <i class="fa-solid fa-plus"></i> Adicionar Sessão
+                        </button>
+                    </div>
+
+                    <!-- Mensagem -->
+                    <div style="background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:12px;padding:20px;">
+                        <h3 style="font-size:.9rem;font-weight:700;color:#0ea5e9;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+                            <i class="fa-solid fa-message"></i> Mensagem
+                        </h3>
+                        <div class="form-group" style="margin-bottom:14px;">
+                            <label>Texto</label>
+                            <textarea id="tr-mensagem-text" rows="4" placeholder="Digite a mensagem do treino..."
+                                style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:var(--text-main);padding:12px;font-size:.92rem;resize:vertical;font-family:inherit;box-sizing:border-box;"></textarea>
+                        </div>
+                        <label style="font-size:.8rem;font-weight:600;color:var(--text-muted);display:block;margin-bottom:8px;">
+                            <i class="fa-solid fa-photo-film"></i> Mídia
+                        </label>
+                        <div id="tr-msg-media-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;"></div>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+                            <select id="tr-msg-media-type" class="form-select" style="width:130px;flex-shrink:0;">
+                                <option value="youtube">YouTube ID</option>
+                                <option value="image">Imagem URL</option>
+                                <option value="video_url">Vídeo URL</option>
+                            </select>
+                            <input id="tr-msg-media-value" class="form-input" type="text" placeholder="Cole o ID ou URL" style="flex:1;min-width:160px;">
+                            <input id="tr-msg-media-caption" class="form-input" type="text" placeholder="Legenda (opcional)" style="flex:1;min-width:120px;">
+                            <button id="btn-tr-msg-add" class="btn btn-secondary btn-sm"><i class="fa-solid fa-plus"></i> Adicionar</button>
+                            <input type="file" id="tr-msg-media-file" accept="image/*,video/*" style="display:none;">
+                            <button id="btn-tr-msg-upload" class="btn btn-secondary btn-sm"><i class="fa-solid fa-upload"></i> Upload</button>
+                        </div>
+                    </div>
+
+                    <!-- Destaque Técnico -->
+                    <div style="background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:12px;padding:20px;">
+                        <h3 style="font-size:.9rem;font-weight:700;color:#f59e0b;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+                            <i class="fa-solid fa-star"></i> Destaque Técnico
+                        </h3>
+                        <div class="form-group" style="margin-bottom:14px;">
+                            <label>Texto</label>
+                            <textarea id="tr-destaque-text" rows="4" placeholder="Digite o destaque técnico..."
+                                style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:var(--text-main);padding:12px;font-size:.92rem;resize:vertical;font-family:inherit;box-sizing:border-box;"></textarea>
+                        </div>
+                        <label style="font-size:.8rem;font-weight:600;color:var(--text-muted);display:block;margin-bottom:8px;">
+                            <i class="fa-solid fa-photo-film"></i> Mídia
+                        </label>
+                        <div id="tr-tec-media-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;"></div>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+                            <select id="tr-tec-media-type" class="form-select" style="width:130px;flex-shrink:0;">
+                                <option value="youtube">YouTube ID</option>
+                                <option value="image">Imagem URL</option>
+                                <option value="video_url">Vídeo URL</option>
+                            </select>
+                            <input id="tr-tec-media-value" class="form-input" type="text" placeholder="Cole o ID ou URL" style="flex:1;min-width:160px;">
+                            <input id="tr-tec-media-caption" class="form-input" type="text" placeholder="Legenda (opcional)" style="flex:1;min-width:120px;">
+                            <button id="btn-tr-tec-add" class="btn btn-secondary btn-sm"><i class="fa-solid fa-plus"></i> Adicionar</button>
+                            <input type="file" id="tr-tec-media-file" accept="image/*,video/*" style="display:none;">
+                            <button id="btn-tr-tec-upload" class="btn btn-secondary btn-sm"><i class="fa-solid fa-upload"></i> Upload</button>
+                        </div>
+                    </div>
+
+                </div><!-- /#tr-editor-body -->
+            </div><!-- right column -->
+        </div><!-- /#module-treinos -->
 
         <!-- ══ Module: Carga ══ -->
         <div id="module-carga" class="admin-module hidden">

@@ -1781,6 +1781,8 @@
             if (mod === 'fundamentals') loadFundModuleList();
             if (mod === 'mensagem') initMensagemModule();
             if (mod === 'carga') initCargaModule();
+            if (mod === 'treinos') loadTrainingModule();
+
         });
     });
 
@@ -2097,6 +2099,224 @@
             table.innerHTML = `<p style="color:#ef4444;">Erro: ${e.message}</p>`;
         }
     }
+
+    // ══════════════════════════════════════════════════════════════
+    // TREINOS MODULE
+    // ══════════════════════════════════════════════════════════════
+
+    let trTrainings       = [];
+    let editingTrainingId = null;
+    let trSessions        = [];   // [{name, description}]
+    let _trMsgMedia       = [];   // [{type, value, caption}]
+    let _trTecMedia       = [];
+    let _trMediaWired     = false;
+
+    function _trEsc(s) {
+        return String(s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function _trRenderMsgMedia() {
+        _renderMediaList('tr-msg-media-list', _trMsgMedia,
+            (i) => { _trMsgMedia.splice(i, 1); _trRenderMsgMedia(); });
+    }
+
+    function _trRenderTecMedia() {
+        _renderMediaList('tr-tec-media-list', _trTecMedia,
+            (i) => { _trTecMedia.splice(i, 1); _trRenderTecMedia(); });
+    }
+
+    async function loadTrainingModule() {
+        try { trTrainings = await window.FLApi.Trainings.getAll(); }
+        catch (err) { console.error('[Admin] Erro ao carregar treinos:', err); trTrainings = []; }
+        _renderTrainingList();
+        if (!editingTrainingId && trTrainings.length) {
+            _openTrainingEditor(trTrainings[0]);
+        }
+        if (!_trMediaWired) {
+            _setupMediaAdder(
+                'tr-msg-media-type', 'tr-msg-media-value', 'tr-msg-media-caption', 'btn-tr-msg-add',
+                () => _trMsgMedia, (arr) => { _trMsgMedia = arr; },
+                'tr-msg-media-list'
+            );
+            _setupMediaAdder(
+                'tr-tec-media-type', 'tr-tec-media-value', 'tr-tec-media-caption', 'btn-tr-tec-add',
+                () => _trTecMedia, (arr) => { _trTecMedia = arr; },
+                'tr-tec-media-list'
+            );
+            _setupUploadBtn('btn-tr-msg-upload', 'tr-msg-media-file', () => _trMsgMedia, 'tr-msg-media-list');
+            _setupUploadBtn('btn-tr-tec-upload', 'tr-tec-media-file', () => _trTecMedia, 'tr-tec-media-list');
+            _trMediaWired = true;
+        }
+    }
+
+    function _renderTrainingList() {
+        const el = document.getElementById('tr-training-list');
+        if (!trTrainings.length) {
+            el.innerHTML = '<p style="color:var(--text-muted);font-size:.8rem;">Nenhum treino.</p>';
+            return;
+        }
+        el.innerHTML = trTrainings.map(t => `
+            <div class="tr-list-item" data-id="${_trEsc(t.id)}"
+                 style="cursor:pointer;padding:10px 12px;border-radius:8px;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;transition:background .15s;">
+                <span style="font-size:.88rem;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${_trEsc(t.title)}">${_trEsc(t.title)}</span>
+                <button class="btn-icon tr-btn-del" data-id="${_trEsc(t.id)}" title="Excluir" style="color:var(--acc-danger);flex-shrink:0;">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </div>
+        `).join('');
+
+        el.querySelectorAll('.tr-list-item').forEach(row => {
+            row.addEventListener('click', (e) => {
+                if (e.target.closest('.tr-btn-del')) return;
+                const t = trTrainings.find(x => x.id === row.dataset.id);
+                if (t) _openTrainingEditor(t);
+            });
+        });
+        el.querySelectorAll('.tr-btn-del').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                _deleteTraining(btn.dataset.id);
+            });
+        });
+        _trUpdateHighlight();
+    }
+
+    function _trUpdateHighlight() {
+        document.querySelectorAll('#tr-training-list .tr-list-item').forEach(row => {
+            row.style.background = row.dataset.id === editingTrainingId
+                ? 'rgba(16,185,129,.15)'
+                : 'transparent';
+        });
+    }
+
+    function _openTrainingEditor(t) {
+        editingTrainingId = t ? t.id : null;
+        trSessions  = t ? JSON.parse(JSON.stringify(t.sessions  || [])) : [];
+        _trMsgMedia = t ? JSON.parse(JSON.stringify(t.mensagem_media || [])) : [];
+        _trTecMedia = t ? JSON.parse(JSON.stringify(t.destaque_media  || [])) : [];
+
+        document.getElementById('tr-title-input').value    = t ? (t.title || '') : '';
+        document.getElementById('tr-chk-visible').checked  = t ? !!t.visible : false;
+        document.getElementById('tr-mensagem-text').value  = t ? (t.mensagem_text || '') : '';
+        document.getElementById('tr-destaque-text').value  = t ? (t.destaque_text  || '') : '';
+
+        document.getElementById('tr-editor-header').classList.remove('hidden');
+        document.getElementById('tr-select-hint').classList.add('hidden');
+        document.getElementById('tr-editor-body').classList.remove('hidden');
+
+        _renderTrainingSessionRows();
+        _trRenderMsgMedia();
+        _trRenderTecMedia();
+        _trUpdateHighlight();
+    }
+
+    function _renderTrainingSessionRows() {
+        const cont = document.getElementById('tr-session-rows');
+        if (!trSessions.length) {
+            cont.innerHTML = '<p style="color:var(--text-muted);font-size:.82rem;">Nenhuma sessão. Clique em &quot;+ Adicionar Sessão&quot;.</p>';
+            return;
+        }
+        cont.innerHTML = trSessions.map((s, i) => `
+            <div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:8px 12px;">
+                <span style="flex-shrink:0;width:22px;height:22px;background:rgba(16,185,129,.2);color:#10b981;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;">${i + 1}</span>
+                <input class="form-input tr-sess-name" data-idx="${i}" type="text"
+                    placeholder="Nome da sessão" value="${_trEsc(s.name || '')}"
+                    style="width:200px;flex-shrink:0;">
+                <input class="form-input tr-sess-desc" data-idx="${i}" type="text"
+                    placeholder="Descrição" value="${_trEsc(s.description || '')}"
+                    style="flex:1;min-width:0;">
+                <button class="btn-icon tr-sess-rm" data-idx="${i}" title="Remover" style="color:var(--acc-danger);flex-shrink:0;">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        `).join('');
+
+        cont.querySelectorAll('.tr-sess-name').forEach(inp => {
+            inp.addEventListener('input', () => { trSessions[+inp.dataset.idx].name = inp.value; });
+        });
+        cont.querySelectorAll('.tr-sess-desc').forEach(inp => {
+            inp.addEventListener('input', () => { trSessions[+inp.dataset.idx].description = inp.value; });
+        });
+        cont.querySelectorAll('.tr-sess-rm').forEach(btn => {
+            btn.addEventListener('click', () => {
+                trSessions.splice(+btn.dataset.idx, 1);
+                _renderTrainingSessionRows();
+            });
+        });
+    }
+
+    async function _saveTraining() {
+        const title = document.getElementById('tr-title-input').value.trim();
+        if (!title) { toast('Informe o título do treino.', 'error'); document.getElementById('tr-title-input').focus(); return; }
+        const payload = {
+            title,
+            visible:        document.getElementById('tr-chk-visible').checked,
+            sessions:       trSessions,
+            mensagem_text:  document.getElementById('tr-mensagem-text').value.trim(),
+            mensagem_media: _trMsgMedia,
+            destaque_text:  document.getElementById('tr-destaque-text').value.trim(),
+            destaque_media: _trTecMedia,
+        };
+        const btn = document.getElementById('tr-btn-save');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
+        try {
+            if (editingTrainingId) {
+                await window.FLApi.Trainings.update(editingTrainingId, payload);
+                toast('Treino atualizado!');
+            } else {
+                const created = await window.FLApi.Trainings.create(payload);
+                editingTrainingId = created.id;
+                toast('Treino criado!');
+            }
+            await loadTrainingModule();
+        } catch (err) {
+            toast('Erro: ' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar';
+        }
+    }
+
+    async function _deleteTraining(id) {
+        const t = trTrainings.find(x => x.id === id);
+        const name = t && t.title ? `"${t.title}"` : 'este treino';
+        if (!confirm(`Excluir ${name}?\nEsta ação não pode ser desfeita.`)) return;
+        try {
+            await window.FLApi.Trainings.delete(id);
+            if (editingTrainingId === id) {
+                editingTrainingId = null;
+                document.getElementById('tr-editor-header').classList.add('hidden');
+                document.getElementById('tr-select-hint').classList.remove('hidden');
+                document.getElementById('tr-editor-body').classList.add('hidden');
+            }
+            toast('Treino excluído.');
+            await loadTrainingModule();
+        } catch (err) {
+            toast('Erro ao excluir: ' + err.message, 'error');
+        }
+    }
+
+    // ── Treinos event listeners ───────────────────────────────────
+    document.getElementById('tr-btn-new').addEventListener('click', () => {
+        editingTrainingId = null;
+        _openTrainingEditor({ sessions: [], mensagem_text: '', mensagem_media: [], destaque_text: '', destaque_media: [], visible: false });
+    });
+
+    document.getElementById('tr-btn-save').addEventListener('click', _saveTraining);
+
+    document.getElementById('tr-btn-cancel').addEventListener('click', () => {
+        editingTrainingId = null;
+        document.getElementById('tr-editor-header').classList.add('hidden');
+        document.getElementById('tr-select-hint').classList.remove('hidden');
+        document.getElementById('tr-editor-body').classList.add('hidden');
+        _trUpdateHighlight();
+    });
+
+    document.getElementById('tr-btn-add-session').addEventListener('click', () => {
+        trSessions.push({ name: '', description: '' });
+        _renderTrainingSessionRows();
+    });
 
     // ── Boot ──────────────────────────────────────────────────────
     init();

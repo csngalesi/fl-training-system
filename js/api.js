@@ -209,6 +209,48 @@
         },
     };
 
+    // ── Trainings ─────────────────────────────────────────────────
+    const Trainings = {
+        async getAll() {
+            const { data, error } = await db()
+                .from('fl_trainings')
+                .select('id, title, visible, sessions, mensagem_text, mensagem_media, destaque_text, destaque_media, created_at')
+                .order('created_at', { ascending: false });
+            if (error) throw error;
+            return data || [];
+        },
+
+        async create(payload) {
+            const user = await window.FLAuth.currentUser();
+            const { data, error } = await db()
+                .from('fl_trainings')
+                .insert({ ...payload, user_id: user.id })
+                .select()
+                .single();
+            if (error) throw error;
+            return data;
+        },
+
+        async update(id, payload) {
+            const { data, error } = await db()
+                .from('fl_trainings')
+                .update(payload)
+                .eq('id', id)
+                .select()
+                .single();
+            if (error) throw error;
+            return data;
+        },
+
+        async delete(id) {
+            const { error } = await db()
+                .from('fl_trainings')
+                .delete()
+                .eq('id', id);
+            if (error) throw error;
+        },
+    };
+
     // ── Mensagem ──────────────────────────────────────────────────
     const Mensagem = {
         async getByPlan(planId) {
@@ -331,7 +373,8 @@
         },
     };
 
-    window.FLApi = { Fundamentals, Drills, Templates, WeekPlans, Mensagem, CargaRegistros, FLGestao, Storage };
+    window.FLApi = { Fundamentals, Drills, Templates, WeekPlans, Trainings, Mensagem, CargaRegistros, FLGestao, Storage };
+
 
     console.info('[FL] API module loaded.');
 })();
