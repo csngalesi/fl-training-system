@@ -130,10 +130,11 @@
         loginSection.classList.add('hidden');
         adminSection.classList.remove('hidden');
         btnLogout.classList.remove('hidden');
-        await loadFundamentals();
-        await loadTemplates();
-        await loadWeekPlans();
-        await loadFundModuleList(); // default module is fundamentals
+        // Default module: Treinos
+        document.querySelectorAll('.admin-module').forEach(m => m.classList.add('hidden'));
+        const treinosEl = document.getElementById('module-treinos');
+        if (treinosEl) treinosEl.classList.remove('hidden');
+        await loadTrainingModule();
     }
 
     btnLogin.addEventListener('click', async () => {
