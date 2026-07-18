@@ -14,10 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const pitchHeaderCaption = document.getElementById('visual-caption');
     const btnReplay = document.getElementById('btn-replay');
 
-    // Week plan elements
-    const btnModeFund      = document.getElementById('btn-mode-fundamentals');
+    // Treinos elements
     const btnModeWeek      = document.getElementById('btn-mode-week');
-    const btnModePrancheta = document.getElementById('btn-mode-prancheta');
     const navFundamentals  = document.getElementById('nav-fundamentals');
     const navWeekPlans     = document.getElementById('nav-week-plans');
     const weekPlansNavList = document.getElementById('week-plans-nav-list');
@@ -28,8 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const weekSessionCount = document.getElementById('week-session-count');
     const weekDrillsList   = document.getElementById('week-drills-list');
 
-    let appMode = 'fundamentals';   // 'fundamentals' | 'week' | 'prancheta'
-    let selectedPlanId = null;
+    let appMode = 'week';
+    let selectedPlanId = null;           // = fl_trainings.id
+    let _currentTrainingData = null;     // cached currently selected training
 
     // Modal Elements
     const btnTechBase     = document.getElementById('btn-tech-base');
@@ -119,10 +118,9 @@ document.addEventListener('DOMContentLoaded', () => {
             sidebarBackdrop.addEventListener('click', closeMobileSidebar);
         }
 
-        // Mode switcher
-        btnModeFund.addEventListener('click', () => switchMode('fundamentals'));
-        btnModeWeek.addEventListener('click', () => switchMode('week'));
-        btnModePrancheta.addEventListener('click', () => switchMode('prancheta'));
+        // Mode switcher — only Treinos in main nav; start in week mode
+        if (btnModeWeek) btnModeWeek.addEventListener('click', () => switchMode('week'));
+        switchMode('week');
 
         // Prancheta
         initPrancheta();
@@ -130,7 +128,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // Controle de Carga
         initCarga();
 
-        // ── Helper: renderiza lista de mídia no modal ──────────────
+        // ── Helper: normaliza media para array ───────────────────────
+        function toMediaArr(val) {
+            if (!val) return [];
+            return Array.isArray(val) ? val : [val];
+        }
+
+        // ── Helper: renderiza lista de mídia no modal ──────────────────────
         function renderModalMedia(containerId, mediaArr) {
             const el = document.getElementById(containerId);
             if (!el) return;
@@ -160,29 +164,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Mensagem modal
-        document.getElementById('btn-mensagem').addEventListener('click', async () => {
+        document.getElementById('btn-mensagem').addEventListener('click', () => {
             const modal   = document.getElementById('mensagem-modal');
             const loading = document.getElementById('mensagem-loading');
             const content = document.getElementById('mensagem-content');
             const empty   = document.getElementById('mensagem-empty');
-            loading.classList.remove('hidden');
+            loading.classList.add('hidden');
             content.classList.add('hidden');
             empty.classList.add('hidden');
             modal.classList.remove('hidden');
-            try {
-                const data = await window.FLApi.Mensagem.getByPlan(selectedPlanId);
-                loading.classList.add('hidden');
-                if (data && data.mensagem) {
-                    document.getElementById('mensagem-texto').textContent = data.mensagem;
-                    renderModalMedia('mensagem-media', data.media_mensagem);
-                    content.classList.remove('hidden');
-                } else {
-                    empty.classList.remove('hidden');
-                }
-            } catch (e) {
-                loading.classList.add('hidden');
+            if (_currentTrainingData && _currentTrainingData.mensagem_text) {
+                document.getElementById('mensagem-texto').textContent = _currentTrainingData.mensagem_text;
+                renderModalMedia('mensagem-media', toMediaArr(_currentTrainingData.mensagem_media));
+                content.classList.remove('hidden');
+            } else {
                 empty.classList.remove('hidden');
-                console.error('[FL] Mensagem.getByPlan() error:', e);
             }
         });
         const closeMensagemModal = () => {
@@ -197,29 +193,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Técnica modal
-        document.getElementById('btn-tecnica').addEventListener('click', async () => {
+        document.getElementById('btn-tecnica').addEventListener('click', () => {
             const modal   = document.getElementById('tecnica-modal');
             const loading = document.getElementById('tecnica-loading');
             const content = document.getElementById('tecnica-content');
             const empty   = document.getElementById('tecnica-empty');
-            loading.classList.remove('hidden');
+            loading.classList.add('hidden');
             content.classList.add('hidden');
             empty.classList.add('hidden');
             modal.classList.remove('hidden');
-            try {
-                const data = await window.FLApi.Mensagem.getByPlan(selectedPlanId);
-                loading.classList.add('hidden');
-                if (data && data.destaque_tecnico) {
-                    document.getElementById('tecnica-texto').textContent = data.destaque_tecnico;
-                    renderModalMedia('tecnica-media', data.media_tecnica);
-                    content.classList.remove('hidden');
-                } else {
-                    empty.classList.remove('hidden');
-                }
-            } catch (e) {
-                loading.classList.add('hidden');
+            if (_currentTrainingData && _currentTrainingData.destaque_text) {
+                document.getElementById('tecnica-texto').textContent = _currentTrainingData.destaque_text;
+                renderModalMedia('tecnica-media', toMediaArr(_currentTrainingData.destaque_media));
+                content.classList.remove('hidden');
+            } else {
                 empty.classList.remove('hidden');
-                console.error('[FL] Mensagem.getByPlan() error:', e);
             }
         });
         const closeTecnicaModal = () => {
@@ -450,17 +438,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const btnRef    = document.getElementById('btn-app-carga-refresh');
 
             modal.classList.remove('hidden');
-            plansList.innerHTML = '<span style="color:var(--text-muted);font-size:.85rem;">Carregando planos...</span>';
-            title.textContent = 'Selecione um plano acima';
+            plansList.innerHTML = '<span style="color:var(--text-muted);font-size:.85rem;">Carregando treinos...</span>';
+            title.textContent = 'Selecione um treino acima';
             title.style.color = 'var(--text-muted)';
             btnRef.style.display = 'none';
             loading.classList.add('hidden');
             table.innerHTML = '';
 
             try {
-                const plans = await window.FLApi.WeekPlans.getAll();
+                const plans = await window.FLApi.Trainings.getAll();
                 if (!plans.length) {
-                    plansList.innerHTML = '<span style="color:var(--text-muted);font-size:.85rem;">Nenhum plano cadastrado.</span>';
+                    plansList.innerHTML = '<span style="color:var(--text-muted);font-size:.85rem;">Nenhum treino cadastrado.</span>';
                     return;
                 }
                 plansList.innerHTML = plans.map(p => `
@@ -824,16 +812,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function switchMode(mode) {
         appMode = mode;
         stopSimulation();
-        btnModeFund.classList.toggle('active', mode === 'fundamentals');
-        btnModeWeek.classList.toggle('active', mode === 'week');
-        btnModePrancheta.classList.toggle('active', mode === 'prancheta');
+        if (btnModeWeek) btnModeWeek.classList.toggle('active', mode === 'week');
 
-        navFundamentals.classList.toggle('hidden', mode !== 'fundamentals');
+        if (navFundamentals) navFundamentals.classList.toggle('hidden', mode !== 'fundamentals');
         navWeekPlans.classList.toggle('hidden', mode !== 'week');
 
-        fundamentalsPanel.classList.toggle('hidden', mode !== 'fundamentals');
+        if (fundamentalsPanel) fundamentalsPanel.classList.toggle('hidden', mode !== 'fundamentals');
         weekPanel.classList.toggle('hidden', mode !== 'week');
-        pranchetaPanel.classList.toggle('hidden', mode !== 'prancheta');
+        if (pranchetaPanel) pranchetaPanel.classList.toggle('hidden', mode !== 'prancheta');
 
         const pitchEl = document.getElementById('pitch');
 
@@ -850,7 +836,7 @@ document.addEventListener('DOMContentLoaded', () => {
             pitchEl.classList.remove('prancheta-mode');
         }
 
-        // Show Controle de Carga / Mensagem / Técnica / Metodologia buttons only in week mode
+        // Show Carga / Mensagem / Técnica / Metodologia buttons only in week mode
         document.getElementById('btn-carga').classList.toggle('hidden', mode !== 'week');
         document.getElementById('btn-mensagem').classList.toggle('hidden', mode !== 'week');
         document.getElementById('btn-tecnica').classList.toggle('hidden', mode !== 'week');
@@ -858,10 +844,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (mode === 'week') {
             fundTitle.textContent = 'Treino da Semana';
-            fundDesc.textContent = 'Selecione um plano no menu lateral.';
+            fundDesc.textContent = 'Selecione um treino no menu lateral.';
             btnTechBase.classList.add('hidden');
             workspace.classList.remove('hidden');
-            loadVisiblePlans();
+            loadVisibleTrainings();
         } else if (mode === 'fundamentals') {
             if (currentFundamental) {
                 fundTitle.textContent = currentFundamental.title;
@@ -872,122 +858,100 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function loadVisiblePlans() {
+    async function loadVisibleTrainings() {
         weekPlansNavList.innerHTML = '<p style="color:var(--text-muted);font-size:.8rem;padding:4px 0">Carregando...</p>';
-        let plans;
+        let trainings;
         try {
-            plans = await window.FLApi.WeekPlans.getVisible();
+            trainings = await window.FLApi.Trainings.getVisible();
         } catch (err) {
-            weekPlansNavList.innerHTML = '<p style="color:#ef4444;font-size:.8rem">Erro ao carregar planos.</p>';
+            weekPlansNavList.innerHTML = '<p style="color:#ef4444;font-size:.8rem">Erro ao carregar treinos.</p>';
             return;
         }
-        if (!plans.length) {
-            weekPlansNavList.innerHTML = '<p style="color:var(--text-muted);font-size:.8rem">Nenhum plano visível configurado.</p>';
+        if (!trainings.length) {
+            weekPlansNavList.innerHTML = '<p style="color:var(--text-muted);font-size:.8rem">Nenhum treino visível configurado.</p>';
             return;
         }
-        weekPlansNavList.innerHTML = plans.map(p => `
-            <button class="week-plan-nav-btn ${p.id === selectedPlanId ? 'active' : ''}" data-plan-id="${p.id}">
+        weekPlansNavList.innerHTML = trainings.map(t => `
+            <button class="week-plan-nav-btn ${t.id === selectedPlanId ? 'active' : ''}" data-plan-id="${t.id}">
                 <i class="fa-solid fa-calendar-check"></i>
                 <div>
-                    <div class="week-plan-nav-title">${escHtml(p.title)}</div>
-                    <div class="week-plan-nav-meta">${p.sessions ? p.sessions.length : 0} sessões</div>
+                    <div class="week-plan-nav-title">${escHtml(t.title)}</div>
+                    <div class="week-plan-nav-meta">${t.sessions ? t.sessions.length : 0} sessões</div>
                 </div>
             </button>`).join('');
 
         weekPlansNavList.querySelectorAll('.week-plan-nav-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                const plan = plans.find(p => p.id === btn.dataset.planId);
-                if (plan) selectWeekPlan(plan);
-            });
-        });
-    }
-
-    function selectWeekPlan(plan) {
-        selectedPlanId = plan.id;
-        // Update active state in nav
-        weekPlansNavList.querySelectorAll('.week-plan-nav-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.planId === plan.id);
-        });
-        // Keep header fixed as "Treino da Semana" — don't overwrite with plan title
-        fundDesc.textContent = `${plan.sessions ? plan.sessions.length : 0} sessões`;
-        btnTechBase.classList.add('hidden');
-        workspace.classList.remove('hidden');
-        weekPanel.classList.remove('hidden');
-        fundamentalsPanel.classList.add('hidden');
-        if (!plan.sessions || !plan.sessions.length) {
-            weekPlanName.textContent = plan.title;
-            weekSessionCount.textContent = '0 sessões';
-            weekDrillsList.innerHTML = '<p style="color:var(--text-muted);font-size:.88rem;padding:16px 0">Nenhuma sessão neste plano.</p>';
-        } else {
-            weekPlanName.textContent = plan.title;
-            weekSessionCount.textContent = `${plan.sessions.length} sessões`;
-            renderWeekSessions(plan.sessions);
-        }
-
-        // Enable buttons optimistically, then disable if no content
-        const btnMsg = document.getElementById('btn-mensagem');
-        const btnTec = document.getElementById('btn-tecnica');
-        btnMsg.disabled = false;
-        btnTec.disabled = false;
-        const checkId = plan.id;
-        window.FLApi.Mensagem.getByPlan(plan.id).then(data => {
-            if (selectedPlanId !== checkId) return;
-            btnMsg.disabled = !(data && data.mensagem);
-            btnTec.disabled = !(data && data.destaque_tecnico);
-        }).catch(() => {});
-    }
-
-    function renderWeekSessions(sessions) {
-        weekDrillsList.innerHTML = sessions.map((s, i) => `
-            <div class="week-session-card" data-drill-id="${s.drill_id}">
-                <button class="drill-info-btn${s.description ? ' has-desc' : ''}" data-drill-id="${s.drill_id}" title="Ver descrição">i</button>
-                <div class="week-session-num">Sessão ${i + 1}</div>
-                <div class="week-session-title">${escHtml(s.title)}</div>
-                <div class="week-session-meta">
-                    ${s.fundamental_title ? escHtml(s.fundamental_title) : ''}
-                    ${s.duration ? ' · ' + escHtml(s.duration) : ''}
-                </div>
-            </div>`).join('');
-
-        weekDrillsList.querySelectorAll('.week-session-card').forEach(card => {
-            card.addEventListener('click', () => selectWeekSession(card, card.dataset.drillId));
-        });
-
-        weekDrillsList.querySelectorAll('.drill-info-btn').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                e.stopPropagation();
-                const drillId = btn.dataset.drillId;
-                const modal = document.getElementById('drill-info-modal');
-                const titleEl = document.getElementById('drill-info-title');
-                const descEl = document.getElementById('drill-info-desc');
-                titleEl.textContent = '…';
-                descEl.textContent = '';
-                modal.classList.remove('hidden');
-                try {
-                    const drill = await window.FLApi.Drills.getById(drillId);
-                    titleEl.textContent = drill.title;
-                    descEl.textContent = drill.description || 'Sem descrição.';
-                } catch (err) {
-                    titleEl.textContent = 'Erro';
-                    descEl.textContent = err.message;
+                const training = trainings.find(t => t.id === btn.dataset.planId);
+                if (training) {
+                    selectTraining(training);
+                    closeMobileSidebar();
                 }
             });
         });
     }
 
-    async function selectWeekSession(cardEl, drillId) {
-        document.querySelectorAll('.week-session-card').forEach(c => c.classList.remove('active'));
-        cardEl.classList.add('active');
-        pitchHeaderCaption.innerHTML = '<p><i class="fa-solid fa-spinner fa-spin"></i> Carregando animação...</p>';
-        try {
-            const drill = await window.FLApi.Drills.getById(drillId);
-            currentDrill = drill;
-            pitchHeaderCaption.innerHTML = `<p><i class="fa-solid fa-play"></i> <strong>${drill.title}</strong></p>`;
-            playDrillAnimation(drill);
-        } catch (err) {
-            pitchHeaderCaption.innerHTML = `<p style="color:#ef4444">Erro: ${err.message}</p>`;
+    function selectTraining(training) {
+        _currentTrainingData = training;
+        selectedPlanId = training.id;
+        // Update active state in nav
+        weekPlansNavList.querySelectorAll('.week-plan-nav-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.planId === training.id);
+        });
+        fundDesc.textContent = `${training.sessions ? training.sessions.length : 0} sessões`;
+        btnTechBase.classList.add('hidden');
+        workspace.classList.remove('hidden');
+        weekPanel.classList.remove('hidden');
+        if (fundamentalsPanel) fundamentalsPanel.classList.add('hidden');
+        weekPlanName.textContent = training.title;
+        weekSessionCount.textContent = `${training.sessions ? training.sessions.length : 0} sessões`;
+        if (!training.sessions || !training.sessions.length) {
+            weekDrillsList.innerHTML = '<p style="color:var(--text-muted);font-size:.88rem;padding:16px 0">Nenhuma sessão neste treino.</p>';
+        } else {
+            renderTrainingSessions(training.sessions);
         }
+        // Update mensagem/técnica button state from cached training data
+        const btnMsg = document.getElementById('btn-mensagem');
+        const btnTec = document.getElementById('btn-tecnica');
+        btnMsg.disabled = !(training.mensagem_text && training.mensagem_text.trim());
+        btnTec.disabled = !(training.destaque_text && training.destaque_text.trim());
     }
+
+    function renderTrainingSessions(sessions) {
+        weekDrillsList.innerHTML = sessions.map((s, i) => {
+            const name = escHtml(s.name || s.title || `Sessão ${i + 1}`);
+            const desc = (s.description || '').trim();
+            return `
+                <div class="week-session-card" data-idx="${i}">
+                    <div class="week-session-num">Sessão ${i + 1}</div>
+                    <div class="week-session-title">${name}</div>
+                    <div class="week-session-inline-desc" style="max-height:0;overflow:hidden;transition:max-height .35s ease,margin-top .35s ease,opacity .35s ease;opacity:0;font-size:.82rem;line-height:1.6;color:var(--text-muted);white-space:pre-wrap;">${escHtml(desc)}</div>
+                </div>`;
+        }).join('');
+
+        weekDrillsList.querySelectorAll('.week-session-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const isActive = card.classList.contains('active');
+                // Collapse all
+                document.querySelectorAll('.week-session-card').forEach(c => {
+                    c.classList.remove('active');
+                    const d = c.querySelector('.week-session-inline-desc');
+                    if (d) { d.style.maxHeight = '0'; d.style.opacity = '0'; d.style.marginTop = '0'; }
+                });
+                // Expand clicked (toggle)
+                if (!isActive) {
+                    card.classList.add('active');
+                    const desc = card.querySelector('.week-session-inline-desc');
+                    if (desc && desc.textContent.trim()) {
+                        desc.style.maxHeight = '400px';
+                        desc.style.opacity = '1';
+                        desc.style.marginTop = '8px';
+                    }
+                }
+            });
+        });
+    }
+
 
     // ─── PRANCHETA ───────────────────────────────────────────────────────────────
     function initPrancheta() {
@@ -1338,7 +1302,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
             try {
                 await window.FLApi.CargaRegistros.create({
-                    week_plan_id:  selectedPlanId,
+                    training_id:   selectedPlanId,
                     student_id:    _cargaStudent.id || null,
                     student_name:  _cargaStudent.name,
                     pse_value:     _cargaPse,

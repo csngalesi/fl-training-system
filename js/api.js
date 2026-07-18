@@ -215,7 +215,17 @@
             const { data, error } = await db()
                 .from('fl_trainings')
                 .select('id, title, visible, sessions, mensagem_text, mensagem_media, destaque_text, destaque_media, created_at')
-                .order('created_at', { ascending: false });
+                .order('created_at', { ascending: true });
+            if (error) throw error;
+            return data || [];
+        },
+
+        async getVisible() {
+            const { data, error } = await db()
+                .from('fl_trainings')
+                .select('id, title, visible, sessions, mensagem_text, mensagem_media, destaque_text, destaque_media, created_at')
+                .eq('visible', true)
+                .order('created_at', { ascending: true });
             if (error) throw error;
             return data || [];
         },
