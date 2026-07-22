@@ -913,8 +913,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update mensagem/técnica button state from cached training data
         const btnMsg = document.getElementById('btn-mensagem');
         const btnTec = document.getElementById('btn-tecnica');
-        btnMsg.disabled = false;
-        btnTec.disabled = false;
+        btnMsg.disabled = !(training.mensagem_text && training.mensagem_text.trim());
+        btnTec.disabled = !(training.destaque_text && training.destaque_text.trim());
     }
 
     function renderTrainingSessions(sessions) {
