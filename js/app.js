@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Football Lab | Application Logic & Animation Engine
  * Upgraded to explicitly manage a squad of 4 interacting players (p1, p2, p3, p4).
  */
@@ -913,8 +913,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update mensagem/técnica button state from cached training data
         const btnMsg = document.getElementById('btn-mensagem');
         const btnTec = document.getElementById('btn-tecnica');
-        btnMsg.disabled = !(training.mensagem_text && training.mensagem_text.trim());
-        btnTec.disabled = !(training.destaque_text && training.destaque_text.trim());
+        btnMsg.disabled = false;
+        btnTec.disabled = false;
     }
 
     function renderTrainingSessions(sessions) {
@@ -1304,7 +1304,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
             try {
                 await window.FLApi.CargaRegistros.create({
-                    training_id:   selectedPlanId,
+                    week_plan_id:  selectedPlanId,
                     student_id:    _cargaStudent.id || null,
                     student_name:  _cargaStudent.name,
                     pse_value:     _cargaPse,
