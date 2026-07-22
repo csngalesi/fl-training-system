@@ -1303,6 +1303,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
             try {
+                console.log('[CARGA DEBUG] selectedPlanId=', selectedPlanId, 'student=', _cargaStudent, 'pse=', _cargaPse);
                 await window.FLApi.CargaRegistros.create({
                     week_plan_id:  selectedPlanId,
                     student_id:    _cargaStudent.id || null,
