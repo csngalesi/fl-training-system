@@ -1,4 +1,4 @@
-﻿/**
+/**
  * FL Training System â€” API Module
  * Queries Supabase. Exposed via window.FLApi.
  */
@@ -372,7 +372,7 @@
         async getSchedule() {
             const [classes, enrollments] = await Promise.all([
                 flGestaoFetch('schedule_classes?select=id,day_of_week,start_time&order=start_time.asc'),
-                flGestaoFetch('class_enrollments?select=schedule_class_id,is_reschedule,students(full_name,student_type,birth_date)'),
+                flGestaoFetch('class_enrollments?select=schedule_class_id,is_reschedule,is_avulsa,is_aula_teste,students(full_name,student_type,birth_date,id)&order=students(full_name).asc'),
             ]);
             return { classes, enrollments };
         },

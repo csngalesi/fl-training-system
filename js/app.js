@@ -272,11 +272,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (!enrollMap[sid]) enrollMap[sid] = [];
                     if (e.students) {
                         enrollMap[sid].push({
-                            id: e.students.id,
-                            full_name: e.students.full_name,
-                            student_type: e.students.student_type,
-                            birth_date: e.students.birth_date || null,
-                            is_reschedule: e.is_reschedule || false
+                            id:            e.students.id,
+                            full_name:     e.students.full_name,
+                            student_type:  e.students.student_type,
+                            birth_date:    e.students.birth_date || null,
+                            is_reschedule: e.is_reschedule  || false,
+                            is_avulsa:     e.is_avulsa      || false,
+                            is_aula_teste: e.is_aula_teste  || false,
                         });
                     }
                 });
@@ -328,21 +330,31 @@ document.addEventListener('DOMContentLoaded', () => {
                             cell = '<span style="color:rgba(255,255,255,.15);font-size:.72rem;">vazio</span>';
                         } else {
                             cell = students.map(s => {
-                                const isPre     = s.student_type === 'pre-cadastro';
-                                const isResched = s.is_reschedule;
-                                
-                                let bg     = 'rgba(16,185,129,.12)'; // Verde default
+                                const isPre       = s.student_type === 'pre-cadastro';
+                                const isResched   = s.is_reschedule;
+                                const isAvulsa    = s.is_avulsa;
+                                const isAulaTeste = s.is_aula_teste;
+
+                                let bg     = 'rgba(16,185,129,.12)';  // Verde — aluno fixo
                                 let color  = '#10b981';
                                 let border = 'rgba(16,185,129,.35)';
-                                
-                                if (isPre) {
-                                    bg     = 'rgba(251,191,36,.12)'; // Amarelo
+
+                                if (isResched) {
+                                    bg     = 'rgba(59,130,246,.12)';   // Azul — Reagendamento
+                                    color  = '#3b82f6';
+                                    border = 'rgba(59,130,246,.35)';
+                                } else if (isAvulsa) {
+                                    bg     = 'rgba(248,250,252,.08)';   // Branco — Avulso
+                                    color  = '#f1f5f9';
+                                    border = 'rgba(248,250,252,.30)';
+                                } else if (isAulaTeste) {
+                                    bg     = 'rgba(202,138,4,.15)';    // Amarelo — Aula Teste
+                                    color  = '#fef08a';
+                                    border = 'rgba(202,138,4,.45)';
+                                } else if (isPre) {
+                                    bg     = 'rgba(251,191,36,.12)';   // Âmbar — Pré-Cadastro
                                     color  = '#fbbf24';
                                     border = 'rgba(251,191,36,.35)';
-                                } else if (isResched) {
-                                    bg     = 'rgba(59, 130, 246, .12)'; // Azul
-                                    color  = '#3b82f6';
-                                    border = 'rgba(59, 130, 246, .35)';
                                 }
                                 
                                 return (() => {
