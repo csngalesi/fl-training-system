@@ -2,98 +2,87 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     const slides = document.querySelectorAll('.tv-slide');
-    const playerContainer = document.getElementById('playlist-player').parentNode;
-    const templatePlayer = document.getElementById('playlist-player');
-    
     let currentSlide = 0;
     let timerTimeout = null;
 
-    // Lista de vídeos puxados da pasta /TV/
+    // ─── Playlist: IDs dos vídeos no YouTube ───────────────────────────────────
     const playlist = [
-        "TV/Chutes S.mp4",
-        "TV/Dribles S_small.mp4"
+        '-AdCu8vFf9s',  // Chutes S
+        'bo6QtuYuUyg'   // Dribles S small
     ];
     let currentVideoIndex = 0;
-    const videoElements = [];
+    let ytPlayer = null;
+    let playerReady = false;
 
-    // Pre-load de todos os vídeos (Pool) para evitar consumo repetitivo de internet no Vercel
-    // e parar as travadas nativas do hardware da TV quando se troca o src.
-    playlist.forEach((src, index) => {
-        const vid = templatePlayer.cloneNode(true);
-        vid.id = `video-pool-${index}`;
-        vid.src = src;
-        vid.preload = "auto";
-        vid.style.display = 'none';
+    // ─── Carrega a YouTube IFrame API de forma assíncrona ─────────────────────
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(tag);
 
-        vid.addEventListener('ended', () => {
-            currentVideoIndex++; // Próximo vídeo da fila
-            playNextVideo();
+    // Callback global chamado pela API do YouTube quando ela termina de carregar
+    window.onYouTubeIframeAPIReady = function () {
+        ytPlayer = new YT.Player('yt-player', {
+            videoId: playlist[0],
+            playerVars: {
+                autoplay:        0,   // Inicia pausado; playVideo() é chamado no slide
+                mute:            1,   // Necessário para autoplay funcionar nos browsers
+                controls:        0,   // Sem barra de controles
+                rel:             0,   // Sem vídeos relacionados ao terminar
+                modestbranding:  1,   // Menos branding do YouTube
+                playsinline:     1,   // Reproduz inline (TVs / iOS)
+                iv_load_policy:  3,   // Sem anotações
+                disablekb:       1,   // Sem atalhos de teclado
+                fs:              0    // Sem botão de fullscreen
+            },
+            events: {
+                onReady: function () {
+                    playerReady = true;
+                },
+                onStateChange: function (event) {
+                    // Quando o vídeo atual termina, avança para o próximo
+                    if (event.data === YT.PlayerState.ENDED) {
+                        currentVideoIndex++;
+                        if (currentVideoIndex >= playlist.length) {
+                            nextSlide(); // Playlist completa → próximo slide
+                        } else {
+                            ytPlayer.loadVideoById(playlist[currentVideoIndex]);
+                        }
+                    }
+                }
+            }
         });
+    };
 
-        playerContainer.appendChild(vid);
-        videoElements.push(vid);
-    });
-
-    // Remove o template original
-    templatePlayer.remove();
-
+    // ─── Controle de slides ───────────────────────────────────────────────────
     function nextSlide() {
         clearTimeout(timerTimeout);
 
-        // Oculta slide atual
         slides[currentSlide].classList.remove('active');
-
-        // Avança índice
         currentSlide = (currentSlide + 1) % slides.length;
-
-        // Exibe novo slide
         slides[currentSlide].classList.add('active');
 
-        const currentSlideElement = slides[currentSlide];
-        
-        // Verifica se o slide atual é o dos vídeos apontando pela ID do Slide
-        if (currentSlideElement.id === 'slide-birthday') {
-            // Inicia o loop da playlist!
+        if (slides[currentSlide].id === 'slide-birthday') {
+            // Slide de vídeos: inicia a playlist do YouTube
             playVideoSequence();
         } else {
-            // Outros slides normais (Cartaz, Equipe, etc) ficam por 7 Segundos
+            // Slides estáticos ficam visíveis por 7 segundos
             timerTimeout = setTimeout(nextSlide, 7000);
         }
     }
 
     function playVideoSequence() {
-        if (videoElements.length === 0) {
-            timerTimeout = setTimeout(nextSlide, 5000); // Fallback
-            return;
-        }
         currentVideoIndex = 0;
-        playNextVideo();
-    }
 
-    function playNextVideo() {
-        // Esconde e pausa todos preventivamente
-        videoElements.forEach(v => {
-            v.style.display = 'none';
-            v.pause();
-            v.currentTime = 0;
-        });
-
-        // Se já rodou todos os vídeos do Array
-        if (currentVideoIndex >= playlist.length) {
-            nextSlide(); // Acabou a fila: Pula para o Slide 1 novamente!
-            return;
+        if (playerReady && ytPlayer) {
+            // Carrega o primeiro vídeo e inicia reprodução
+            ytPlayer.loadVideoById(playlist[currentVideoIndex]);
+        } else {
+            // Player ainda inicializando → aguarda e tenta novamente
+            timerTimeout = setTimeout(playVideoSequence, 500);
         }
-
-        const activeVid = videoElements[currentVideoIndex];
-        activeVid.style.display = 'block';
-        activeVid.play().catch(e => {
-            console.log('Autoplay bloqueado no navegador, forçando auto-pulo...', e);
-            currentVideoIndex++;
-            playNextVideo();
-        });
     }
 
-    // Start Inicial da TV -> Slide 1
+    // ─── Início: exibe Slide 1 por 7s antes de avançar ───────────────────────
     timerTimeout = setTimeout(nextSlide, 7000);
 
 });
